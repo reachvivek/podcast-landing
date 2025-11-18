@@ -1,0 +1,14 @@
+<svg width="600" height="400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad6" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#673AB7;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#9C27B0;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#grad6)"/>
+  <text x="50%" y="45%" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="white">Episode 11</text>
+  <text x="50%" y="55%" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="rgba(255,255,255,0.9)">Color & Design</text>
+  <circle cx="250" cy="200" r="30" fill="#FF5722" opacity="0.7"/>
+  <circle cx="300" cy="200" r="30" fill="#4CAF50" opacity="0.7"/>
+  <circle cx="350" cy="200" r="30" fill="#2196F3" opacity="0.7"/>
+</svg>
