@@ -35,7 +35,7 @@ const services: Service[] = [
       '1 Hour Session',
     ],
     ctaText: 'Book Session',
-    ctaHref: '#contact',
+    ctaHref: '/book',
   },
   {
     id: 'video-content',
@@ -52,7 +52,7 @@ const services: Service[] = [
       '1 Hour Session',
     ],
     ctaText: 'Get Started',
-    ctaHref: '#contact',
+    ctaHref: '/book',
   },
   {
     id: 'social-media-reels',
@@ -68,7 +68,7 @@ const services: Service[] = [
       'Save 300 AED',
     ],
     ctaText: 'Create Reels',
-    ctaHref: '#contact',
+    ctaHref: '/book',
   },
 ];
 

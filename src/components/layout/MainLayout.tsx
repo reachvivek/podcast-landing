@@ -1,6 +1,7 @@
 import React from 'react';
 import { Header } from './Header';
 import { Footer } from './Footer';
+import { SupportWidget } from '../ui/SupportWidget';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -12,6 +13,7 @@ export function MainLayout({ children }: MainLayoutProps) {
       <Header />
       <main className="flex-1 ">{children}</main>
       <Footer />
+      <SupportWidget />
     </div>
   );
 }

@@ -21,10 +21,12 @@ interface HeaderProps {
 
 const defaultNavigation: readonly NavigationItem[] = [
   { name: 'Home', href: '/' },
-  { name: 'Services', href: '/services' },
-  { name: 'Pricing', href: '/pricing' },
-  { name: 'Portfolio', href: '/portfolio' },
-  { name: 'Contact', href: '/contact' },
+  { name: 'About', href: '/about' },
+  { name: 'Services', href: '#services' },
+  { name: 'Portfolio', href: '#portfolio' },
+  { name: 'Pricing', href: '#pricing' },
+  { name: 'FAQ', href: '/faq' },
+  { name: 'Contact', href: '#contact' },
 ];
 
 export function Header({
@@ -32,7 +34,7 @@ export function Header({
   siteName = 'Podcast EcoSpace',
   navigation = defaultNavigation,
   ctaText = 'Book Studio',
-  ctaHref = '#contact',
+  ctaHref = '/book',
 }: Readonly<HeaderProps>) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { glassButtonStyles, glassButtonClass, glassButtonPrimaryClass } from '@/lib/utils';
 
 interface HeroSectionProps {
   readonly title: string;
@@ -140,7 +140,7 @@ export function HeroSection({
                 </motion.span>
               </AnimatePresence>
             </div>
-            <div className="text-ecospace-green" style={{ fontWeight: 180 }}>Come to Life</div>
+            <div className="text-ecospace-green" style={{ fontWeight: 300 }}>Come to Life</div>
           </motion.h1>
 
           {/* Subtitle - Experience-Focused */}
@@ -161,82 +161,59 @@ export function HeroSection({
             className="flex flex-col sm:flex-row gap-4"
             style={{ perspective: '1000px' }}
           >
-            {/* Primary CTA - White/Silver Glassmorphism with 3D Tilt */}
-            <Button
-              asChild
-              size="lg"
-              className="relative overflow-hidden bg-white/10 hover:bg-ecospace-green/80 text-white hover:text-black font-light backdrop-blur-md text-base px-10 py-7 rounded-full shadow-2xl hover:shadow-ecospace-green/50 transition-all duration-500 group border border-white/30"
-              style={{
-                transformStyle: 'preserve-3d',
-                transform: 'rotateX(0deg) rotateY(0deg)',
+            {/* Primary CTA - Glassmorphism with 3D Tilt (Main Character) */}
+            <a
+              href="/book"
+              className={`${glassButtonPrimaryClass} inline-flex items-center justify-center gap-3`}
+              style={glassButtonStyles.tilt3d}
+              onMouseMove={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = ((y - centerY) / centerY) * -5;
+                const rotateY = ((x - centerX) / centerX) * 5;
+                e.currentTarget.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'rotateX(0deg) rotateY(0deg)';
               }}
             >
-              <a
-                href="#contact"
-                className="flex items-center justify-center gap-3 relative z-10"
-                onMouseMove={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  const x = e.clientX - rect.left;
-                  const y = e.clientY - rect.top;
-                  const centerX = rect.width / 2;
-                  const centerY = rect.height / 2;
-                  const rotateX = ((y - centerY) / centerY) * -5;
-                  const rotateY = ((x - centerX) / centerX) * 5;
-                  e.currentTarget.parentElement!.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.parentElement!.style.transform = 'rotateX(0deg) rotateY(0deg)';
-                }}
-              >
-                {/* 3D Depth Layer */}
-                <span className="absolute inset-0 rounded-full bg-gradient-to-b from-white/10 to-transparent pointer-events-none" style={{ transform: 'translateZ(-10px)' }} />
+              {/* 3D Depth Layer */}
+              <span className={glassButtonStyles.primaryDepthLayer} style={{ transform: 'translateZ(-10px)' }} />
+              {/* Shimmer Effect */}
+              <span className={glassButtonStyles.primaryShimmer} />
+              <Calendar className="w-5 h-5 group-hover:rotate-12 transition-all duration-300 relative z-10" />
+              <span className="uppercase tracking-widest relative z-10">{primaryCTA}</span>
+            </a>
 
-                {/* Shimmer Effect - Enhanced */}
-                <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out bg-gradient-to-r from-transparent via-white/60 to-transparent pointer-events-none" />
-
-                <Calendar className="w-5 h-5 group-hover:rotate-12 transition-all duration-300 relative z-10" />
-                <span className="uppercase tracking-widest relative z-10">{primaryCTA}</span>
-              </a>
-            </Button>
-
-            {/* Secondary CTA - Outlined Glass with 3D Tilt */}
-            <Button
-              asChild
-              variant="outline"
-              size="lg"
-              className="relative overflow-hidden border-2 border-white/60 bg-white/5 backdrop-blur-xl text-white hover:text-white hover:bg-white/15 hover:border-white font-light text-sm px-10 py-7 rounded-full transition-all duration-500 group shadow-lg hover:shadow-white/30"
-              style={{
-                transformStyle: 'preserve-3d',
-                transform: 'rotateX(0deg) rotateY(0deg)',
+            {/* Secondary CTA - Glassmorphism with 3D Tilt */}
+            <a
+              href="#portfolio"
+              className={`${glassButtonClass} inline-flex items-center justify-center gap-2`}
+              style={glassButtonStyles.tilt3d}
+              onMouseMove={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = ((y - centerY) / centerY) * -5;
+                const rotateY = ((x - centerX) / centerX) * 5;
+                e.currentTarget.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'rotateX(0deg) rotateY(0deg)';
               }}
             >
-              <a
-                href="#portfolio"
-                className="flex items-center justify-center gap-2 relative z-10"
-                onMouseMove={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  const x = e.clientX - rect.left;
-                  const y = e.clientY - rect.top;
-                  const centerX = rect.width / 2;
-                  const centerY = rect.height / 2;
-                  const rotateX = ((y - centerY) / centerY) * -5;
-                  const rotateY = ((x - centerX) / centerX) * 5;
-                  e.currentTarget.parentElement!.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.parentElement!.style.transform = 'rotateX(0deg) rotateY(0deg)';
-                }}
-              >
-                {/* 3D Depth Layer */}
-                <span className="absolute inset-0 rounded-full bg-gradient-to-b from-white/5 to-transparent pointer-events-none" style={{ transform: 'translateZ(-10px)' }} />
-
-                {/* Shimmer Effect - Enhanced */}
-                <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none" />
-
-                <span className="uppercase tracking-widest relative z-10">{secondaryCTA}</span>
-                <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300 relative z-10" />
-              </a>
-            </Button>
+              {/* 3D Depth Layer */}
+              <span className={glassButtonStyles.depthLayer} style={{ transform: 'translateZ(-10px)' }} />
+              {/* Shimmer Effect */}
+              <span className={glassButtonStyles.shimmer} />
+              <span className="uppercase tracking-widest relative z-10">{secondaryCTA}</span>
+              <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300 relative z-10" />
+            </a>
           </motion.div>
         </div>
       </div>

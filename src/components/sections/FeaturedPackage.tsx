@@ -1,205 +1,301 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Check, Star, Sparkles } from 'lucide-react';
+import { Check, Star, Mic, Video, Smartphone, Home } from 'lucide-react';
+import { glassButtonPrimaryClass, glassButtonClass, glassButtonStyles } from '@/lib/utils';
 
 interface PackageFeature {
   text: string;
 }
 
 interface PackageCard {
+  id: string;
+  icon: React.ComponentType<{ className?: string }>;
   name: string;
+  description: string;
   price: number;
   originalPrice: number;
   savings: number;
   features: PackageFeature[];
   isPopular?: boolean;
   ctaText: string;
+  ctaHref: string;
 }
 
 const packages: PackageCard[] = [
   {
+    id: 'studio-rental',
+    icon: Home,
+    name: 'Studio Rental',
+    description: 'DIY production with full studio access',
+    price: 200,
+    originalPrice: 300,
+    savings: 100,
+    features: [
+      { text: 'Bring your equipment' },
+      { text: 'Full studio access' },
+      { text: 'Professional space' },
+      { text: 'Flexible hours' },
+    ],
+    ctaText: 'Get Quote',
+    ctaHref: '/book',
+  },
+  {
+    id: 'basic-recording',
+    icon: Mic,
     name: 'Basic Recording',
+    description: 'Professional recording setup with raw files',
     price: 350,
     originalPrice: 550,
     savings: 200,
     features: [
       { text: '1-hour studio time' },
-      { text: 'Professional sound' },
+      { text: 'Professional audio' },
       { text: 'Studio lighting' },
       { text: 'Raw audio files' },
     ],
     ctaText: 'Book Now',
+    ctaHref: '/book',
   },
   {
-    name: 'Podcast + Editing',
+    id: 'podcast-premium',
+    icon: Video,
+    name: 'Podcast Premium',
+    description: 'Complete podcast production, ready to publish',
     price: 750,
     originalPrice: 980,
     savings: 230,
     isPopular: true,
     features: [
       { text: '1-hour video recording' },
-      { text: '2-camera setup' },
-      { text: 'Professional sound & lights' },
+      { text: '2-camera 4K setup' },
+      { text: 'Professional audio & lights' },
       { text: 'Full editing & color correction' },
       { text: 'Ready-to-publish content' },
     ],
     ctaText: 'Book This Package',
+    ctaHref: '/book',
   },
   {
-    name: 'Studio Rental',
-    price: 200,
-    originalPrice: 300,
-    savings: 100,
+    id: 'social-content',
+    icon: Smartphone,
+    name: 'Social Content Bundle',
+    description: 'Multiple edited reels for social platforms',
+    price: 950,
+    originalPrice: 1250,
+    savings: 300,
     features: [
-      { text: 'Personal production' },
-      { text: 'Bring your equipment' },
-      { text: 'Full studio access' },
-      { text: 'Flexible hours' },
+      { text: '5 Edited Reels' },
+      { text: 'Professional editing' },
+      { text: 'Custom titles & graphics' },
+      { text: 'Color correction' },
+      { text: 'Optimized for social' },
     ],
-    ctaText: 'Get Quote',
+    ctaText: 'Create Reels',
+    ctaHref: '/book',
   },
 ];
 
 export function FeaturedPackage() {
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+      },
+    },
+  };
+
+  const titleVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: 'easeOut' as const,
+      },
+    },
+  };
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 40 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: 'easeOut' as const,
+      },
+    },
+  };
+
   return (
-    <section className="py-20 md:py-28 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="pricing" className="py-24 bg-black relative overflow-hidden">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-5">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle at 1px 1px, #A8D646 1px, transparent 0)',
+            backgroundSize: '40px 40px',
+          }}
+        />
+      </div>
+
+      <div className="container mx-auto px-4 lg:px-8 relative z-10">
         {/* Section Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center max-w-3xl mx-auto mb-16"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-100px' }}
+          variants={containerVariants}
         >
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+          <motion.p
+            variants={titleVariants}
+            className="text-ecospace-green font-bold uppercase tracking-widest text-sm mb-4"
+          >
+            Pricing
+          </motion.p>
+          <motion.h2
+            variants={titleVariants}
+            className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6"
+          >
             Studio Packages
-          </h2>
-          <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
-            Choose the perfect package for your content
-          </p>
+          </motion.h2>
+          <motion.p
+            variants={titleVariants}
+            className="text-lg text-gray-400 max-w-2xl mx-auto"
+          >
+            Choose the perfect package for your content. All packages include our premium studio space and professional equipment.
+          </motion.p>
         </motion.div>
 
         {/* Packages Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch">
-          {packages.map((pkg, index) => (
-            <motion.div
-              key={pkg.name}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className={`relative flex flex-col rounded-2xl overflow-hidden ${
-                pkg.isPopular
-                  ? 'bg-[#0A3D47] text-white shadow-2xl md:scale-105 md:-my-4 z-10'
-                  : 'bg-white text-gray-900 shadow-lg hover:shadow-xl'
-              } transition-all duration-300`}
-            >
-              {/* Popular Badge */}
-              {pkg.isPopular && (
-                <div className="absolute top-0 left-0 right-0">
-                  <div className="bg-[#A8D646] text-[#0A3D47] font-bold text-sm py-2 px-4 flex items-center justify-center gap-2">
-                    <Star className="w-4 h-4 fill-current" />
-                    MOST POPULAR
-                    <Star className="w-4 h-4 fill-current" />
-                  </div>
-                </div>
-              )}
-
-              {/* Card Content */}
-              <div className={`flex flex-col flex-grow p-6 lg:p-8 ${pkg.isPopular ? 'pt-14' : ''}`}>
-                {/* Package Name */}
-                <h3 className={`text-xl lg:text-2xl font-bold mb-4 ${
-                  pkg.isPopular ? 'text-white' : 'text-gray-900'
-                }`}>
-                  {pkg.name}
-                </h3>
-
-                {/* Pricing */}
-                <div className="mb-6">
-                  <div className="flex items-baseline gap-2 mb-2">
-                    <span className={`text-4xl lg:text-5xl font-bold ${
-                      pkg.isPopular ? 'text-[#A8D646]' : 'text-[#0A3D47]'
-                    }`}>
-                      {pkg.price}
-                    </span>
-                    <span className={`text-lg ${
-                      pkg.isPopular ? 'text-gray-300' : 'text-gray-500'
-                    }`}>
-                      AED
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className={`line-through text-sm ${
-                      pkg.isPopular ? 'text-gray-400' : 'text-gray-400'
-                    }`}>
-                      {pkg.originalPrice} AED
-                    </span>
-                    <span className="bg-[#A8D646] text-[#0A3D47] text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
-                      <Sparkles className="w-3 h-3" />
-                      SAVE {pkg.savings} AED
-                    </span>
-                  </div>
-                </div>
-
-                {/* Features List */}
-                <div className="flex-grow">
-                  <p className={`text-sm font-semibold mb-3 ${
-                    pkg.isPopular ? 'text-gray-300' : 'text-gray-500'
-                  }`}>
-                    What&apos;s Included:
-                  </p>
-                  <ul className="space-y-3">
-                    {pkg.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-start gap-3">
-                        <div className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center ${
-                          pkg.isPopular ? 'bg-[#A8D646]' : 'bg-[#A8D646]/20'
-                        }`}>
-                          <Check className={`w-3 h-3 ${
-                            pkg.isPopular ? 'text-[#0A3D47]' : 'text-[#0A3D47]'
-                          }`} />
-                        </div>
-                        <span className={`text-sm lg:text-base ${
-                          pkg.isPopular ? 'text-gray-200' : 'text-gray-600'
-                        }`}>
-                          {feature.text}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* CTA Button */}
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className={`w-full mt-8 py-4 px-6 rounded-xl font-bold text-base transition-all duration-300 ${
-                    pkg.isPopular
-                      ? 'bg-[#A8D646] text-[#0A3D47] hover:bg-[#9BC53D] shadow-lg'
-                      : 'bg-[#0A3D47] text-white hover:bg-[#0A3D47]/90'
-                  }`}
-                >
-                  {pkg.ctaText}
-                </motion.button>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* View All Pricing Link */}
         <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 mt-16 pt-8"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-100px' }}
+          variants={containerVariants}
+        >
+          {packages.map((pkg) => {
+            const IconComponent = pkg.icon;
+            return (
+              <motion.div
+                key={pkg.id}
+                variants={cardVariants}
+                className="relative group"
+              >
+                {/* Card */}
+                <div className="relative h-full backdrop-blur-md rounded-3xl overflow-hidden transition-all duration-500 bg-white/5 border border-white/20 shadow-lg hover:shadow-2xl hover:border-ecospace-green/50 hover:bg-white/10">
+                  {/* Shimmer Effect on Card */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+                    <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1500 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                  </div>
+
+                  <div className="relative p-6 lg:p-8 h-full flex flex-col">
+                    {/* Icon */}
+                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-all duration-500 bg-white/10 text-ecospace-green group-hover:bg-ecospace-green group-hover:text-black">
+                      <IconComponent className="w-7 h-7" />
+                    </div>
+
+                    {/* Title */}
+                    <h3 className="text-2xl font-black text-white mb-2 group-hover:text-ecospace-green transition-colors">
+                      {pkg.name}
+                    </h3>
+
+                    {/* Description */}
+                    <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+                      {pkg.description}
+                    </p>
+
+                    {/* Price */}
+                    <div className="mb-6">
+                      <div className="flex items-baseline gap-2 mb-2">
+                        <span className="text-4xl font-black text-white">
+                          {pkg.price}
+                        </span>
+                        <span className="text-lg text-gray-500">AED</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="line-through text-sm text-gray-600">
+                          {pkg.originalPrice} AED
+                        </span>
+                        <span className="bg-ecospace-green/20 text-ecospace-green text-xs font-bold px-2 py-1 rounded-full border border-ecospace-green/30">
+                          SAVE {pkg.savings} AED
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Features List */}
+                    <div className="flex-grow mb-8">
+                      <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-4">
+                        What&apos;s Included:
+                      </p>
+                      <ul className="space-y-3">
+                        {pkg.features.map((feature, idx) => (
+                          <li key={idx} className="flex items-start gap-3">
+                            <div className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center bg-white/10">
+                              <Check className="w-3 h-3 text-ecospace-green" />
+                            </div>
+                            <span className="text-gray-300 text-sm">
+                              {feature.text}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* CTA Button */}
+                    <a
+                      href={pkg.ctaHref}
+                      className={`${glassButtonClass} inline-flex items-center justify-center gap-2 w-full text-center`}
+                      style={glassButtonStyles.tilt3d}
+                      onMouseMove={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+                        const centerX = rect.width / 2;
+                        const centerY = rect.height / 2;
+                        const rotateX = ((y - centerY) / centerY) * -3;
+                        const rotateY = ((x - centerX) / centerX) * 3;
+                        e.currentTarget.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'rotateX(0deg) rotateY(0deg)';
+                      }}
+                    >
+                      <span className={glassButtonStyles.depthLayer} />
+                      <span className={glassButtonStyles.shimmer} />
+                      <span className="uppercase tracking-widest relative z-10">{pkg.ctaText}</span>
+                    </a>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+
+        {/* Bottom CTA */}
+        <motion.div
+          className="text-center mt-16"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="text-center mt-12"
+          transition={{ duration: 0.6, delay: 0.4 }}
         >
+          <p className="text-gray-400 mb-6 text-lg">
+            Need a custom package or have questions?
+          </p>
           <a
             href="/pricing"
-            className="inline-flex items-center gap-2 text-[#0A3D47] hover:text-[#A8D646] font-semibold text-lg transition-colors duration-300 group"
+            className="inline-flex items-center gap-2 text-ecospace-green hover:text-white font-semibold text-lg transition-colors duration-300 group"
           >
-            View All Packages
+            View All Pricing Options
             <svg
               className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300"
               fill="none"

@@ -1,50 +1,47 @@
 'use client';
 
 import { HeroSection } from '@/components/sections/HeroSection';
-import { ServicesOverview } from '@/components/sections/ServicesOverview';
+import { WhyChooseUs } from '@/components/sections/WhyChooseUs';
+import { PortfolioShowcase } from '@/components/sections/PortfolioShowcase';
+import { HowItWorks } from '@/components/sections/HowItWorks';
 import { FeaturedPackage } from '@/components/sections/FeaturedPackage';
-import { FeaturedPodcasts } from '@/components/sections/FeaturedPodcasts';
-import { EpisodesCarousel } from '@/components/sections/EpisodesCarousel';
-import { PodcastExplore } from '@/components/sections/PodcastExplore';
+import { LocationMap } from '@/components/sections/LocationMap';
+import { ContactSection } from '@/components/sections/ContactSection';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { episodes, getFeaturedEpisodes } from '@/data/episodes';
 
 export default function Home() {
-  const featuredEpisodes = getFeaturedEpisodes();
-
   return (
     <MainLayout>
-      {/* Hero Section - Studio Booking */}
+      {/* 1. Hero Section - Hook with visuals */}
       <HeroSection
         title="Dubai World Trade Center's Premier Podcast Studio"
         subtitle="Professional Recording | Expert Production | Flexible Packages From 350 AED"
         backgroundImage="/images/hero section image.jpg"
         primaryCTA="BOOK STUDIOS & SERVICES"
-        secondaryCTA="View Pricing"
+        secondaryCTA="Explore Our Studio"
       />
 
-      {/* Services Overview Section */}
-      <ServicesOverview />
-      {/* Featured Package Section */}
+      {/* 2. Why Choose Us - Build trust with features */}
+      <WhyChooseUs />
+
+      {/* 3. Portfolio - Social proof of past creators */}
+      <PortfolioShowcase />
+
+      {/* 4. How It Works - Easy booking process */}
+      <HowItWorks />
+
+      {/* 5. Pricing - Only after they see the value */}
       <FeaturedPackage />
 
-      {/* Podcast Explore Section */}
-      <PodcastExplore
-        episodes={episodes}
-        category="Fashion Life"
-        title="Explore podcast in"
-        subtitle="Marketing Show"
-      />
+      {/* 6. Location - Studio location with map */}
+      <LocationMap />
 
-      {/* Featured Podcasts Section */}
-      <FeaturedPodcasts episodes={featuredEpisodes} />
+      {/* 7. Contact Form - Lead capture */}
+      <ContactSection />
 
-      {/* Episodes Carousel - Just above footer/newsletter */}
-      <EpisodesCarousel
-        episodes={episodes}
-        title="Trending Now"
-        subtitle="Most Popular Episodes"
-      />
+      {/* TODO: Add sections below */}
+      {/* Testimonials */}
+      {/* FAQ Preview */}
     </MainLayout>
   );
 }
