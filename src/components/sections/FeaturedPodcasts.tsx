@@ -54,11 +54,11 @@ export function FeaturedPodcasts({ episodes }: FeaturedPodcastsProps) {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <p className="text-[#FF5722] font-semibold uppercase tracking-wider mb-3" style={{ fontSize: '15px', letterSpacing: '0.1em' }}>
-            Enjoy New Shows
+          <p className="text-ecospace-green font-semibold uppercase tracking-wider mb-3" style={{ fontSize: '15px', letterSpacing: '0.1em' }}>
+            Premium Options
           </p>
           <h2 className="text-black font-bold" style={{ fontSize: '48px', fontWeight: 700, letterSpacing: '-0.02em' }}>
-            Featured podcasts
+            Featured Packages
           </h2>
         </motion.div>
 
@@ -114,7 +114,7 @@ export function FeaturedPodcasts({ episodes }: FeaturedPodcastsProps) {
               {/* Content */}
               <motion.div variants={itemVariants} className="space-y-6">
                 <div>
-                  <p className="text-[#FF5722] font-bold uppercase tracking-wide mb-2" style={{ fontSize: '15px', fontWeight: 700 }}>
+                  <p className="text-ecospace-green font-bold uppercase tracking-wide mb-2" style={{ fontSize: '15px', fontWeight: 700 }}>
                     {episode.category} . Episode {episode.episodeNumber}
                   </p>
                   <h3 className="text-black font-bold mb-4" style={{ fontSize: '36px', fontWeight: 700, lineHeight: '1.3' }}>

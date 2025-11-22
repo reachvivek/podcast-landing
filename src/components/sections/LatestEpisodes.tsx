@@ -63,17 +63,17 @@ export function LatestEpisodes({ episodes }: LatestEpisodesProps) {
           <div className="text-left">
             <motion.p
               variants={titleVariants}
-              className="text-[#FF5722] font-semibold uppercase tracking-wider text-base mb-3"
+              className="text-ecospace-green font-semibold uppercase tracking-wider text-base mb-3"
               style={{ fontSize: '15px', letterSpacing: '0.1em' }}
             >
-              Enjoy New Shows
+              Our Services
             </motion.p>
             <motion.h2
               variants={titleVariants}
               className="text-4xl md:text-5xl lg:text-6xl font-bold text-black"
               style={{ fontSize: '48px', fontWeight: 700, letterSpacing: '-0.02em' }}
             >
-              Latest episodes
+              Studio Packages
             </motion.h2>
           </div>
 

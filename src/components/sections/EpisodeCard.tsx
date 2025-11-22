@@ -66,8 +66,8 @@ export function EpisodeCard({ episode, index = 0 }: EpisodeCardProps) {
         <div className="p-6">
           {/* Category Badge */}
           <div className="flex items-center gap-2 mb-3">
-            <Headphones className="w-5 h-5 text-[#FF5722]" />
-            <span className="text-[#FF5722] font-bold uppercase tracking-wide" style={{ fontSize: '15px', fontWeight: 700 }}>
+            <Headphones className="w-5 h-5 text-ecospace-green" />
+            <span className="text-ecospace-green font-bold uppercase tracking-wide" style={{ fontSize: '15px', fontWeight: 700 }}>
               {episode.category}
             </span>
             <span className="text-gray-400">•</span>
@@ -82,7 +82,7 @@ export function EpisodeCard({ episode, index = 0 }: EpisodeCardProps) {
           {/* View Episode Link */}
           <Link
             href={`/podcast/${episode.id}`}
-            className="inline-flex items-center font-semibold text-black group-hover:text-[#FF5722] transition-colors uppercase tracking-wide"
+            className="inline-flex items-center font-semibold text-black hover:text-ecospace-green transition-colors uppercase tracking-wide"
             style={{ fontSize: '13px', letterSpacing: '0.05em' }}
           >
             View Episode

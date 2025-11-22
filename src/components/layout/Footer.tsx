@@ -22,7 +22,7 @@ export function Footer() {
   return (
     <footer className="bg-black text-white">
       {/* Newsletter Section */}
-      <div className="bg-[#FF5722] py-16">
+      <div className="bg-ecospace-green py-16">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="flex items-center space-x-4">
@@ -73,7 +73,7 @@ export function Footer() {
                     href={social.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-10 h-10 rounded-full bg-white/10 hover:bg-[#FF5722] flex items-center justify-center transition-colors"
+                    className="w-10 h-10 rounded-full bg-white/10 hover:bg-ecospace-green-dark flex items-center justify-center transition-colors"
                     aria-label={social.platform}
                   >
                     <Icon className="w-5 h-5" />
@@ -86,7 +86,7 @@ export function Footer() {
           {/* Explore Section */}
           <div>
             <h4 className="text-xl font-bold mb-6 flex items-center">
-              <span className="text-[#FF5722] mr-2">♥</span>
+              <span className="text-ecospace-green mr-2">♥</span>
               Explore
             </h4>
             <ul className="space-y-3">
@@ -94,7 +94,7 @@ export function Footer() {
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-gray-400 hover:text-[#FF5722] transition-colors"
+                    className="text-gray-400 hover:text-ecospace-green transition-colors"
                   >
                     {link.name}
                   </Link>
@@ -106,12 +106,12 @@ export function Footer() {
           {/* Find Section */}
           <div>
             <h4 className="text-xl font-bold mb-6 flex items-center">
-              <span className="text-[#FF5722] mr-2">♥</span>
+              <span className="text-ecospace-green mr-2">♥</span>
               Find
             </h4>
             <address className="not-italic space-y-3">
               <p className="text-gray-400 flex items-start">
-                <MapPin className="w-5 h-5 mr-2 flex-shrink-0 mt-1 text-[#FF5722]" />
+                <MapPin className="w-5 h-5 mr-2 flex-shrink-0 mt-1 text-ecospace-green" />
                 <span>{siteConfig.address}</span>
               </p>
             </address>
@@ -120,12 +120,12 @@ export function Footer() {
           {/* Contact Section */}
           <div>
             <h4 className="text-xl font-bold mb-6 flex items-center">
-              <span className="text-[#FF5722] mr-2">♥</span>
+              <span className="text-ecospace-green mr-2">♥</span>
               Contact
             </h4>
             <ul className="space-y-3">
               <li className="flex items-center text-gray-400">
-                <Phone className="w-5 h-5 mr-2 text-[#FF5722]" />
+                <Phone className="w-5 h-5 mr-2 text-ecospace-green" />
                 <a
                   href={`tel:${siteConfig.phone}`}
                   className="hover:text-[#FF5722] transition-colors"
@@ -134,11 +134,11 @@ export function Footer() {
                 </a>
               </li>
               <li className="flex items-center text-gray-400">
-                <Clock className="w-5 h-5 mr-2 text-[#FF5722]" />
+                <Clock className="w-5 h-5 mr-2 text-ecospace-green" />
                 {siteConfig.hours}
               </li>
               <li className="flex items-center text-gray-400">
-                <Mail className="w-5 h-5 mr-2 text-[#FF5722]" />
+                <Mail className="w-5 h-5 mr-2 text-ecospace-green" />
                 <a
                   href={`mailto:${siteConfig.email}`}
                   className="hover:text-[#FF5722] transition-colors"

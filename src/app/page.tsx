@@ -1,8 +1,8 @@
 'use client';
 
 import { HeroSection } from '@/components/sections/HeroSection';
-import { AudioPlayer } from '@/components/audio/AudioPlayer';
-import { LatestEpisodes } from '@/components/sections/LatestEpisodes';
+import { ServicesOverview } from '@/components/sections/ServicesOverview';
+import { FeaturedPackage } from '@/components/sections/FeaturedPackage';
 import { FeaturedPodcasts } from '@/components/sections/FeaturedPodcasts';
 import { EpisodesCarousel } from '@/components/sections/EpisodesCarousel';
 import { PodcastExplore } from '@/components/sections/PodcastExplore';
@@ -10,23 +10,23 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { episodes, getFeaturedEpisodes } from '@/data/episodes';
 
 export default function Home() {
-  const featuredEpisode = episodes[2];
   const featuredEpisodes = getFeaturedEpisodes();
 
   return (
     <MainLayout>
-      {/* Static Hero Section */}
+      {/* Hero Section - Studio Booking */}
       <HeroSection
-        title="Listen TO US DAILY"
-        subtitle="Our daily podcast"
-        backgroundImage="/images/hero-background.jpg"
+        title="Dubai World Trade Center's Premier Podcast Studio"
+        subtitle="Professional Recording | Expert Production | Flexible Packages From 350 AED"
+        backgroundImage="/images/hero section image.jpg"
+        primaryCTA="BOOK STUDIOS & SERVICES"
+        secondaryCTA="View Pricing"
       />
 
-      {/* Audio Player - NOT sticky */}
-      <AudioPlayer episode={featuredEpisode} />
-
-      {/* Latest Episodes Section */}
-      <LatestEpisodes episodes={episodes} />
+      {/* Services Overview Section */}
+      <ServicesOverview />
+      {/* Featured Package Section */}
+      <FeaturedPackage />
 
       {/* Podcast Explore Section */}
       <PodcastExplore

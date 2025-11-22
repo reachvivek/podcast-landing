@@ -28,7 +28,7 @@ export function EpisodesCarousel({
       <div className="container mx-auto px-4 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <p className="text-[#FF5722] font-semibold uppercase tracking-wider mb-3" style={{ fontSize: '15px', letterSpacing: '0.1em' }}>
+          <p className="text-ecospace-green font-semibold uppercase tracking-wider mb-3" style={{ fontSize: '15px', letterSpacing: '0.1em' }}>
             {subtitle}
           </p>
           <h2 className="text-black font-bold" style={{ fontSize: '48px', fontWeight: 700, letterSpacing: '-0.02em' }}>{title}</h2>
@@ -104,8 +104,8 @@ export function EpisodesCarousel({
                   <div className="p-6">
                     {/* Category */}
                     <div className="flex items-center gap-2 mb-3">
-                      <Headphones className="w-5 h-5 text-[#FF5722]" />
-                      <span className="text-[#FF5722] font-bold uppercase tracking-wide" style={{ fontSize: '15px', fontWeight: 700 }}>
+                      <Headphones className="w-5 h-5 text-ecospace-green" />
+                      <span className="text-ecospace-green font-bold uppercase tracking-wide" style={{ fontSize: '15px', fontWeight: 700 }}>
                         {episode.category}
                       </span>
                     </div>
@@ -138,7 +138,7 @@ export function EpisodesCarousel({
         .episodes-carousel .swiper-button-prev,
         .episodes-carousel .swiper-button-next {
           color: #fff;
-          background: linear-gradient(135deg, #ff5722 0%, #f4511e 100%);
+          background: linear-gradient(135deg, var(--brand-primary-hex) 0%, var(--brand-primary-dark-hex) 100%);
           width: 55px;
           height: 55px;
           border-radius: 50%;
@@ -161,7 +161,7 @@ export function EpisodesCarousel({
 
         .episodes-carousel .swiper-button-prev:hover,
         .episodes-carousel .swiper-button-next:hover {
-          background: linear-gradient(135deg, #f4511e 0%, #e64a19 100%);
+          background: linear-gradient(135deg, var(--brand-primary-dark-hex) 0%, #e64a19 100%);
           transform: scale(1.15);
           box-shadow: 0 12px 28px rgba(255, 87, 34, 0.5);
           border-color: white;
@@ -193,7 +193,7 @@ export function EpisodesCarousel({
         }
 
         .episodes-carousel .swiper-pagination-bullet-active {
-          background: linear-gradient(135deg, #ff5722 0%, #f4511e 100%);
+          background: linear-gradient(135deg, var(--brand-primary-hex) 0%, var(--brand-primary-dark-hex) 100%);
           width: 36px;
           border-radius: 6px;
           box-shadow: 0 2px 8px rgba(255, 87, 34, 0.4);

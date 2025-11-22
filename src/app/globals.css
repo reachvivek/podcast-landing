@@ -42,62 +42,73 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* Roboto Variable Font - Local files */
-@font-face {
-  font-family: 'Roboto';
-  src: url('/fonts/Roboto-VariableFont_wdth,wght.ttf') format('truetype-variations');
-  font-weight: 100 900;
-  font-stretch: 75% 100%;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Roboto';
-  src: url('/fonts/Roboto-Italic-VariableFont_wdth,wght.ttf') format('truetype-variations');
-  font-weight: 100 900;
-  font-stretch: 75% 100%;
-  font-style: italic;
-  font-display: swap;
-}
+/* Font files now managed by Next.js next/font/google
+   - Automatically optimized and self-hosted
+   - No need for manual @font-face declarations
+   - Zero layout shift with font-display: swap
+*/
 
 :root {
-  /* Primary font family - Change this to switch fonts globally */
-  --font-primary: 'Roboto', system-ui, -apple-system, sans-serif;
+  /* Primary font - Inter for everything */
+  --font-primary: var(--font-inter), system-ui, -apple-system, sans-serif;
 
-  /* Theme variables */
+  /* ============================================
+     ECOSPACE BRAND COLOR SYSTEM
+     Change these hex values to switch brand colors globally
+     ============================================ */
+
+  /* Main Brand Colors - CHANGE THESE TO SWITCH PALETTE */
+  --brand-primary-hex: #A8D646;        /* Lime Green - Primary brand color */
+  --brand-primary-dark-hex: #8fbd2e;   /* Darker Lime Green - Hover states */
+  --brand-primary-light-hex: #c5e67e;  /* Lighter Lime Green - Accents */
+
+  --brand-secondary-hex: #0A3D47;      /* Dark Teal - Secondary brand color */
+  --brand-secondary-light-hex: #0e5561; /* Lighter Teal - Hover states */
+  --brand-secondary-dark-hex: #062b33;  /* Darker Teal - Deep accents */
+
+  /* Theme variables - Using OKLCH color space for Tailwind v4 */
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --background: oklch(1 0 0); /* White */
+  --foreground: oklch(0.145 0 0); /* Dark text */
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
+
+  /* Primary = Lime Green #A8D646 */
+  --primary: oklch(0.80 0.15 130); /* Lime green */
+  --primary-foreground: oklch(0.145 0 0); /* Dark text on lime green */
+
+  /* Secondary = Dark Teal #0A3D47 */
+  --secondary: oklch(0.25 0.05 200); /* Dark teal */
+  --secondary-foreground: oklch(0.985 0 0); /* White text on dark teal */
+
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+
+  /* Accent = Lime Green variant */
+  --accent: oklch(0.85 0.12 130); /* Lighter lime green */
+  --accent-foreground: oklch(0.145 0 0);
+
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
+  --ring: oklch(0.80 0.15 130); /* Lime green ring */
+
+  --chart-1: oklch(0.80 0.15 130); /* Lime green */
+  --chart-2: oklch(0.25 0.05 200); /* Dark teal */
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
+
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.80 0.15 130); /* Lime green */
+  --sidebar-primary-foreground: oklch(0.145 0 0);
   --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-accent-foreground: oklch(0.145 0 0);
   --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-ring: oklch(0.80 0.15 130);
 }
 
 .dark {
@@ -147,19 +158,25 @@
 /* ============================================
    TYPOGRAPHY CONFIGURATION
    ============================================
-   Centralized font management using CSS custom properties.
-   To change the global font, update the --font-primary variable in :root above.
+   Using Next.js optimized Google Fonts for best performance:
 
-   Current font: DM Sans (Google Fonts) - Clean, modern, professional
-   Matches the original Podover theme styling
+   - Inter: Modern, geometric sans-serif for everything
+     Perfect for tech/creative brands, excellent readability
+     Used by: Vercel, GitHub, Linear, Stripe
+
+   Variable font loaded via next/font/google for:
+   ✓ Zero layout shift
+   ✓ Automatic subsetting
+   ✓ Self-hosted (no external requests)
+   ✓ Better Core Web Vitals
    ============================================ */
 
-/* Apply font globally to all elements */
+/* Apply Inter globally to all elements */
 * {
   font-family: var(--font-primary) !important;
 }
 
-/* Optional: Define specific font weights for consistency */
+/* Font weight utilities */
 .font-light { font-weight: 300; }
 .font-normal { font-weight: 400; }
 .font-medium { font-weight: 500; }
@@ -168,4 +185,175 @@
 .font-extrabold { font-weight: 800; }
 .font-black { font-weight: 900; }
 
+/* Global button text styling - Thin and elegant by default */
+button, a[role="button"], [class*="button"] {
+  font-weight: 500 !important; /* Medium weight for all buttons */
+}
+
 /* Card and content sections will use component-level styling for better control */
+
+/* ============================================
+   ECOSPACE BRAND UTILITIES
+   Using CSS Variables - Change colors at :root to update globally
+   ============================================ */
+
+/* Primary Brand Color (Lime Green) */
+.bg-ecospace-green {
+  background-color: var(--brand-primary-hex);
+}
+
+.text-ecospace-green {
+  color: var(--brand-primary-hex);
+}
+
+.border-ecospace-green {
+  border-color: var(--brand-primary-hex);
+}
+
+.fill-ecospace-green {
+  fill: var(--brand-primary-hex);
+}
+
+.stroke-ecospace-green {
+  stroke: var(--brand-primary-hex);
+}
+
+/* Primary Dark (Hover states) */
+.bg-ecospace-green-dark {
+  background-color: var(--brand-primary-dark-hex);
+}
+
+.text-ecospace-green-dark {
+  color: var(--brand-primary-dark-hex);
+}
+
+.border-ecospace-green-dark {
+  border-color: var(--brand-primary-dark-hex);
+}
+
+/* Primary Light (Accents) */
+.bg-ecospace-green-light {
+  background-color: var(--brand-primary-light-hex);
+}
+
+.text-ecospace-green-light {
+  color: var(--brand-primary-light-hex);
+}
+
+.border-ecospace-green-light {
+  border-color: var(--brand-primary-light-hex);
+}
+
+/* Secondary Brand Color (Dark Teal) */
+.bg-ecospace-teal {
+  background-color: var(--brand-secondary-hex);
+}
+
+.text-ecospace-teal {
+  color: var(--brand-secondary-hex);
+}
+
+.border-ecospace-teal {
+  border-color: var(--brand-secondary-hex);
+}
+
+.fill-ecospace-teal {
+  fill: var(--brand-secondary-hex);
+}
+
+.stroke-ecospace-teal {
+  stroke: var(--brand-secondary-hex);
+}
+
+/* Secondary Light (Hover states) */
+.bg-ecospace-teal-light {
+  background-color: var(--brand-secondary-light-hex);
+}
+
+.text-ecospace-teal-light {
+  color: var(--brand-secondary-light-hex);
+}
+
+.border-ecospace-teal-light {
+  border-color: var(--brand-secondary-light-hex);
+}
+
+/* Secondary Dark (Deep accents) */
+.bg-ecospace-teal-dark {
+  background-color: var(--brand-secondary-dark-hex);
+}
+
+.text-ecospace-teal-dark {
+  color: var(--brand-secondary-dark-hex);
+}
+
+.border-ecospace-teal-dark {
+  border-color: var(--brand-secondary-dark-hex);
+}
+
+/* Hover State Utilities */
+.hover\:bg-ecospace-green:hover {
+  background-color: var(--brand-primary-hex);
+}
+
+.hover\:bg-ecospace-green-dark:hover {
+  background-color: var(--brand-primary-dark-hex);
+}
+
+.hover\:bg-ecospace-green-light:hover {
+  background-color: var(--brand-primary-light-hex);
+}
+
+.hover\:text-ecospace-green:hover {
+  color: var(--brand-primary-hex);
+}
+
+.hover\:text-ecospace-green-dark:hover {
+  color: var(--brand-primary-dark-hex);
+}
+
+.hover\:border-ecospace-green:hover {
+  border-color: var(--brand-primary-hex);
+}
+
+.hover\:bg-ecospace-teal:hover {
+  background-color: var(--brand-secondary-hex);
+}
+
+.hover\:bg-ecospace-teal-light:hover {
+  background-color: var(--brand-secondary-light-hex);
+}
+
+.hover\:bg-ecospace-teal-dark:hover {
+  background-color: var(--brand-secondary-dark-hex);
+}
+
+.hover\:text-ecospace-teal:hover {
+  color: var(--brand-secondary-hex);
+}
+
+.hover\:border-ecospace-teal:hover {
+  border-color: var(--brand-secondary-hex);
+}
+
+/* Shadow Utilities with Brand Colors */
+.shadow-ecospace-green {
+  box-shadow: 0 10px 30px -10px var(--brand-primary-hex);
+}
+
+.shadow-ecospace-teal {
+  box-shadow: 0 10px 30px -10px var(--brand-secondary-hex);
+}
+
+/* Gradient Utilities */
+.gradient-ecospace-primary {
+  background: linear-gradient(135deg, var(--brand-primary-hex), var(--brand-primary-dark-hex));
+}
+
+.gradient-ecospace-secondary {
+  background: linear-gradient(135deg, var(--brand-secondary-hex), var(--brand-secondary-light-hex));
+}
+
+.gradient-ecospace-mixed {
+  background: linear-gradient(135deg, var(--brand-primary-hex), var(--brand-secondary-hex));
+}

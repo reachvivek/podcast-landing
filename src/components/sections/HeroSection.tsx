@@ -1,138 +1,266 @@
 'use client';
 
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Play, Pause } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Calendar, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { podcastPlatforms } from '@/data/site-config';
 
 interface HeroSectionProps {
-  title: string;
-  subtitle: string;
-  backgroundImage?: string;
+  readonly title: string;
+  readonly subtitle: string;
+  readonly backgroundImage?: string;
+  readonly primaryCTA?: string;
+  readonly secondaryCTA?: string;
 }
 
-export function HeroSection({ title, subtitle, backgroundImage }: HeroSectionProps) {
-  const [isPlaying, setIsPlaying] = React.useState(false);
+// Priority images - Your best shots
+const allStudioImages = [
+  '/images/studio-hero-10.jpg',    // _DSC7221 - PRIORITY
+  '/images/studio-hero-11.jpg',    // _DSC8577 - PRIORITY
+  '/images/studio-hero-12.jpg',    // _DSC8858 - PRIORITY
+  '/images/studio-hero-13.jpg',    // _DSC8872 - PRIORITY
+  '/images/studio-hero-14.jpg',    // _DSC8920 - PRIORITY
+  '/images/studio-hero-15.jpg',    // _DSC8601 - PRIORITY
+  '/images/studio-hero-16.jpg',    // _DSC7241 - PRIORITY
+  '/images/studio-hero-17.jpg',    // _DSC7222 - PRIORITY
+  '/images/studio-hero-8.jpg',     // Female guest
+  '/images/studio-hero-7.jpg',     // People recording
+];
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-        delayChildren: 0.3,
-      },
-    },
-  };
+// Shuffle array function - Fisher-Yates algorithm
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-      },
-    },
-  };
+// Rotating words for headline
+const rotatingWords = ['Stories', 'Ideas', 'Voices', 'Brands', 'Visions', 'Conversations'];
+
+export function HeroSection({
+  primaryCTA = "BOOK STUDIOS & SERVICES",
+  secondaryCTA = "Explore Our Space"
+}: Readonly<HeroSectionProps>) {
+  // Use unshuffled images initially, shuffle after hydration
+  const [studioImages, setStudioImages] = useState(allStudioImages);
+  const [currentImage, setCurrentImage] = useState(0);
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+
+  // Shuffle images after component mounts (client-side only)
+  useEffect(() => {
+    setStudioImages(shuffleArray(allStudioImages));
+  }, []);
+
+  // Auto-rotate images every 5 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentImage((prev) => (prev + 1) % studioImages.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [studioImages.length]);
+
+  // Auto-rotate headline words every 3 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentWordIndex((prev) => (prev + 1) % rotatingWords.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
-    <section className="hero-section relative h-screen flex items-center justify-center overflow-hidden">
-      {/* Background with Red Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-red-900/90 via-red-800/80 to-orange-900/90">
-        {backgroundImage && (
-          <div
-            className="absolute inset-0 bg-cover bg-center mix-blend-overlay opacity-40"
-            style={{ backgroundImage: `url(${backgroundImage})` }}
-          />
-        )}
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
+      {/* Fullscreen Image Carousel with Parallax Effect */}
+      <div className="absolute inset-0">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentImage}
+            initial={{ opacity: 0, scale: 1.1 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 1.2, ease: "easeInOut" }}
+            className="absolute inset-0"
+          >
+            <Image
+              src={studioImages[currentImage]}
+              alt="Podcast Studio EcoSpace"
+              fill
+              className="object-cover"
+              priority
+              quality={90}
+            />
+            {/* Gradient Overlay - Darker for text readability */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/60" />
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Image Indicators */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-3">
+          {studioImages.map((img, index) => (
+            <button
+              key={`hero-image-${index}-${img}`}
+              onClick={() => setCurrentImage(index)}
+              className={`h-1.5 rounded-full transition-all duration-500 ${
+                index === currentImage
+                  ? 'w-12 bg-ecospace-green'
+                  : 'w-6 bg-white/30 hover:bg-white/50'
+              }`}
+              aria-label={`View image ${index + 1}`}
+            />
+          ))}
+        </div>
       </div>
 
-      {/* Decorative Elements */}
-      <div className="absolute top-0 right-0 w-1/3 h-full">
-        <div className="absolute top-20 right-10 text-orange-500/30">
-          <div className="text-[200px] font-bold leading-none">///</div>
-        </div>
-        <div className="absolute top-40 right-40">
-          <div className="border-4 border-orange-500/30 p-4">
-            <div className="text-orange-500/50 text-xs space-y-1">
-              <div>HOLLYWOOD</div>
-              <div>PRODUCTION________</div>
-              <div>DIRECTOR__________</div>
-              <div>CAMERA____________</div>
-              <div>___DATE___SCENE___TAKE</div>
+      {/* Minimal Text Content - Bottom Aligned */}
+      <div className="container mx-auto px-4 lg:px-8 relative z-10 mb-24 mt-20">
+        <div className="max-w-4xl">
+          {/* Main Headline - Simple & Powerful with Rotating Word */}
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+            className="text-5xl md:text-6xl lg:text-7xl text-white mb-6 leading-none tracking-wide"
+            style={{ fontWeight: 270 }}
+          >
+            <div>
+              Where{' '}
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={rotatingWords[currentWordIndex]}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.5, ease: 'easeInOut' }}
+                  className="inline-block"
+                >
+                  {rotatingWords[currentWordIndex]}
+                </motion.span>
+              </AnimatePresence>
             </div>
-          </div>
-        </div>
-      </div>
+            <div className="text-ecospace-green" style={{ fontWeight: 180 }}>Come to Life</div>
+          </motion.h1>
 
-      {/* Content */}
-      <motion.div
-        className="container mx-auto px-4 lg:px-8 relative z-10 text-center"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        <motion.div variants={itemVariants} className="mb-4">
-          <span className="text-white/80 text-sm md:text-base uppercase tracking-widest">
-            {subtitle}
-          </span>
-        </motion.div>
+          {/* Subtitle - Experience-Focused */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            className="text-xl md:text-2xl text-gray-300 mb-10 max-w-3xl leading-relaxed font-light"
+          >
+            Dubai's premier podcast studio. Professional recording, expert production, and an experience that transforms your vision into reality.
+          </motion.p>
 
-        <motion.h1
-          variants={itemVariants}
-          className="text-5xl md:text-7xl lg:text-[100px] font-medium text-white mb-12 mx-auto uppercase leading-none"
-          style={{
-            fontWeight: 500,
-            letterSpacing: '0.24em',
-            maxWidth: 'none'
-          }}
-        >
-          {title}
-        </motion.h1>
-
-        {/* Podcast Platform Buttons */}
-        <motion.div
-          variants={itemVariants}
-          className="flex flex-wrap items-center justify-center gap-4 mb-8"
-        >
-          {podcastPlatforms.map((platform) => (
+          {/* CTA Buttons - Premium Glassmorphism with 3D Effects */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.7 }}
+            className="flex flex-col sm:flex-row gap-4"
+            style={{ perspective: '1000px' }}
+          >
+            {/* Primary CTA - White/Silver Glassmorphism with 3D Tilt */}
             <Button
-              key={platform.name}
               asChild
-              className="bg-primary hover:bg-primary/90 text-white rounded-full px-8 py-6 text-sm md:text-base font-semibold uppercase tracking-wide shadow-lg hover:shadow-xl transition-all"
+              size="lg"
+              className="relative overflow-hidden bg-white/10 hover:bg-ecospace-green/80 text-white hover:text-black font-light backdrop-blur-md text-base px-10 py-7 rounded-full shadow-2xl hover:shadow-ecospace-green/50 transition-all duration-500 group border border-white/30"
+              style={{
+                transformStyle: 'preserve-3d',
+                transform: 'rotateX(0deg) rotateY(0deg)',
+              }}
             >
               <a
-                href={platform.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center space-x-2"
+                href="#contact"
+                className="flex items-center justify-center gap-3 relative z-10"
+                onMouseMove={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const x = e.clientX - rect.left;
+                  const y = e.clientY - rect.top;
+                  const centerX = rect.width / 2;
+                  const centerY = rect.height / 2;
+                  const rotateX = ((y - centerY) / centerY) * -5;
+                  const rotateY = ((x - centerX) / centerX) * 5;
+                  e.currentTarget.parentElement!.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.parentElement!.style.transform = 'rotateX(0deg) rotateY(0deg)';
+                }}
               >
-                {platform.icon === 'soundcloud' && (
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 12.5v5.8c0 .2.1.3.3.3h9.4c.2 0 .3-.1.3-.3V12h-10zm10-2c-.1-2.2-1.9-3.9-4-3.9-.5 0-1 .1-1.5.3V6.2c0-.2-.1-.3-.3-.3h-3.9c-.2 0-.3.1-.3.3v11.1c0 .2.1.3.3.3h9.4c.2 0 .3-.1.3-.3v-7z"/>
-                  </svg>
-                )}
-                {platform.icon === 'spotify' && (
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
-                  </svg>
-                )}
-                {platform.icon === 'apple' && (
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
-                  </svg>
-                )}
-                <span>{platform.name.toUpperCase()}</span>
+                {/* 3D Depth Layer */}
+                <span className="absolute inset-0 rounded-full bg-gradient-to-b from-white/10 to-transparent pointer-events-none" style={{ transform: 'translateZ(-10px)' }} />
+
+                {/* Shimmer Effect - Enhanced */}
+                <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out bg-gradient-to-r from-transparent via-white/60 to-transparent pointer-events-none" />
+
+                <Calendar className="w-5 h-5 group-hover:rotate-12 transition-all duration-300 relative z-10" />
+                <span className="uppercase tracking-widest relative z-10">{primaryCTA}</span>
               </a>
             </Button>
-          ))}
-        </motion.div>
-      </motion.div>
 
-      {/* Bottom Gradient Fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent" />
+            {/* Secondary CTA - Outlined Glass with 3D Tilt */}
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="relative overflow-hidden border-2 border-white/60 bg-white/5 backdrop-blur-xl text-white hover:text-white hover:bg-white/15 hover:border-white font-light text-sm px-10 py-7 rounded-full transition-all duration-500 group shadow-lg hover:shadow-white/30"
+              style={{
+                transformStyle: 'preserve-3d',
+                transform: 'rotateX(0deg) rotateY(0deg)',
+              }}
+            >
+              <a
+                href="#portfolio"
+                className="flex items-center justify-center gap-2 relative z-10"
+                onMouseMove={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const x = e.clientX - rect.left;
+                  const y = e.clientY - rect.top;
+                  const centerX = rect.width / 2;
+                  const centerY = rect.height / 2;
+                  const rotateX = ((y - centerY) / centerY) * -5;
+                  const rotateY = ((x - centerX) / centerX) * 5;
+                  e.currentTarget.parentElement!.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.parentElement!.style.transform = 'rotateX(0deg) rotateY(0deg)';
+                }}
+              >
+                {/* 3D Depth Layer */}
+                <span className="absolute inset-0 rounded-full bg-gradient-to-b from-white/5 to-transparent pointer-events-none" style={{ transform: 'translateZ(-10px)' }} />
+
+                {/* Shimmer Effect - Enhanced */}
+                <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none" />
+
+                <span className="uppercase tracking-widest relative z-10">{secondaryCTA}</span>
+                <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300 relative z-10" />
+              </a>
+            </Button>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Floating Feature Tags - Minimal & Elegant */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1, delay: 1 }}
+        className="absolute top-1/3 right-8 hidden xl:flex flex-col gap-4 z-20"
+      >
+        <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl px-6 py-4 hover:bg-black/60 transition-all">
+          <p className="text-white font-bold text-lg">2-Camera</p>
+          <p className="text-gray-400 text-sm">4K Setup</p>
+        </div>
+        <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl px-6 py-4 hover:bg-black/60 transition-all">
+          <p className="text-white font-bold text-lg">Pro Audio</p>
+          <p className="text-gray-400 text-sm">Studio Quality</p>
+        </div>
+        <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl px-6 py-4 hover:bg-black/60 transition-all">
+          <p className="text-white font-bold text-lg">Full Service</p>
+          <p className="text-gray-400 text-sm">Record to Edit</p>
+        </div>
+      </motion.div>
     </section>
   );
 }
