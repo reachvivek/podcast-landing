@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { BookingStatus, PaymentStatus } from '@prisma/client';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -55,15 +54,15 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     // Handle status updates with timestamps
     const updateData: Record<string, unknown> = { ...body };
 
-    if (body.status === BookingStatus.CONFIRMED && existingBooking.status !== BookingStatus.CONFIRMED) {
+    if (body.status === 'CONFIRMED' && existingBooking.status !== 'CONFIRMED') {
       updateData.confirmedAt = new Date();
     }
 
-    if (body.status === BookingStatus.CANCELLED && existingBooking.status !== BookingStatus.CANCELLED) {
+    if (body.status === 'CANCELLED' && existingBooking.status !== 'CANCELLED') {
       updateData.cancelledAt = new Date();
     }
 
-    if (body.status === BookingStatus.COMPLETED && existingBooking.status !== BookingStatus.COMPLETED) {
+    if (body.status === 'COMPLETED' && existingBooking.status !== 'COMPLETED') {
       updateData.completedAt = new Date();
     }
 
@@ -119,7 +118,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       const booking = await prisma.booking.update({
         where: { id },
         data: {
-          status: BookingStatus.CANCELLED,
+          status: 'CANCELLED',
           cancelledAt: new Date(),
         },
       });
