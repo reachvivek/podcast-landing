@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Video, Mic, Camera, Monitor } from 'lucide-react';
 import Image from 'next/image';
-import type { BookingData } from '@/app/book/page';
+import type { BookingData } from '@/contexts/BookingContext';
 
 interface BookingStep2Props {
   bookingData: BookingData;

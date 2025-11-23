@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Check, Star, Sparkles } from 'lucide-react';
-import type { BookingData } from '@/app/book/page';
+import type { BookingData } from '@/contexts/BookingContext';
 
 interface BookingStep3Props {
   bookingData: BookingData;

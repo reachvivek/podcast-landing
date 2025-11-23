@@ -1,0 +1,217 @@
+// Prisma schema for Podcast EcoSpace Booking System
+// MongoDB provider
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// Booking model - stores all booking information
+model Booking {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  // Customer Information
+  customerName      String
+  customerEmail     String
+  customerPhone     String
+
+  // Session Details
+  selectedDate      DateTime
+  selectedTime      String
+  sessionDuration   Int      // in hours
+  peopleCount       Int
+
+  // Selected Options
+  selectedSetup     String   // standard, video-2cam, premium
+  selectedService   Json     // { id, name, price }
+  additionalServices String[] // array of service IDs
+
+  // Pricing
+  basePrice         Float
+  addonsTotal       Float
+  totalPrice        Float
+
+  // Status
+  status            BookingStatus @default(PENDING)
+  paymentStatus     PaymentStatus @default(UNPAID)
+  paymentMethod     String?       // cash, card, apple_pay
+
+  // Notes
+  specialRequests   String?
+  adminNotes        String?
+
+  // Timestamps
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  confirmedAt       DateTime?
+  cancelledAt       DateTime?
+  completedAt       DateTime?
+
+  // Cancellation
+  cancellationReason String?
+
+  @@index([customerEmail])
+  @@index([selectedDate])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  REFUNDED
+  PARTIAL
+}
+
+// Service Package model - stores available services/packages
+model ServicePackage {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  name            String
+  slug            String   @unique
+  description     String
+  price           Float
+  originalPrice   Float?
+
+  // Features included
+  features        String[]
+  notIncluded     String[]
+
+  // Session details
+  duration        Int      // default duration in hours
+  maxPeople       Int      @default(5)
+
+  // Display options
+  isPopular       Boolean  @default(false)
+  isActive        Boolean  @default(true)
+  sortOrder       Int      @default(0)
+
+  // Metadata
+  category        String   // recording-only, podcast-editing, studio-rental, reels
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([isActive])
+  @@index([category])
+}
+
+// Add-on Service model
+model AddOnService {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  name            String
+  slug            String   @unique
+  description     String
+  price           Float
+  icon            String   // lucide icon name
+
+  isActive        Boolean  @default(true)
+  sortOrder       Int      @default(0)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// Blocked Time Slots - for unavailable dates/times
+model BlockedSlot {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  date            DateTime
+  timeSlots       String[] // specific times blocked, empty means whole day
+  reason          String?
+
+  createdAt       DateTime @default(now())
+
+  @@index([date])
+}
+
+// Admin User model
+model AdminUser {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  email           String   @unique
+  passwordHash    String
+  name            String
+  role            AdminRole @default(STAFF)
+
+  isActive        Boolean  @default(true)
+  lastLoginAt     DateTime?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  STAFF
+}
+
+// Analytics Event model - for tracking
+model AnalyticsEvent {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  eventType       String   // page_view, booking_started, booking_completed, etc.
+  eventData       Json?
+
+  // Session info
+  sessionId       String?
+  userAgent       String?
+  referrer        String?
+
+  createdAt       DateTime @default(now())
+
+  @@index([eventType])
+  @@index([createdAt])
+}
+
+// Contact Form Submissions
+model ContactSubmission {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  name            String
+  email           String
+  phone           String?
+  message         String
+
+  status          ContactStatus @default(NEW)
+  adminNotes      String?
+
+  createdAt       DateTime @default(now())
+  respondedAt     DateTime?
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum ContactStatus {
+  NEW
+  READ
+  RESPONDED
+  ARCHIVED
+}
+
+// Newsletter Subscribers
+model NewsletterSubscriber {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  email           String   @unique
+  isActive        Boolean  @default(true)
+
+  subscribedAt    DateTime @default(now())
+  unsubscribedAt  DateTime?
+}

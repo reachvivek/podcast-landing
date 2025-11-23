@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Camera, Film, Palette, Clock, Music, Users } from 'lucide-react';
-import type { BookingData } from '@/app/book/page';
+import type { BookingData } from '@/contexts/BookingContext';
 
 interface BookingStep4Props {
   bookingData: BookingData;

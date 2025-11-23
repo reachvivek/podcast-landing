@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from 'next/font/google';
 import "./globals.css";
+import { BookingProvider } from '@/contexts/BookingContext';
 
 // Inter - Modern, clean sans-serif for everything
 // Perfect for tech/creative brands, excellent readability
@@ -12,6 +13,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
   title: "EcoSpace - Premier Podcast Studio Dubai | Professional Recording & Production",
   description: "Dubai's premier podcast studio at Dubai World Trade Center. Professional recording, video production, editing services. Book your session today. Starting from 350 AED.",
   keywords: [
@@ -77,7 +79,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body className="antialiased">
-        {children}
+        <BookingProvider>
+          {children}
+        </BookingProvider>
       </body>
     </html>
   );

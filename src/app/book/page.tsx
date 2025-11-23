@@ -8,32 +8,12 @@ import { BookingStep4 } from '@/components/booking/BookingStep4';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-
-export interface BookingData {
-  sessionDuration: number; // in hours
-  peopleCount: number;
-  selectedDate?: Date;
-  selectedTime?: string;
-  selectedSetup?: string;
-  selectedService?: {
-    id: string;
-    name: string;
-    price: number;
-  };
-  additionalServices?: string[];
-}
+import { useBooking, type BookingData } from '@/contexts/BookingContext';
 
 export default function BookingPage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
-  const [bookingData, setBookingData] = useState<BookingData>({
-    sessionDuration: 1,
-    peopleCount: 2,
-  });
-
-  const updateBookingData = (data: Partial<BookingData>) => {
-    setBookingData((prev) => ({ ...prev, ...data }));
-  };
+  const { bookingData, updateBookingData } = useBooking();
 
   const nextStep = () => {
     if (currentStep < 4) {

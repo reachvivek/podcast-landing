@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
@@ -17,54 +17,29 @@ import {
   Smartphone
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-
-// Mock booking data - in real app, this would come from context/state management
-const mockBookingData = {
-  selectedDate: new Date(2025, 11, 25),
-  selectedTime: '10:00',
-  sessionDuration: 2,
-  peopleCount: 2,
-  selectedSetup: 'video-2cam',
-  selectedService: {
-    id: 'podcast-editing',
-    name: 'Podcast + Editing',
-    price: 750
-  },
-  additionalServices: ['extra-camera', 'thumbnail-design']
-};
-
-const additionalServicesData = [
-  { id: 'extra-camera', name: 'Extra Camera Angle', price: 200 },
-  { id: 'social-reels', name: 'Social Media Clips', price: 200 },
-  { id: 'thumbnail-design', name: 'Thumbnail Design', price: 150 },
-  { id: 'extra-hour', name: 'Extra Studio Hour', price: 150 },
-  { id: 'custom-intro', name: 'Custom Intro/Outro', price: 300 },
-  { id: 'extra-guest', name: 'Additional Guest Mic', price: 100 }
-];
+import { useBooking, additionalServicesConfig } from '@/contexts/BookingContext';
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const { bookingData, calculateAddonsTotal, calculateTotal, resetBookingData } = useBooking();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
+  const [bookingId, setBookingId] = useState<string>('');
+  const [error, setError] = useState<string>('');
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     phone: '',
+    specialRequests: '',
     agreeTerms: false
   });
 
-  const bookingData = mockBookingData;
-
-  const calculateAddonsTotal = () => {
-    return bookingData.additionalServices.reduce((total, serviceId) => {
-      const service = additionalServicesData.find(s => s.id === serviceId);
-      return total + (service?.price || 0);
-    }, 0);
-  };
-
-  const calculateTotal = () => {
-    return bookingData.selectedService.price + calculateAddonsTotal();
-  };
+  // Redirect if no booking data
+  useEffect(() => {
+    if (!bookingData.selectedDate || !bookingData.selectedService) {
+      router.push('/book');
+    }
+  }, [bookingData, router]);
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('en-US', {
@@ -86,12 +61,47 @@ export default function CheckoutPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError('');
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      const response = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          customerName: formData.fullName,
+          customerEmail: formData.email,
+          customerPhone: formData.phone,
+          selectedDate: bookingData.selectedDate,
+          selectedTime: bookingData.selectedTime,
+          sessionDuration: bookingData.sessionDuration,
+          peopleCount: bookingData.peopleCount,
+          selectedSetup: bookingData.selectedSetup,
+          selectedService: bookingData.selectedService,
+          additionalServices: bookingData.additionalServices,
+          basePrice: bookingData.selectedService?.price || 0,
+          addonsTotal: calculateAddonsTotal(),
+          totalPrice: calculateTotal(),
+          specialRequests: formData.specialRequests,
+        }),
+      });
 
-    setIsSubmitting(false);
-    setIsComplete(true);
+      const data = await response.json();
+
+      if (data.success) {
+        setBookingId(data.data.id);
+        setIsComplete(true);
+        resetBookingData();
+      } else {
+        setError(data.error || 'Failed to create booking');
+      }
+    } catch (err) {
+      setError('An error occurred. Please try again.');
+      console.error('Booking error:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isComplete) {
@@ -116,19 +126,21 @@ export default function CheckoutPage() {
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-400">Booking ID</span>
-                <span className="text-white font-mono">ESC-2025-001</span>
+                <span className="text-white font-mono text-xs">{bookingId.slice(-8).toUpperCase()}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Date</span>
-                <span className="text-white">{formatDate(bookingData.selectedDate)}</span>
-              </div>
+              {bookingData.selectedDate && (
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Date</span>
+                  <span className="text-white">{formatDate(bookingData.selectedDate)}</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-gray-400">Time</span>
                 <span className="text-white">{bookingData.selectedTime}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-400">Package</span>
-                <span className="text-white">{bookingData.selectedService.name}</span>
+                <span className="text-white">{bookingData.selectedService?.name}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-400">Total</span>
@@ -169,6 +181,14 @@ export default function CheckoutPage() {
     );
   }
 
+  if (!bookingData.selectedDate || !bookingData.selectedService) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-ecospace-green animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen bg-black flex flex-col overflow-hidden">
       {/* Header */}
@@ -194,6 +214,13 @@ export default function CheckoutPage() {
           <div className="grid lg:grid-cols-5 gap-8 max-w-6xl mx-auto">
             {/* Left Column - Form */}
             <div className="lg:col-span-3 space-y-6">
+              {/* Error Message */}
+              {error && (
+                <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400">
+                  {error}
+                </div>
+              )}
+
               {/* Your Details */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -240,6 +267,17 @@ export default function CheckoutPage() {
                         placeholder="+971-50-1234567"
                       />
                     </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-400 mb-2">Special Requests (Optional)</label>
+                    <textarea
+                      name="specialRequests"
+                      value={formData.specialRequests}
+                      onChange={handleInputChange}
+                      rows={3}
+                      className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-ecospace-green focus:outline-none transition-colors resize-none"
+                      placeholder="Any special requirements or notes..."
+                    />
                   </div>
                 </form>
               </motion.div>
@@ -373,9 +411,9 @@ export default function CheckoutPage() {
                 <div className="mb-4">
                   <div className="flex justify-between">
                     <span className="text-gray-400">Package</span>
-                    <span className="text-white">{bookingData.selectedService.price} AED</span>
+                    <span className="text-white">{bookingData.selectedService?.price} AED</span>
                   </div>
-                  <p className="text-white font-medium">{bookingData.selectedService.name}</p>
+                  <p className="text-white font-medium">{bookingData.selectedService?.name}</p>
                 </div>
 
                 {/* Add-ons */}
@@ -383,7 +421,7 @@ export default function CheckoutPage() {
                   <div className="mb-4">
                     <p className="text-gray-400 text-sm mb-2">Add-ons</p>
                     {bookingData.additionalServices.map(serviceId => {
-                      const service = additionalServicesData.find(s => s.id === serviceId);
+                      const service = additionalServicesConfig.find(s => s.id === serviceId);
                       return (
                         <div key={serviceId} className="flex justify-between text-sm py-1">
                           <span className="text-gray-300">{service?.name}</span>
