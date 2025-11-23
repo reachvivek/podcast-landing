@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
         where: { status: 'CANCELLED' },
       }),
       recentBookings: bookings.length,
-      totalRevenue: bookings.reduce((sum: number, booking) => {
+      totalRevenue: bookings.reduce((sum: number, booking: any) => {
         if (booking.status === 'CANCELLED') return sum;
         return sum + booking.totalPrice;
       }, 0),
