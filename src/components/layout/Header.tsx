@@ -56,15 +56,15 @@ export function Header({
       }`}
       style={{ borderRadius: '4rem' }}
     >
-      <div className="flex items-center justify-between relative">
-        {/* Mobile menu placeholder for centering */}
-        <div className="lg:hidden w-10 flex-shrink-0" />
+      <div className="flex items-center justify-between">
+        {/* Mobile: Empty spacer for centering */}
+        <div className="lg:hidden w-10" />
 
-        {/* Logo */}
+        {/* Logo - Centered on mobile, left on desktop */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="absolute left-16 lg:static lg:left-0 flex items-center gap-2"
+          className="lg:flex-none"
         >
           <Link href="/" className="flex items-center gap-2 group">
             <div className="relative h-10 w-10 flex-shrink-0">

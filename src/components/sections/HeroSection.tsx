@@ -116,13 +116,13 @@ export function HeroSection({
 
       {/* Minimal Text Content - Bottom Aligned */}
       <div className="container mx-auto px-4 lg:px-8 relative z-10 mb-24 mt-20">
-        <div className="max-w-4xl">
+        <div className="max-w-4xl mx-auto lg:mx-0 text-center lg:text-left">
           {/* Main Headline - Simple & Powerful with Rotating Word */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="text-5xl md:text-6xl lg:text-7xl text-white mb-6 leading-none tracking-wide"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-white mb-6 leading-tight tracking-wide"
             style={{ fontWeight: 270 }}
           >
             <div>
@@ -148,7 +148,7 @@ export function HeroSection({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
-            className="text-xl md:text-2xl text-gray-300 mb-10 max-w-3xl leading-relaxed font-light"
+            className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 mb-8 sm:mb-10 max-w-3xl mx-auto lg:mx-0 leading-relaxed font-light"
           >
             Dubai's premier podcast studio. Professional recording, expert production, and an experience that transforms your vision into reality.
           </motion.p>
@@ -158,7 +158,7 @@ export function HeroSection({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.7 }}
-            className="flex flex-col sm:flex-row gap-4"
+            className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start"
             style={{ perspective: '1000px' }}
           >
             {/* Primary CTA - Glassmorphism with 3D Tilt (Main Character) */}
@@ -190,7 +190,7 @@ export function HeroSection({
 
             {/* Secondary CTA - Glassmorphism with 3D Tilt */}
             <a
-              href="#portfolio"
+              href="#studio"
               className={`${glassButtonClass} inline-flex items-center justify-center gap-2`}
               style={glassButtonStyles.tilt3d}
               onMouseMove={(e) => {

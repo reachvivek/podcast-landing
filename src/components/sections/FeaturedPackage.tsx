@@ -176,7 +176,7 @@ export function FeaturedPackage() {
 
         {/* Packages Grid */}
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 mt-16 pt-8"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 mt-10 sm:mt-16 pt-4 sm:pt-8"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: '-100px' }}

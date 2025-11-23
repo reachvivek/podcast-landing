@@ -2,6 +2,7 @@
 
 import { HeroSection } from '@/components/sections/HeroSection';
 import { WhyChooseUs } from '@/components/sections/WhyChooseUs';
+import { StudioGallery } from '@/components/sections/StudioGallery';
 import { PortfolioShowcase } from '@/components/sections/PortfolioShowcase';
 import { HowItWorks } from '@/components/sections/HowItWorks';
 import { FeaturedPackage } from '@/components/sections/FeaturedPackage';
@@ -24,7 +25,10 @@ export default function Home() {
       {/* 2. Why Choose Us - Build trust with features */}
       <WhyChooseUs />
 
-      {/* 3. Portfolio - Social proof of past creators */}
+      {/* 3. Studio Gallery - Explore the space */}
+      <StudioGallery />
+
+      {/* 4. Portfolio - Social proof of past creators */}
       <PortfolioShowcase />
 
       {/* 4. How It Works - Easy booking process */}

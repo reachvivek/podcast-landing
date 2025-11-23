@@ -45,7 +45,7 @@ export function PortfolioShowcase() {
   const [hoveredId, setHoveredId] = useState<number | null>(null);
 
   return (
-    <section className="py-24 bg-black">
+    <section id="portfolio" className="py-24 bg-black">
       <div className="container mx-auto px-4 lg:px-8">
         {/* Section Header */}
         <motion.div
@@ -68,7 +68,7 @@ export function PortfolioShowcase() {
         </motion.div>
 
         {/* Portfolio Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           {portfolioItems.map((item, index) => (
             <motion.div
               key={item.id}

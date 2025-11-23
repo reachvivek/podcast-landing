@@ -98,7 +98,7 @@ export function BookingStep3({ bookingData, updateBookingData, nextStep, prevSte
       </motion.div>
 
       {/* Service Packages Grid */}
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {servicePackages.map((service, index) => {
           const isSelected = bookingData.selectedService?.id === service.id;
           const savings = service.originalPrice - service.price;
@@ -197,7 +197,7 @@ export function BookingStep3({ bookingData, updateBookingData, nextStep, prevSte
         className="bg-white/5 rounded-2xl p-6 border border-white/10"
       >
         <h3 className="text-lg font-semibold text-white mb-4">Social Media Reels Packages</h3>
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {[
             { name: 'Single Reel', price: 250, description: 'Quick promo video' },
             { name: '5 Reels Package', price: 950, description: 'Save 300 AED', perReel: 190 },

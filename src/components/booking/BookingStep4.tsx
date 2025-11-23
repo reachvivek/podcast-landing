@@ -89,21 +89,21 @@ export function BookingStep4({ bookingData, updateBookingData, nextStep, prevSte
   };
 
   return (
-    <div className="grid lg:grid-cols-3 gap-8">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
       {/* Left Column - Additional Services */}
-      <div className="lg:col-span-2 space-y-6">
+      <div className="lg:col-span-2 space-y-5">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <h2 className="text-3xl font-bold text-white mb-2">Additional Services</h2>
-          <p className="text-gray-400">Enhance your session with optional add-ons</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">Additional Services</h2>
+          <p className="text-gray-400 text-sm sm:text-base">Enhance your session with optional add-ons</p>
         </motion.div>
 
         {/* Services Grid */}
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           {additionalServices.map((service, index) => {
             const Icon = service.icon;
             const isSelected = selectedServices.includes(service.id);

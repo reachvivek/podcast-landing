@@ -62,19 +62,27 @@ export default function BookingPage() {
       <div className="border-b border-white/10 bg-black/95 backdrop-blur-md flex-shrink-0">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex items-center justify-between py-3">
-            {/* Logo/Brand */}
-            <div className="flex items-center gap-3">
+            {/* Logo/Brand - Hidden on mobile, show on md+ */}
+            <div className="hidden md:flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-ecospace-green flex items-center justify-center">
                 <span className="text-black font-bold text-sm">ES</span>
               </div>
               <h1 className="text-white font-bold text-lg">Book a Session</h1>
             </div>
 
-            {/* Progress Steps */}
-            <div className="flex items-center gap-8">
+            {/* Mobile: Close button on left */}
+            <button
+              onClick={() => router.push('/')}
+              className="md:hidden w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"
+            >
+              <X className="w-5 h-5 text-white" />
+            </button>
+
+            {/* Progress Steps - Responsive */}
+            <div className="flex items-center gap-2 sm:gap-4 lg:gap-8">
               <StepIndicator
                 number={1}
-                label="Date and time"
+                label="Date & time"
                 isActive={currentStep === 1}
                 isCompleted={currentStep > 1}
                 onClick={() => goToStep(1)}
@@ -95,17 +103,17 @@ export default function BookingPage() {
               />
               <StepIndicator
                 number={4}
-                label="Additional services"
+                label="Extras"
                 isActive={currentStep === 4}
                 isCompleted={false}
                 onClick={() => goToStep(4)}
               />
             </div>
 
-            {/* Close Button */}
+            {/* Close Button - Desktop only */}
             <button
               onClick={() => router.push('/')}
-              className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"
+              className="hidden md:flex w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 items-center justify-center transition-colors"
             >
               <X className="w-5 h-5 text-white" />
             </button>
@@ -179,13 +187,13 @@ function StepIndicator({
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-3 transition-all ${
+      className={`flex items-center gap-1.5 sm:gap-2 transition-all ${
         isActive || isCompleted ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
       }`}
       disabled={!isActive && !isCompleted}
     >
       <div
-        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
+        className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold transition-all ${
           isCompleted
             ? 'bg-ecospace-green text-black'
             : isActive
@@ -196,7 +204,7 @@ function StepIndicator({
         {isCompleted ? '✓' : number}
       </div>
       <span
-        className={`font-medium text-sm ${
+        className={`hidden sm:block font-medium text-xs sm:text-sm ${
           isActive ? 'text-ecospace-green' : isCompleted ? 'text-white' : 'text-gray-500'
         }`}
       >

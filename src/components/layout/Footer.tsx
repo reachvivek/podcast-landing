@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Phone,
   Mail,
@@ -8,6 +9,7 @@ import {
   Twitter,
   Facebook,
   Instagram,
+  Send,
 } from 'lucide-react';
 import { siteConfig, footerLinks, socialLinks } from '@/data/site-config';
 
@@ -15,39 +17,42 @@ const socialIcons = {
   twitter: Twitter,
   facebook: Facebook,
   instagram: Instagram,
-  pinterest: Instagram, // Using Instagram as placeholder
+  pinterest: Instagram,
 };
 
 export function Footer() {
   return (
     <footer className="bg-black text-white">
-      {/* Newsletter Section */}
-      <div className="bg-ecospace-green py-16">
+      {/* Newsletter Section - Matching site style */}
+      <div className="bg-ecospace-green py-12 sm:py-16">
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="flex items-center space-x-4">
-              <Mail className="w-12 h-12 text-white" />
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+            <div className="flex flex-col sm:flex-row items-center text-center sm:text-left gap-4 sm:gap-6">
+              <div className="w-14 h-14 rounded-2xl bg-black/20 flex items-center justify-center flex-shrink-0">
+                <Mail className="w-7 h-7 text-white" />
+              </div>
               <div>
-                <div className="text-white/90 uppercase tracking-wider mb-1" style={{ fontSize: '14px', letterSpacing: '0.08em', fontWeight: 500 }}>
-                  Get early access to the new episodes.
-                </div>
-                <h3 className="text-white font-bold" style={{ fontSize: '36px', fontWeight: 700 }}>Subscribe to newsletter!</h3>
+                <p className="text-white/80 uppercase tracking-widest text-xs sm:text-sm mb-2 font-light">
+                  Stay Updated
+                </p>
+                <h3 className="text-white text-2xl sm:text-3xl lg:text-4xl" style={{ fontWeight: 250 }}>
+                  Subscribe to Our <span className="font-medium">Newsletter</span>
+                </h3>
               </div>
             </div>
-            <div className="w-full md:w-auto md:min-w-[450px]">
-              <form className="flex gap-3">
+            <div className="w-full lg:w-auto lg:min-w-[400px]">
+              <form className="flex flex-col sm:flex-row gap-3">
                 <input
                   type="email"
                   placeholder="Enter your email address"
-                  className="flex-1 px-6 py-4 rounded-full bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white/30 transition-all shadow-lg"
-                  style={{ fontSize: '15px', fontWeight: 400 }}
+                  className="flex-1 px-6 py-4 rounded-full bg-white/10 backdrop-blur-sm text-white placeholder-white/50 border border-white/20 focus:outline-none focus:border-white/50 transition-all font-light"
                 />
                 <button
                   type="submit"
-                  className="bg-black text-white px-10 py-4 rounded-full font-bold uppercase hover:bg-gray-900 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
-                  style={{ fontSize: '13px', letterSpacing: '0.08em', fontWeight: 700 }}
+                  className="bg-black text-white px-8 py-4 rounded-full font-light uppercase tracking-widest text-sm hover:bg-gray-900 transition-all flex items-center justify-center gap-2 group"
                 >
-                  Subscribe
+                  <span>Subscribe</span>
+                  <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
               </form>
             </div>
@@ -57,12 +62,26 @@ export function Footer() {
 
       {/* Main Footer Content */}
       <div className="container mx-auto px-4 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-          {/* About Section */}
-          <div>
-            <p className="text-gray-400 leading-relaxed mb-6">
-              Our pick of the best podcasts on Spotify, Apple Podcasts and more
-              covering all trends.
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 sm:gap-12">
+          {/* Brand Section */}
+          <div className="sm:col-span-2 lg:col-span-1">
+            <Link href="/" className="flex items-center gap-3 mb-6">
+              <div className="relative h-10 w-10">
+                <Image
+                  src="/images/IMG_20251121_085355_649.png"
+                  alt="Podcast EcoSpace"
+                  width={40}
+                  height={40}
+                  className="object-contain"
+                />
+              </div>
+              <div>
+                <span className="text-white font-light text-sm tracking-wide">Podcast</span>
+                <span className="text-ecospace-green font-light text-sm tracking-wide ml-1">EcoSpace</span>
+              </div>
+            </Link>
+            <p className="text-gray-400 leading-relaxed mb-6 font-light text-sm">
+              Dubai's premier podcast studio. Professional recording, expert production, and an experience that transforms your vision into reality.
             </p>
             <div className="flex space-x-3">
               {socialLinks.map((social) => {
@@ -73,28 +92,27 @@ export function Footer() {
                     href={social.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-10 h-10 rounded-full bg-white/10 hover:bg-ecospace-green-dark flex items-center justify-center transition-colors"
+                    className="w-10 h-10 rounded-full bg-white/5 border border-white/10 hover:bg-ecospace-green hover:border-ecospace-green hover:text-black flex items-center justify-center transition-all duration-300"
                     aria-label={social.platform}
                   >
-                    <Icon className="w-5 h-5" />
+                    <Icon className="w-4 h-4" />
                   </a>
                 );
               })}
             </div>
           </div>
 
-          {/* Explore Section */}
+          {/* Quick Links */}
           <div>
-            <h4 className="text-xl font-bold mb-6 flex items-center">
-              <span className="text-ecospace-green mr-2">♥</span>
-              Explore
+            <h4 className="text-white text-lg mb-6 font-light tracking-wide">
+              Quick Links
             </h4>
             <ul className="space-y-3">
               {footerLinks.explore.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-gray-400 hover:text-ecospace-green transition-colors"
+                    className="text-gray-400 hover:text-ecospace-green transition-colors font-light text-sm"
                   >
                     {link.name}
                   </Link>
@@ -103,47 +121,61 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Find Section */}
+          {/* Location */}
           <div>
-            <h4 className="text-xl font-bold mb-6 flex items-center">
-              <span className="text-ecospace-green mr-2">♥</span>
-              Find
+            <h4 className="text-white text-lg mb-6 font-light tracking-wide">
+              Location
             </h4>
-            <address className="not-italic space-y-3">
-              <p className="text-gray-400 flex items-start">
-                <MapPin className="w-5 h-5 mr-2 flex-shrink-0 mt-1 text-ecospace-green" />
-                <span>{siteConfig.address}</span>
-              </p>
+            <address className="not-italic space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-lg bg-ecospace-green/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <MapPin className="w-4 h-4 text-ecospace-green" />
+                </div>
+                <p className="text-gray-400 font-light text-sm leading-relaxed">
+                  {siteConfig.address}
+                </p>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-lg bg-ecospace-green/10 flex items-center justify-center flex-shrink-0">
+                  <Clock className="w-4 h-4 text-ecospace-green" />
+                </div>
+                <p className="text-gray-400 font-light text-sm">
+                  {siteConfig.hours}
+                </p>
+              </div>
             </address>
           </div>
 
-          {/* Contact Section */}
+          {/* Contact */}
           <div>
-            <h4 className="text-xl font-bold mb-6 flex items-center">
-              <span className="text-ecospace-green mr-2">♥</span>
-              Contact
+            <h4 className="text-white text-lg mb-6 font-light tracking-wide">
+              Contact Us
             </h4>
-            <ul className="space-y-3">
-              <li className="flex items-center text-gray-400">
-                <Phone className="w-5 h-5 mr-2 text-ecospace-green" />
+            <ul className="space-y-4">
+              <li>
                 <a
                   href={`tel:${siteConfig.phone}`}
-                  className="hover:text-[#FF5722] transition-colors"
+                  className="flex items-center gap-3 group"
                 >
-                  {siteConfig.phone}
+                  <div className="w-8 h-8 rounded-lg bg-ecospace-green/10 flex items-center justify-center flex-shrink-0 group-hover:bg-ecospace-green transition-colors">
+                    <Phone className="w-4 h-4 text-ecospace-green group-hover:text-black transition-colors" />
+                  </div>
+                  <span className="text-gray-400 font-light text-sm group-hover:text-ecospace-green transition-colors">
+                    {siteConfig.phone}
+                  </span>
                 </a>
               </li>
-              <li className="flex items-center text-gray-400">
-                <Clock className="w-5 h-5 mr-2 text-ecospace-green" />
-                {siteConfig.hours}
-              </li>
-              <li className="flex items-center text-gray-400">
-                <Mail className="w-5 h-5 mr-2 text-ecospace-green" />
+              <li>
                 <a
                   href={`mailto:${siteConfig.email}`}
-                  className="hover:text-[#FF5722] transition-colors"
+                  className="flex items-center gap-3 group"
                 >
-                  {siteConfig.email}
+                  <div className="w-8 h-8 rounded-lg bg-ecospace-green/10 flex items-center justify-center flex-shrink-0 group-hover:bg-ecospace-green transition-colors">
+                    <Mail className="w-4 h-4 text-ecospace-green group-hover:text-black transition-colors" />
+                  </div>
+                  <span className="text-gray-400 font-light text-sm group-hover:text-ecospace-green transition-colors">
+                    {siteConfig.email}
+                  </span>
                 </a>
               </li>
             </ul>
@@ -154,9 +186,19 @@ export function Footer() {
       {/* Copyright */}
       <div className="border-t border-white/10">
         <div className="container mx-auto px-4 lg:px-8 py-6">
-          <p className="text-center text-gray-400 text-sm">
-            © {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
-          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-gray-500 text-sm font-light">
+              © {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
+            </p>
+            <div className="flex items-center gap-6">
+              <Link href="/privacy" className="text-gray-500 hover:text-ecospace-green text-sm font-light transition-colors">
+                Privacy Policy
+              </Link>
+              <Link href="/terms" className="text-gray-500 hover:text-ecospace-green text-sm font-light transition-colors">
+                Terms of Service
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </footer>

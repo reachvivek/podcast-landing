@@ -32,7 +32,7 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section className="py-24 bg-black">
+    <section id="how-it-works" className="py-24 bg-black">
       <div className="container mx-auto px-4 lg:px-8">
         {/* Section Header */}
         <motion.div
@@ -59,7 +59,7 @@ export function HowItWorks() {
           {/* Connection Line - Desktop */}
           <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-ecospace-green/30 to-transparent -translate-y-1/2" />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
             {steps.map((step, index) => (
               <motion.div
                 key={step.number}

@@ -80,7 +80,7 @@ export function BookingStep2({ bookingData, updateBookingData, nextStep, prevSte
       </motion.div>
 
       {/* Setup Options Grid */}
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {setupOptions.map((setup, index) => {
           const Icon = setup.icon;
           const isSelected = bookingData.selectedSetup === setup.id;
@@ -160,7 +160,7 @@ export function BookingStep2({ bookingData, updateBookingData, nextStep, prevSte
         className="bg-white/5 rounded-2xl p-6 border border-white/10"
       >
         <h3 className="text-lg font-semibold text-white mb-4">All setups include:</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-ecospace-green/20">
               <Monitor className="w-5 h-5 text-ecospace-green" />
