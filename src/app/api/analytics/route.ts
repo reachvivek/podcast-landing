@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
 
     // Group bookings by date
     const bookingsByDate: { [key: string]: number } = {};
-    bookings.forEach((booking) => {
+    bookings.forEach((booking: any) => {
       const date = booking.createdAt.toISOString().split('T')[0];
       bookingsByDate[date] = (bookingsByDate[date] || 0) + 1;
     });
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
 
     // Get popular services from JSON field
     const serviceCount: { [key: string]: number } = {};
-    bookings.forEach((booking) => {
+    bookings.forEach((booking: any) => {
       if (booking.selectedService && booking.status !== 'CANCELLED') {
         const service = booking.selectedService as { name?: string; price?: number };
         const serviceName = service.name || 'Unknown';
