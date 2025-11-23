@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { BookingStatus, PaymentStatus } from '@prisma/client';
 
 // GET /api/bookings - Get all bookings (with filters)
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status') as BookingStatus | null;
+    const status = searchParams.get('status');
     const date = searchParams.get('date');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
@@ -94,7 +93,7 @@ export async function POST(request: NextRequest) {
         selectedDate: bookingDate,
         selectedTime: selectedTime,
         status: {
-          in: [BookingStatus.PENDING, BookingStatus.CONFIRMED, BookingStatus.IN_PROGRESS],
+          in: ['PENDING', 'CONFIRMED', 'IN_PROGRESS'],
         },
       },
     });
@@ -123,8 +122,8 @@ export async function POST(request: NextRequest) {
         addonsTotal: addonsTotal || 0,
         totalPrice: totalPrice || 0,
         specialRequests,
-        status: BookingStatus.PENDING,
-        paymentStatus: PaymentStatus.UNPAID,
+        status: 'PENDING',
+        paymentStatus: 'UNPAID',
       },
     });
 
