@@ -17,9 +17,31 @@ const emailConfig = {
 };
 
 // Constants
-const LOGO_URL = `${process.env.NEXT_PUBLIC_APP_URL || 'https://podspace.vercel.app'}/images/IMG_20251121_085355_649.png`;
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://podspace.vercel.app';
+const LOGO_URL = `${APP_URL}/images/IMG_20251121_085355_649.png`;
 const RATE_LIMIT_DELAY = 1000; // 1 second between emails
+
+// Logo as text fallback (works in all email clients)
+const LOGO_TEXT = 'PODCAST ECOSPACE';
+
+// Studio Location Details
+const STUDIO_LOCATION = {
+  name: 'Podcast EcoSpace Dubai',
+  address: 'Dubai World Trade Centre (DWTC)',
+  city: 'Dubai, United Arab Emirates',
+  lat: 25.226111,
+  lng: 55.2838106,
+  phone: '+971 50 206 0674',
+  whatsapp: 'https://wa.me/971502060674',
+  googleMapsUrl: 'https://www.google.com/maps/place/DEXNET+Technologies.+DEXNode/@25.226111,55.2863855,17z/data=!3m1!4b1!4m6!3m5!1s0x3e5f434fb87cd29d:0x3760eeb213084725!8m2!3d25.226111!4d55.2838106!16s%2Fg%2F11vj9bcnwc?entry=ttu&g_ep=EgoyMDI1MTExNy4wIKXMDSoASAFQAw%3D%3D',
+};
+
+// Log configuration for debugging
+console.log('[Email Config]', {
+  APP_URL,
+  LOGO_URL,
+  isProduction: process.env.NODE_ENV === 'production',
+});
 
 // Transporter (lazy init)
 let transporter: nodemailer.Transporter | null = null;
@@ -300,11 +322,25 @@ function generateEmailHtml(templateType: string, data: Record<string, unknown>):
 
 // Header with logo
 function getHeader(showTagline = true): string {
+  // Use production logo URL if deployed, otherwise use text
+  const isLocalhost = APP_URL.includes('localhost');
+  const useImage = isLocalhost === false;
+
   return `
     <tr>
       <td style="background-color: #0a0a0a; padding: 32px 40px; text-align: center;">
-        <img src="${LOGO_URL}" alt="Podcast EcoSpace" style="height: 60px; width: auto; margin-bottom: 8px;" />
-        ${showTagline ? '<p style="margin: 0; color: #71717a; font-size: 14px;">Premium Podcast Studio | Dubai</p>' : ''}
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="text-align: center; padding-bottom: ${showTagline ? '12px' : '0'};">
+              ${useImage ? `
+              <img src="${LOGO_URL}" alt="${LOGO_TEXT}" style="height: 60px; width: auto; max-width: 100%; display: block; margin: 0 auto;" />
+              ` : `
+              <h1 style="margin: 0; color: #a3e635; font-size: 28px; font-weight: 700; letter-spacing: 2px; font-family: Arial, sans-serif;">${LOGO_TEXT}</h1>
+              `}
+            </td>
+          </tr>
+          ${showTagline ? `<tr><td style="text-align: center;"><p style="margin: 0; color: #71717a; font-size: 14px;">Premium Podcast Studio | Dubai</p></td></tr>` : ''}
+        </table>
       </td>
     </tr>
   `;
@@ -313,13 +349,22 @@ function getHeader(showTagline = true): string {
 // Admin header with badge
 function getAdminHeader(badge: string, badgeColor = '#a3e635'): string {
   const textColor = badgeColor === '#a3e635' ? '#0a0a0a' : '#ffffff';
+  const isLocalhost = APP_URL.includes('localhost');
+  const useImage = isLocalhost === false;
+
   return `
     <tr>
       <td style="background-color: #0a0a0a; padding: 24px 40px;">
         <table width="100%" cellpadding="0" cellspacing="0">
           <tr>
-            <td><img src="${LOGO_URL}" alt="Podcast EcoSpace" style="height: 40px; width: auto;" /></td>
-            <td style="text-align: right;">
+            <td style="vertical-align: middle;">
+              ${useImage ? `
+              <img src="${LOGO_URL}" alt="${LOGO_TEXT}" style="height: 40px; width: auto; max-width: 200px; display: block;" />
+              ` : `
+              <span style="color: #a3e635; font-size: 18px; font-weight: 700; letter-spacing: 1px; font-family: Arial, sans-serif;">${LOGO_TEXT}</span>
+              `}
+            </td>
+            <td style="text-align: right; vertical-align: middle;">
               <span style="background-color: ${badgeColor}; color: ${textColor}; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; text-transform: uppercase;">${badge}</span>
             </td>
           </tr>
@@ -401,10 +446,21 @@ function generateBookingConfirmationHtml(booking: BookingEmailData): string {
           </td></tr>
         </table>
 
-        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #0a0a0a; border-radius: 8px; margin-bottom: 32px;">
-          <tr><td style="padding: 24px;">
-            <p style="margin: 0 0 4px; color: #a3e635; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Studio Location</p>
-            <p style="margin: 8px 0 0; color: #ffffff; font-size: 15px; line-height: 1.6;">Dubai World Trade Center<br>Sheikh Zayed Road, Dubai, UAE</p>
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fafafa; border-radius: 8px; border: 1px solid #e4e4e7; margin-bottom: 32px;">
+          <tr><td style="padding: 20px 24px; border-bottom: 1px solid #e4e4e7;"><p style="margin: 0; color: #a3e635; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Studio Location</p></td></tr>
+          <tr><td style="padding: 20px 24px;">
+            <p style="margin: 0 0 4px; color: #18181b; font-size: 15px; font-weight: 600;">${STUDIO_LOCATION.name}</p>
+            <p style="margin: 0 0 20px; color: #71717a; font-size: 14px; line-height: 1.6;">${STUDIO_LOCATION.address}<br>${STUDIO_LOCATION.city}</p>
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="padding-right: 8px; width: 50%;">
+                  <a href="${STUDIO_LOCATION.googleMapsUrl}" style="display: block; background-color: #a3e635; color: #0a0a0a; padding: 12px 16px; border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none; text-align: center;">Get Directions</a>
+                </td>
+                <td style="padding-left: 8px; width: 50%;">
+                  <a href="${STUDIO_LOCATION.whatsapp}" style="display: block; background-color: #16a34a; color: #ffffff; padding: 12px 16px; border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none; text-align: center;">WhatsApp</a>
+                </td>
+              </tr>
+            </table>
           </td></tr>
         </table>
 
@@ -557,10 +613,21 @@ function generateStatusUpdateHtml(booking: BookingEmailData, status: string): st
         </table>
 
         ${status === 'CONFIRMED' ? `
-        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #0a0a0a; border-radius: 8px; margin-bottom: 32px;">
-          <tr><td style="padding: 24px;">
-            <p style="margin: 0 0 4px; color: #a3e635; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Studio Location</p>
-            <p style="margin: 8px 0 0; color: #ffffff; font-size: 15px; line-height: 1.6;">Dubai World Trade Center<br>Sheikh Zayed Road, Dubai, UAE</p>
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fafafa; border-radius: 8px; border: 1px solid #e4e4e7; margin-bottom: 32px;">
+          <tr><td style="padding: 20px 24px; border-bottom: 1px solid #e4e4e7;"><p style="margin: 0; color: #a3e635; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Studio Location</p></td></tr>
+          <tr><td style="padding: 20px 24px;">
+            <p style="margin: 0 0 4px; color: #18181b; font-size: 15px; font-weight: 600;">${STUDIO_LOCATION.name}</p>
+            <p style="margin: 0 0 20px; color: #71717a; font-size: 14px; line-height: 1.6;">${STUDIO_LOCATION.address}<br>${STUDIO_LOCATION.city}</p>
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="padding-right: 8px; width: 50%;">
+                  <a href="${STUDIO_LOCATION.googleMapsUrl}" style="display: block; background-color: #a3e635; color: #0a0a0a; padding: 12px 16px; border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none; text-align: center;">Get Directions</a>
+                </td>
+                <td style="padding-left: 8px; width: 50%;">
+                  <a href="${STUDIO_LOCATION.whatsapp}" style="display: block; background-color: #16a34a; color: #ffffff; padding: 12px 16px; border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none; text-align: center;">WhatsApp</a>
+                </td>
+              </tr>
+            </table>
           </td></tr>
         </table>
         ` : ''}

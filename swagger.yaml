@@ -1,0 +1,1109 @@
+openapi: 3.0.3
+info:
+  title: Podcast EcoSpace Dubai - Booking API
+  description: |
+    Complete API documentation for the Podcast EcoSpace Dubai booking platform.
+
+    This API provides endpoints for:
+    - Booking management (create, read, update, delete)
+    - Service and addon listings
+    - Contact form submissions
+    - Admin authentication
+    - Analytics and reporting
+    - Email notifications
+
+    ## Authentication
+    Most admin endpoints require JWT authentication. Include the token in the Authorization header:
+    ```
+    Authorization: Bearer <your-jwt-token>
+    ```
+
+    ## Email System
+    The platform uses an intelligent email queue system with:
+    - Rate limiting (1 second between emails)
+    - MongoDB audit trail
+    - Automatic retry (up to 3 attempts)
+    - Priority-based queue processing
+
+    ## Base URL
+    - Development: http://localhost:3000/api
+    - Production: https://podspace.vercel.app/api
+  version: 1.0.0
+  contact:
+    name: Podcast EcoSpace Support
+    url: https://wa.me/971502060674
+    email: podcastecospace@gmail.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: http://localhost:3000/api
+    description: Development server
+  - url: https://podspace.vercel.app/api
+    description: Production server
+
+tags:
+  - name: Services
+    description: Service package operations
+  - name: Addons
+    description: Add-on service operations
+  - name: Bookings
+    description: Booking management
+  - name: Contact
+    description: Contact form submissions
+  - name: Authentication
+    description: Admin authentication
+  - name: Analytics
+    description: Analytics and reporting
+  - name: Email
+    description: Email testing and notifications
+
+paths:
+  # ============================================
+  # SERVICES
+  # ============================================
+  /services:
+    get:
+      tags:
+        - Services
+      summary: Get all service packages
+      description: Returns all active service packages sorted by popularity and price
+      operationId: getServices
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ServicePackage'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ============================================
+  # ADDONS
+  # ============================================
+  /addons:
+    get:
+      tags:
+        - Addons
+      summary: Get all add-on services
+      description: Returns all active add-on services sorted by sort order and price
+      operationId: getAddons
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AddOnService'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ============================================
+  # BOOKINGS
+  # ============================================
+  /bookings:
+    get:
+      tags:
+        - Bookings
+      summary: Get all bookings
+      description: Returns paginated list of bookings with optional filters
+      operationId: getBookings
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          description: Filter by booking status
+          schema:
+            type: string
+            enum: [PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED, NO_SHOW]
+        - name: date
+          in: query
+          description: Filter by date (YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: limit
+          in: query
+          description: Items per page
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Booking'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags:
+        - Bookings
+      summary: Create a new booking
+      description: |
+        Creates a new booking and sends confirmation emails to both customer and admin.
+
+        The endpoint will:
+        1. Validate the booking data using Zod schema
+        2. Check for conflicting time slots
+        3. Create the booking in the database
+        4. Queue confirmation emails (non-blocking)
+      operationId: createBooking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingCreate'
+      responses:
+        '201':
+          description: Booking created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Booking created successfully
+                  data:
+                    $ref: '#/components/schemas/Booking'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          description: Time slot conflict
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: This time slot is already booked
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /bookings/{id}:
+    get:
+      tags:
+        - Bookings
+      summary: Get a single booking
+      description: Returns details of a specific booking by ID
+      operationId: getBooking
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Booking'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      tags:
+        - Bookings
+      summary: Update a booking
+      description: |
+        Updates booking details. Automatically tracks status change timestamps:
+        - `confirmedAt` when status changes to CONFIRMED
+        - `cancelledAt` when status changes to CANCELLED
+        - `completedAt` when status changes to COMPLETED
+      operationId: updateBooking
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingUpdate'
+      responses:
+        '200':
+          description: Booking updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Booking updated successfully
+                  data:
+                    $ref: '#/components/schemas/Booking'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - Bookings
+      summary: Delete a booking
+      description: |
+        Deletes a booking. By default, performs a soft delete (cancels the booking).
+        Use `?hard=true` for permanent deletion.
+      operationId: deleteBooking
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+        - name: hard
+          in: query
+          description: Permanent delete instead of soft delete
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Booking deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Booking cancelled successfully
+                  data:
+                    $ref: '#/components/schemas/Booking'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ============================================
+  # CONTACT
+  # ============================================
+  /contact:
+    post:
+      tags:
+        - Contact
+      summary: Submit contact form
+      description: |
+        Submits a contact form inquiry and sends emails to both admin and customer.
+
+        The endpoint will:
+        1. Validate the form data
+        2. Save submission to database
+        3. Queue admin notification email
+        4. Queue customer acknowledgement email
+      operationId: submitContact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactCreate'
+      responses:
+        '200':
+          description: Message sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Your message has been sent successfully. We will get back to you soon!
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      createdAt:
+                        type: string
+                        format: date-time
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      tags:
+        - Contact
+      summary: Get all contact submissions
+      description: Returns paginated list of contact submissions (admin only)
+      operationId: getContactSubmissions
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          description: Filter by status
+          schema:
+            type: string
+            enum: [NEW, IN_PROGRESS, RESOLVED, CLOSED]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ContactSubmission'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /contact/{id}:
+    patch:
+      tags:
+        - Contact
+      summary: Update contact submission
+      description: Updates status and response of a contact submission (admin only)
+      operationId: updateContactSubmission
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [NEW, IN_PROGRESS, RESOLVED, CLOSED]
+                response:
+                  type: string
+      responses:
+        '200':
+          description: Updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/ContactSubmission'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ============================================
+  # AUTHENTICATION
+  # ============================================
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Admin login
+      description: |
+        Authenticates admin user and returns JWT token.
+
+        Default credentials (change in production):
+        - Username: admin
+        - Password: admin123
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          headers:
+            Set-Cookie:
+              description: HTTP-only cookie with JWT token
+              schema:
+                type: string
+                example: admin_token=eyJhbGc...; HttpOnly; Secure; SameSite=Lax; Max-Age=604800
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Login successful
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: Invalid username or password
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Admin logout
+      description: Clears the authentication cookie
+      operationId: logout
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Logout successful
+
+  /auth/verify:
+    get:
+      tags:
+        - Authentication
+      summary: Verify JWT token
+      description: Verifies if the current JWT token is valid
+      operationId: verifyToken
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Token is valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  user:
+                    type: object
+                    properties:
+                      userId:
+                        type: string
+                      email:
+                        type: string
+                      role:
+                        type: string
+        '401':
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+
+  # ============================================
+  # ANALYTICS
+  # ============================================
+  /analytics:
+    get:
+      tags:
+        - Analytics
+      summary: Get analytics data
+      description: |
+        Returns comprehensive analytics including:
+        - Overview statistics (total bookings, revenue, etc.)
+        - Bookings by date (for charts)
+        - Popular services
+      operationId: getAnalytics
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: period
+          in: query
+          description: Number of days to include in analysis
+          schema:
+            type: integer
+            default: 30
+            minimum: 1
+            maximum: 365
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      overview:
+                        $ref: '#/components/schemas/AnalyticsOverview'
+                      bookingsByDate:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            date:
+                              type: string
+                              format: date
+                            count:
+                              type: integer
+                      popularServices:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            count:
+                              type: integer
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ============================================
+  # EMAIL
+  # ============================================
+  /test-email:
+    post:
+      tags:
+        - Email
+      summary: Send test email
+      description: |
+        Sends a test email to verify SMTP configuration.
+        Uses the email queue system with rate limiting and audit trail.
+      operationId: sendTestEmail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: test@example.com
+      responses:
+        '200':
+          description: Test email sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Test email sent successfully
+        '500':
+          description: Email configuration error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+
+# ============================================
+# COMPONENTS
+# ============================================
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /auth/login
+
+  parameters:
+    BookingId:
+      name: id
+      in: path
+      required: true
+      description: MongoDB ObjectId of the booking
+      schema:
+        type: string
+        example: 507f1f77bcf86cd799439011
+
+  schemas:
+    ServicePackage:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          example: Premium Recording Package
+        description:
+          type: string
+        price:
+          type: number
+          format: float
+          example: 500
+        duration:
+          type: integer
+          example: 120
+        features:
+          type: array
+          items:
+            type: string
+        isPopular:
+          type: boolean
+        isActive:
+          type: boolean
+        sortOrder:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    AddOnService:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          example: Professional Video Editing
+        description:
+          type: string
+        price:
+          type: number
+          format: float
+          example: 150
+        icon:
+          type: string
+        isActive:
+          type: boolean
+        sortOrder:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Booking:
+      type: object
+      properties:
+        id:
+          type: string
+        customerName:
+          type: string
+          example: John Doe
+        customerEmail:
+          type: string
+          format: email
+          example: john@example.com
+        customerPhone:
+          type: string
+          example: "+971501234567"
+        selectedDate:
+          type: string
+          format: date-time
+        selectedTime:
+          type: string
+          example: "14:00"
+        sessionDuration:
+          type: integer
+          example: 120
+        peopleCount:
+          type: integer
+          example: 2
+        selectedSetup:
+          type: string
+          example: interview
+        selectedService:
+          type: object
+          properties:
+            name:
+              type: string
+            price:
+              type: number
+        additionalServices:
+          type: array
+          items:
+            type: object
+        basePrice:
+          type: number
+          example: 500
+        addonsTotal:
+          type: number
+          example: 150
+        totalPrice:
+          type: number
+          example: 650
+        specialRequests:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED, NO_SHOW]
+          default: PENDING
+        paymentStatus:
+          type: string
+          enum: [UNPAID, PAID, REFUNDED]
+          default: UNPAID
+        confirmedAt:
+          type: string
+          format: date-time
+          nullable: true
+        cancelledAt:
+          type: string
+          format: date-time
+          nullable: true
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    BookingCreate:
+      type: object
+      required:
+        - customerName
+        - customerEmail
+        - customerPhone
+        - selectedDate
+        - selectedTime
+        - sessionDuration
+        - peopleCount
+        - selectedSetup
+        - selectedService
+        - basePrice
+        - addonsTotal
+        - totalPrice
+      properties:
+        customerName:
+          type: string
+          minLength: 2
+          maxLength: 100
+        customerEmail:
+          type: string
+          format: email
+        customerPhone:
+          type: string
+          pattern: '^\+?[0-9]{8,15}$'
+        selectedDate:
+          type: string
+          format: date-time
+        selectedTime:
+          type: string
+          pattern: '^([01]\d|2[0-3]):([0-5]\d)$'
+        sessionDuration:
+          type: integer
+          minimum: 30
+          maximum: 480
+        peopleCount:
+          type: integer
+          minimum: 1
+          maximum: 20
+        selectedSetup:
+          type: string
+        selectedService:
+          type: object
+        additionalServices:
+          type: array
+          items:
+            type: object
+          default: []
+        basePrice:
+          type: number
+          minimum: 0
+        addonsTotal:
+          type: number
+          minimum: 0
+        totalPrice:
+          type: number
+          minimum: 0
+        specialRequests:
+          type: string
+          maxLength: 1000
+
+    BookingUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED, NO_SHOW]
+        paymentStatus:
+          type: string
+          enum: [UNPAID, PAID, REFUNDED]
+        specialRequests:
+          type: string
+
+    ContactSubmission:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          nullable: true
+        message:
+          type: string
+        status:
+          type: string
+          enum: [NEW, IN_PROGRESS, RESOLVED, CLOSED]
+        response:
+          type: string
+          nullable: true
+        respondedAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ContactCreate:
+      type: object
+      required:
+        - name
+        - email
+        - message
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          pattern: '^\+?[0-9]{8,15}$'
+        message:
+          type: string
+          minLength: 10
+          maxLength: 2000
+
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          minLength: 3
+        password:
+          type: string
+          minLength: 6
+
+    AnalyticsOverview:
+      type: object
+      properties:
+        totalBookings:
+          type: integer
+        pendingBookings:
+          type: integer
+        confirmedBookings:
+          type: integer
+        completedBookings:
+          type: integer
+        cancelledBookings:
+          type: integer
+        recentBookings:
+          type: integer
+        totalRevenue:
+          type: number
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 20
+        total:
+          type: integer
+          example: 150
+        totalPages:
+          type: integer
+          example: 8
+
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error: Booking not found
+
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              error:
+                type: string
+                example: Validation failed
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    path:
+                      type: array
+                      items:
+                        type: string
+                    message:
+                      type: string
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error: Internal server error
