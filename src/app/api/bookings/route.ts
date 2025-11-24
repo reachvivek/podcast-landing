@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { bookingFormSchema, validateData } from '@/lib/validations';
+import { sendBookingConfirmationEmail, sendAdminBookingNotification } from '@/lib/email';
 
 // GET /api/bookings - Get all bookings (with filters)
 export async function GET(request: NextRequest) {
@@ -133,9 +134,17 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // TODO: Send email notifications when credentials are provided
-    // await sendBookingConfirmationEmail(booking);
-    // await sendAdminNewBookingNotification(booking);
+    // Send email notifications (non-blocking - don't fail booking if email fails)
+    const emailData = {
+      ...booking,
+      selectedService: booking.selectedService as { name?: string; price?: number } || { name: 'Standard', price: 0 },
+    };
+    Promise.all([
+      sendBookingConfirmationEmail(emailData),
+      sendAdminBookingNotification(emailData),
+    ]).catch((err) => {
+      console.error('Error sending booking emails:', err);
+    });
 
     return NextResponse.json({
       success: true,

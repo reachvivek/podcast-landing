@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { contactFormSchema, validateData } from '@/lib/validations';
+import { sendContactNotification } from '@/lib/email';
 
 // POST /api/contact - Submit contact form
 export async function POST(request: NextRequest) {
@@ -33,8 +34,10 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // TODO: Send email notification to admin when credentials are provided
-    // await sendAdminNotification(submission);
+    // Send email notification to admin (non-blocking)
+    sendContactNotification(submission).catch((err) => {
+      console.error('Error sending contact notification email:', err);
+    });
 
     return NextResponse.json({
       success: true,
