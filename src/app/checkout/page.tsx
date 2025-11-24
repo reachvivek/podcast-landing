@@ -34,12 +34,12 @@ export default function CheckoutPage() {
     agreeTerms: false
   });
 
-  // Redirect if no booking data
+  // Redirect if no booking data (but not if booking is already complete)
   useEffect(() => {
-    if (!bookingData.selectedDate || !bookingData.selectedService) {
+    if (!isComplete && (!bookingData.selectedDate || !bookingData.selectedService)) {
       router.push('/book');
     }
-  }, [bookingData, router]);
+  }, [bookingData, router, isComplete]);
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('en-US', {
@@ -112,10 +112,42 @@ export default function CheckoutPage() {
           animate={{ opacity: 1, scale: 1 }}
           className="max-w-lg w-full text-center"
         >
-          <div className="w-20 h-20 bg-ecospace-green rounded-full flex items-center justify-center mx-auto mb-6">
-            <Check className="w-10 h-10 text-black" />
-          </div>
-          <h1 className="text-3xl font-bold text-white mb-4">Booking Confirmed!</h1>
+          {/* Animated Check Circle */}
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{
+              type: "spring",
+              stiffness: 260,
+              damping: 20,
+              delay: 0.1
+            }}
+            className="w-20 h-20 bg-ecospace-green rounded-full flex items-center justify-center mx-auto mb-6 relative"
+          >
+            <motion.div
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={{ pathLength: 1, opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+              <Check className="w-10 h-10 text-black" />
+            </motion.div>
+            {/* Ripple effect */}
+            <motion.div
+              initial={{ scale: 1, opacity: 0.5 }}
+              animate={{ scale: 2, opacity: 0 }}
+              transition={{ duration: 1, delay: 0.2 }}
+              className="absolute inset-0 rounded-full bg-ecospace-green"
+            />
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="text-3xl font-bold text-white mb-4"
+          >
+            Booking Confirmed!
+          </motion.h1>
           <p className="text-gray-400 mb-8">
             Thank you for your booking! We've sent a confirmation email to {formData.email}.
             You'll also receive a WhatsApp message with your booking details.
