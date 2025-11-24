@@ -265,8 +265,7 @@ Visit [http://localhost:3000](http://localhost:3000)
 
 ### Admin Access
 - URL: [http://localhost:3000/admin/login](http://localhost:3000/admin/login)
-- Username: `ecospace_admin`
-- Password: `EcoSpace@Dubai2024!`
+- Credentials: Set via environment variables (ADMIN_USERNAME, ADMIN_PASSWORD)
 
 ---
 
@@ -285,22 +284,26 @@ NEXT_PUBLIC_APP_URL="http://localhost:3000"
 # Email (Gmail SMTP)
 SMTP_HOST="smtp.gmail.com"
 SMTP_PORT="587"
-SMTP_USER="podcastecospace@gmail.com"
-SMTP_PASSWORD="zgyq gpdc zghv xpby"
-FROM_EMAIL="podcastecospace@gmail.com"
-ADMIN_EMAIL="podcastecospace@gmail.com"
+SMTP_USER="your-email@gmail.com"
+SMTP_PASSWORD="your-gmail-app-password"
+FROM_EMAIL="your-email@gmail.com"
+ADMIN_EMAIL="your-email@gmail.com"
 
 # Admin Credentials
-ADMIN_USERNAME="ecospace_admin"
-ADMIN_PASSWORD="EcoSpace@Dubai2024!"
-JWT_SECRET="ecospace-jwt-secret-prod-2024-change-this"
+ADMIN_USERNAME="your-admin-username"
+ADMIN_PASSWORD="your-secure-password"
+JWT_SECRET="your-secret-key-min-32-chars"
 
 # Studio Contact
-STUDIO_PHONE="+971 50 206 0674"
-STUDIO_WHATSAPP="https://wa.me/971502060674"
+STUDIO_PHONE="+971-XX-XXX-XXXX"
+STUDIO_WHATSAPP="https://wa.me/971XXXXXXXXX"
 ```
 
-**Security Note:** Rotate credentials before production deployment.
+**Security Note:**
+- Never commit real credentials to Git
+- Use `.env.local` for local development (gitignored by default)
+- Set environment variables directly in Vercel dashboard for production
+- Rotate all secrets before deployment
 
 ---
 
