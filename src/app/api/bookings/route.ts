@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { bookingFormSchema, validateData } from '@/lib/validations';
 
 // GET /api/bookings - Get all bookings (with filters)
 export async function GET(request: NextRequest) {
@@ -61,6 +62,19 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
+    // Validate with Zod
+    const validation = validateData(bookingFormSchema, body);
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Validation failed',
+          details: validation.errors,
+        },
+        { status: 400 }
+      );
+    }
+
     const {
       customerName,
       customerEmail,
@@ -76,15 +90,7 @@ export async function POST(request: NextRequest) {
       addonsTotal,
       totalPrice,
       specialRequests,
-    } = body;
-
-    // Validate required fields
-    if (!customerName || !customerEmail || !customerPhone || !selectedDate || !selectedTime) {
-      return NextResponse.json(
-        { success: false, error: 'Missing required fields' },
-        { status: 400 }
-      );
-    }
+    } = validation.data;
 
     // Check for conflicting bookings
     const bookingDate = new Date(selectedDate);
@@ -113,19 +119,23 @@ export async function POST(request: NextRequest) {
         customerPhone,
         selectedDate: bookingDate,
         selectedTime,
-        sessionDuration: sessionDuration || 2,
-        peopleCount: peopleCount || 1,
-        selectedSetup: selectedSetup || 'standard',
-        selectedService: selectedService || {},
-        additionalServices: additionalServices || [],
-        basePrice: basePrice || 0,
-        addonsTotal: addonsTotal || 0,
-        totalPrice: totalPrice || 0,
-        specialRequests,
+        sessionDuration,
+        peopleCount,
+        selectedSetup,
+        selectedService,
+        additionalServices,
+        basePrice,
+        addonsTotal,
+        totalPrice,
+        specialRequests: specialRequests || null,
         status: 'PENDING',
         paymentStatus: 'UNPAID',
       },
     });
+
+    // TODO: Send email notifications when credentials are provided
+    // await sendBookingConfirmationEmail(booking);
+    // await sendAdminNewBookingNotification(booking);
 
     return NextResponse.json({
       success: true,

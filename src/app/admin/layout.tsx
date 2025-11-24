@@ -48,13 +48,38 @@ export default function AdminLayout({
       return;
     }
 
-    const authToken = localStorage.getItem('adminAuthenticated');
-    if (authToken === 'true') {
-      setIsAuthenticated(true);
-    } else {
-      router.push('/admin/login');
-    }
-    setIsLoading(false);
+    const verifyAuth = async () => {
+      try {
+        // First check if token exists in localStorage
+        const token = localStorage.getItem('adminToken');
+        if (!token) {
+          router.push('/admin/login');
+          return;
+        }
+
+        // Verify token with server
+        const response = await fetch('/api/auth/verify', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          setIsAuthenticated(true);
+        } else {
+          // Token invalid, clear and redirect
+          localStorage.removeItem('adminToken');
+          router.push('/admin/login');
+        }
+      } catch {
+        localStorage.removeItem('adminToken');
+        router.push('/admin/login');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    verifyAuth();
   }, [router, isLoginPage]);
 
   // Load sidebar collapsed state from localStorage
@@ -66,8 +91,13 @@ export default function AdminLayout({
   }, []);
 
   // Handle logout
-  const handleLogout = () => {
-    localStorage.removeItem('adminAuthenticated');
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch {
+      // Continue with logout even if API fails
+    }
+    localStorage.removeItem('adminToken');
     router.push('/admin/login');
   };
 

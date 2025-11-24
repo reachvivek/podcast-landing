@@ -17,13 +17,28 @@ export default function AdminLoginPage() {
     setError('');
     setIsLoading(true);
 
-    // Simple hardcoded authentication (replace with API call in production)
-    // Default credentials: admin / admin123
-    if (username === 'admin' && password === 'admin123') {
-      localStorage.setItem('adminAuthenticated', 'true');
-      router.push('/admin');
-    } else {
-      setError('Invalid username or password');
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Store token in localStorage for client-side checks
+        // The HTTP-only cookie is set by the server for API calls
+        localStorage.setItem('adminToken', data.token);
+        router.push('/admin');
+      } else {
+        setError(data.error || 'Invalid username or password');
+      }
+    } catch {
+      setError('An error occurred. Please try again.');
+    } finally {
       setIsLoading(false);
     }
   };
@@ -117,19 +132,6 @@ export default function AdminLoginPage() {
               )}
             </button>
           </form>
-
-          {/* Demo Credentials Info */}
-          <div className="mt-6 pt-6 border-t border-gray-800">
-            <p className="text-gray-500 text-sm text-center mb-2">Demo Credentials</p>
-            <div className="bg-gray-800/50 rounded-xl p-3 space-y-1">
-              <p className="text-gray-400 text-sm">
-                <span className="text-gray-500">Username:</span> <code className="text-white">admin</code>
-              </p>
-              <p className="text-gray-400 text-sm">
-                <span className="text-gray-500">Password:</span> <code className="text-white">admin123</code>
-              </p>
-            </div>
-          </div>
         </div>
 
         {/* Back to Site Link */}
