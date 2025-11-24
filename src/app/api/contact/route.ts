@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { contactFormSchema, validateData } from '@/lib/validations';
-import { sendContactNotification } from '@/lib/email';
+import { sendContactNotification, sendContactAcknowledgement } from '@/lib/email';
 
 // POST /api/contact - Submit contact form
 export async function POST(request: NextRequest) {
@@ -34,9 +34,14 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Send email notification to admin (non-blocking)
-    sendContactNotification(submission).catch((err) => {
-      console.error('Error sending contact notification email:', err);
+    // Send emails via queue (non-blocking)
+    // 1. Admin notification
+    // 2. Customer acknowledgement
+    Promise.all([
+      sendContactNotification(submission),
+      sendContactAcknowledgement(submission),
+    ]).catch((err) => {
+      console.error('Error queueing contact emails:', err);
     });
 
     return NextResponse.json({

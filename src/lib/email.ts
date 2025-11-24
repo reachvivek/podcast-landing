@@ -1,10 +1,12 @@
 import nodemailer from 'nodemailer';
+import prisma from './prisma';
 
 /**
- * Email Notification Service for Podcast EcoSpace
+ * Email Queue Service for Podcast EcoSpace
+ * Features: Queue system, rate limiting, MongoDB audit, logo support
  */
 
-// Email configuration from environment
+// Email configuration
 const emailConfig = {
   host: process.env.SMTP_HOST || '',
   port: parseInt(process.env.SMTP_PORT || '587'),
@@ -14,32 +16,32 @@ const emailConfig = {
   adminEmail: process.env.ADMIN_EMAIL || '',
 };
 
-// Create transporter (lazy initialization)
+// Constants
+const LOGO_URL = `${process.env.NEXT_PUBLIC_APP_URL || 'https://podspace.vercel.app'}/images/IMG_20251121_085355_649.png`;
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://podspace.vercel.app';
+const RATE_LIMIT_DELAY = 1000; // 1 second between emails
+
+// Transporter (lazy init)
 let transporter: nodemailer.Transporter | null = null;
 
 function getTransporter(): nodemailer.Transporter | null {
   if (!isEmailConfigured()) return null;
-
   if (!transporter) {
     transporter = nodemailer.createTransport({
       host: emailConfig.host,
       port: emailConfig.port,
       secure: emailConfig.port === 465,
-      auth: {
-        user: emailConfig.user,
-        pass: emailConfig.password,
-      },
+      auth: { user: emailConfig.user, pass: emailConfig.password },
     });
   }
   return transporter;
 }
 
-// Check if email is configured
 export function isEmailConfigured(): boolean {
   return !!(emailConfig.host && emailConfig.user && emailConfig.password);
 }
 
-// Booking interface for email templates
+// Types
 interface BookingEmailData {
   id: string;
   customerName: string;
@@ -53,7 +55,6 @@ interface BookingEmailData {
   specialRequests?: string | null;
 }
 
-// Contact submission interface
 interface ContactEmailData {
   id: string;
   name: string;
@@ -62,397 +63,551 @@ interface ContactEmailData {
   message: string;
 }
 
+type TemplateType = 'booking_confirmation' | 'admin_booking' | 'contact_admin' | 'contact_ack' | 'status_update' | 'test';
+
+// ============================================
+// QUEUE SYSTEM
+// ============================================
+
 /**
- * Send booking confirmation email to customer
+ * Add email to queue (main entry point for all emails)
  */
+export async function queueEmail(
+  templateType: TemplateType,
+  to: string,
+  subject: string,
+  templateData: Record<string, unknown>,
+  priority: number = 0,
+  _metadata?: Record<string, unknown>
+): Promise<string | null> {
+  try {
+    const email = await prisma.emailQueue.create({
+      data: {
+        to,
+        subject,
+        templateType,
+        templateData: JSON.parse(JSON.stringify(templateData)),
+        priority,
+        status: 'PENDING',
+        scheduledFor: new Date(),
+      },
+    });
+
+    // Process immediately in background (non-blocking)
+    processEmailQueue().catch(console.error);
+
+    return email.id;
+  } catch (error) {
+    console.error('[Email Queue] Failed to queue email:', error);
+    return null;
+  }
+}
+
+/**
+ * Process pending emails from queue
+ */
+export async function processEmailQueue(): Promise<void> {
+  const pendingEmails = await prisma.emailQueue.findMany({
+    where: {
+      status: 'PENDING',
+      scheduledFor: { lte: new Date() },
+      attempts: { lt: 3 },
+    },
+    orderBy: [{ priority: 'desc' }, { createdAt: 'asc' }],
+    take: 10,
+  });
+
+  for (const email of pendingEmails) {
+    // Mark as processing
+    await prisma.emailQueue.update({
+      where: { id: email.id },
+      data: { status: 'PROCESSING', attempts: { increment: 1 } },
+    });
+
+    try {
+      // Generate HTML from template
+      const html = generateEmailHtml(email.templateType, email.templateData as Record<string, unknown>);
+
+      // Send email
+      const result = await sendEmailDirect({ to: email.to, subject: email.subject, html });
+
+      // Update queue status
+      await prisma.emailQueue.update({
+        where: { id: email.id },
+        data: {
+          status: 'SENT',
+          sentAt: new Date(),
+          processedAt: new Date(),
+        },
+      });
+
+      // Log to audit
+      await prisma.emailLog.create({
+        data: {
+          to: email.to,
+          subject: email.subject,
+          templateType: email.templateType,
+          status: 'sent',
+          messageId: result.messageId || null,
+          metadata: email.templateData as object,
+        },
+      });
+
+      // Rate limiting delay
+      await new Promise(resolve => setTimeout(resolve, RATE_LIMIT_DELAY));
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+      // Update queue with error
+      await prisma.emailQueue.update({
+        where: { id: email.id },
+        data: {
+          status: email.attempts >= 2 ? 'FAILED' : 'PENDING',
+          errorMessage,
+          processedAt: new Date(),
+        },
+      });
+
+      // Log failure
+      await prisma.emailLog.create({
+        data: {
+          to: email.to,
+          subject: email.subject,
+          templateType: email.templateType,
+          status: 'failed',
+          errorMessage,
+          metadata: email.templateData as object,
+        },
+      });
+    }
+  }
+}
+
+// ============================================
+// PUBLIC EMAIL FUNCTIONS
+// ============================================
+
 export async function sendBookingConfirmationEmail(booking: BookingEmailData): Promise<boolean> {
-  if (!isEmailConfigured()) {
-    console.log('[Email] Skipping - Email not configured');
-    return false;
-  }
-
-  const date = new Date(booking.selectedDate);
-  const formattedDate = date.toLocaleDateString('en-AE', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-
-  const emailContent = {
-    to: booking.customerEmail,
-    subject: `Booking Received - ${formattedDate} at ${booking.selectedTime} | Podcast EcoSpace`,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f9f9f9;">
-        <div style="background: #111; padding: 30px; border-radius: 16px;">
-          <div style="text-align: center; margin-bottom: 20px;">
-            <h1 style="color: #A3E635; margin: 0; font-size: 24px;">Podcast EcoSpace</h1>
-            <p style="color: #9CA3AF; margin: 5px 0 0;">Dubai World Trade Center</p>
-          </div>
-
-          <h2 style="color: #fff; margin: 20px 0; font-size: 20px;">Booking Received!</h2>
-
-          <p style="color: #fff; font-size: 16px;">
-            Dear ${booking.customerName},
-          </p>
-
-          <p style="color: #9CA3AF; font-size: 14px; line-height: 1.6;">
-            Thank you for booking with Podcast EcoSpace. Your session request has been received and is pending confirmation. We will contact you shortly to confirm your booking.
-          </p>
-
-          <div style="background: #1F2937; padding: 20px; border-radius: 12px; margin: 20px 0;">
-            <h3 style="color: #A3E635; font-size: 16px; margin: 0 0 15px;">Booking Details</h3>
-
-            <table style="width: 100%; color: #9CA3AF; font-size: 14px; border-collapse: collapse;">
-              <tr>
-                <td style="padding: 10px 0; border-bottom: 1px solid #374151;">Date:</td>
-                <td style="color: #fff; text-align: right; padding: 10px 0; border-bottom: 1px solid #374151;">${formattedDate}</td>
-              </tr>
-              <tr>
-                <td style="padding: 10px 0; border-bottom: 1px solid #374151;">Time:</td>
-                <td style="color: #fff; text-align: right; padding: 10px 0; border-bottom: 1px solid #374151;">${booking.selectedTime}</td>
-              </tr>
-              <tr>
-                <td style="padding: 10px 0; border-bottom: 1px solid #374151;">Duration:</td>
-                <td style="color: #fff; text-align: right; padding: 10px 0; border-bottom: 1px solid #374151;">${booking.sessionDuration} hour(s)</td>
-              </tr>
-              <tr>
-                <td style="padding: 10px 0; border-bottom: 1px solid #374151;">Service:</td>
-                <td style="color: #fff; text-align: right; padding: 10px 0; border-bottom: 1px solid #374151;">${booking.selectedService?.name || 'Standard'}</td>
-              </tr>
-              <tr>
-                <td style="padding: 10px 0; font-weight: bold;">Total:</td>
-                <td style="color: #A3E635; text-align: right; font-size: 18px; font-weight: bold; padding: 10px 0;">
-                  ${booking.totalPrice} AED
-                </td>
-              </tr>
-            </table>
-          </div>
-
-          <div style="background: #1F2937; padding: 20px; border-radius: 12px; margin: 20px 0;">
-            <h3 style="color: #fff; font-size: 14px; margin: 0 0 10px;">Studio Location</h3>
-            <p style="color: #9CA3AF; margin: 0; font-size: 14px;">
-              Dubai World Trade Center<br>
-              Sheikh Zayed Road, Dubai, UAE
-            </p>
-          </div>
-
-          <div style="background: #A3E635; padding: 15px; border-radius: 12px; margin: 20px 0; text-align: center;">
-            <p style="color: #000; margin: 0; font-size: 14px; font-weight: bold;">
-              Questions? Contact us on WhatsApp
-            </p>
-            <a href="https://wa.me/971502060674" style="color: #000; font-size: 16px; text-decoration: none;">
-              +971-502060674
-            </a>
-          </div>
-
-          <p style="color: #6B7280; font-size: 12px; text-align: center; margin-top: 30px;">
-            Booking Reference: #${booking.id.slice(-8).toUpperCase()}
-          </p>
-        </div>
-
-        <p style="color: #666; font-size: 11px; text-align: center; margin-top: 20px;">
-          Podcast EcoSpace Dubai | Dubai World Trade Center
-        </p>
-      </div>
-    `,
-  };
-
-  return await sendEmail(emailContent);
+  if (!isEmailConfigured()) return false;
+  const id = await queueEmail(
+    'booking_confirmation',
+    booking.customerEmail,
+    'Booking Request Received - Podcast EcoSpace',
+    { booking },
+    1,
+    { bookingId: booking.id }
+  );
+  return !!id;
 }
 
-/**
- * Send new booking notification to admin
- */
 export async function sendAdminBookingNotification(booking: BookingEmailData): Promise<boolean> {
-  if (!isEmailConfigured() || !emailConfig.adminEmail) {
-    console.log('[Email] Skipping admin notification - not configured');
-    return false;
-  }
-
+  if (!isEmailConfigured() || !emailConfig.adminEmail) return false;
   const date = new Date(booking.selectedDate);
-  const formattedDate = date.toLocaleDateString('en-AE', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-  });
-
-  const emailContent = {
-    to: emailConfig.adminEmail,
-    subject: `🎙️ New Booking: ${booking.customerName} - ${formattedDate} ${booking.selectedTime}`,
-    html: `
-      <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px;">
-        <h2 style="color: #A3E635; margin-bottom: 20px;">New Booking Received</h2>
-
-        <table style="width: 100%; border-collapse: collapse; background: #f9f9f9; border-radius: 8px;">
-          <tr>
-            <td style="padding: 12px 15px; border-bottom: 1px solid #eee; font-weight: bold; width: 140px;">Customer</td>
-            <td style="padding: 12px 15px; border-bottom: 1px solid #eee;">${booking.customerName}</td>
-          </tr>
-          <tr>
-            <td style="padding: 12px 15px; border-bottom: 1px solid #eee; font-weight: bold;">Email</td>
-            <td style="padding: 12px 15px; border-bottom: 1px solid #eee;">
-              <a href="mailto:${booking.customerEmail}" style="color: #2563EB;">${booking.customerEmail}</a>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding: 12px 15px; border-bottom: 1px solid #eee; font-weight: bold;">Phone</td>
-            <td style="padding: 12px 15px; border-bottom: 1px solid #eee;">
-              <a href="tel:${booking.customerPhone}" style="color: #2563EB;">${booking.customerPhone}</a>
-              &nbsp;|&nbsp;
-              <a href="https://wa.me/${booking.customerPhone.replace(/[^0-9]/g, '')}" style="color: #22C55E;">WhatsApp</a>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding: 12px 15px; border-bottom: 1px solid #eee; font-weight: bold;">Date</td>
-            <td style="padding: 12px 15px; border-bottom: 1px solid #eee;">${formattedDate}</td>
-          </tr>
-          <tr>
-            <td style="padding: 12px 15px; border-bottom: 1px solid #eee; font-weight: bold;">Time</td>
-            <td style="padding: 12px 15px; border-bottom: 1px solid #eee;">${booking.selectedTime}</td>
-          </tr>
-          <tr>
-            <td style="padding: 12px 15px; border-bottom: 1px solid #eee; font-weight: bold;">Duration</td>
-            <td style="padding: 12px 15px; border-bottom: 1px solid #eee;">${booking.sessionDuration} hour(s)</td>
-          </tr>
-          <tr>
-            <td style="padding: 12px 15px; border-bottom: 1px solid #eee; font-weight: bold;">Service</td>
-            <td style="padding: 12px 15px; border-bottom: 1px solid #eee;">${booking.selectedService?.name || 'Standard'}</td>
-          </tr>
-          <tr>
-            <td style="padding: 12px 15px; font-weight: bold;">Total</td>
-            <td style="padding: 12px 15px; color: #16A34A; font-weight: bold; font-size: 18px;">
-              ${booking.totalPrice} AED
-            </td>
-          </tr>
-          ${booking.specialRequests ? `
-          <tr>
-            <td style="padding: 12px 15px; font-weight: bold; vertical-align: top;">Special Requests</td>
-            <td style="padding: 12px 15px; background: #FEF3C7;">${booking.specialRequests}</td>
-          </tr>
-          ` : ''}
-        </table>
-
-        <div style="margin-top: 25px;">
-          <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://podspace.vercel.app'}/admin/bookings"
-             style="background: #A3E635; color: #000; padding: 14px 28px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
-            View in Admin Panel
-          </a>
-        </div>
-
-        <p style="color: #666; font-size: 12px; margin-top: 25px;">
-          Booking ID: ${booking.id}
-        </p>
-      </div>
-    `,
-  };
-
-  return await sendEmail(emailContent);
+  const formattedDate = date.toLocaleDateString('en-AE', { weekday: 'short', month: 'short', day: 'numeric' });
+  const id = await queueEmail(
+    'admin_booking',
+    emailConfig.adminEmail,
+    `New Booking: ${booking.customerName} - ${formattedDate} at ${booking.selectedTime}`,
+    { booking },
+    2,
+    { bookingId: booking.id }
+  );
+  return !!id;
 }
 
-/**
- * Send contact form notification to admin
- */
 export async function sendContactNotification(contact: ContactEmailData): Promise<boolean> {
-  if (!isEmailConfigured() || !emailConfig.adminEmail) {
-    console.log('[Email] Skipping contact notification - not configured');
-    return false;
-  }
-
-  const emailContent = {
-    to: emailConfig.adminEmail,
-    subject: `📩 New Contact Form: ${contact.name}`,
-    html: `
-      <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px;">
-        <h2 style="color: #A3E635; margin-bottom: 20px;">New Contact Form Submission</h2>
-
-        <table style="width: 100%; border-collapse: collapse; background: #f9f9f9; border-radius: 8px;">
-          <tr>
-            <td style="padding: 12px 15px; border-bottom: 1px solid #eee; font-weight: bold; width: 100px;">Name</td>
-            <td style="padding: 12px 15px; border-bottom: 1px solid #eee;">${contact.name}</td>
-          </tr>
-          <tr>
-            <td style="padding: 12px 15px; border-bottom: 1px solid #eee; font-weight: bold;">Email</td>
-            <td style="padding: 12px 15px; border-bottom: 1px solid #eee;">
-              <a href="mailto:${contact.email}" style="color: #2563EB;">${contact.email}</a>
-            </td>
-          </tr>
-          ${contact.phone ? `
-          <tr>
-            <td style="padding: 12px 15px; border-bottom: 1px solid #eee; font-weight: bold;">Phone</td>
-            <td style="padding: 12px 15px; border-bottom: 1px solid #eee;">
-              <a href="tel:${contact.phone}" style="color: #2563EB;">${contact.phone}</a>
-              &nbsp;|&nbsp;
-              <a href="https://wa.me/${contact.phone.replace(/[^0-9]/g, '')}" style="color: #22C55E;">WhatsApp</a>
-            </td>
-          </tr>
-          ` : ''}
-        </table>
-
-        <div style="margin-top: 20px; padding: 20px; background: #f0f9ff; border-left: 4px solid #2563EB; border-radius: 4px;">
-          <h3 style="margin: 0 0 10px; color: #1e40af; font-size: 14px;">Message:</h3>
-          <p style="margin: 0; white-space: pre-wrap; line-height: 1.6;">${contact.message}</p>
-        </div>
-
-        <div style="margin-top: 25px;">
-          <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://podspace.vercel.app'}/admin/messages"
-             style="background: #A3E635; color: #000; padding: 14px 28px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
-            View in Admin Panel
-          </a>
-          &nbsp;&nbsp;
-          <a href="mailto:${contact.email}"
-             style="background: #2563EB; color: #fff; padding: 14px 28px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
-            Reply via Email
-          </a>
-        </div>
-      </div>
-    `,
-  };
-
-  return await sendEmail(emailContent);
+  if (!isEmailConfigured() || !emailConfig.adminEmail) return false;
+  const id = await queueEmail(
+    'contact_admin',
+    emailConfig.adminEmail,
+    `New Inquiry from ${contact.name}`,
+    { contact },
+    1,
+    { contactId: contact.id }
+  );
+  return !!id;
 }
 
-/**
- * Send booking status update to customer
- */
+export async function sendContactAcknowledgement(contact: ContactEmailData): Promise<boolean> {
+  if (!isEmailConfigured()) return false;
+  const id = await queueEmail(
+    'contact_ack',
+    contact.email,
+    'We Received Your Message - Podcast EcoSpace',
+    { contact },
+    1,
+    { contactId: contact.id }
+  );
+  return !!id;
+}
+
 export async function sendBookingStatusUpdate(
   booking: BookingEmailData,
   newStatus: 'CONFIRMED' | 'CANCELLED' | 'COMPLETED'
 ): Promise<boolean> {
-  if (!isEmailConfigured()) {
-    console.log('[Email] Skipping status update - not configured');
-    return false;
-  }
-
-  const statusMessages = {
-    CONFIRMED: {
-      emoji: '✅',
-      subject: 'Your Booking is Confirmed!',
-      heading: 'Booking Confirmed!',
-      message: 'Great news! Your booking has been confirmed. We look forward to seeing you at the studio!',
-      color: '#22C55E',
-    },
-    CANCELLED: {
-      emoji: '❌',
-      subject: 'Booking Cancelled',
-      heading: 'Booking Cancelled',
-      message: 'Your booking has been cancelled. If you have any questions or would like to reschedule, please contact us.',
-      color: '#EF4444',
-    },
-    COMPLETED: {
-      emoji: '🎉',
-      subject: 'Thank You for Your Session!',
-      heading: 'Session Completed!',
-      message: 'Thank you for choosing Podcast EcoSpace! We hope you had a great recording experience. We would love to have you back!',
-      color: '#A3E635',
-    },
+  if (!isEmailConfigured()) return false;
+  const statusSubjects = {
+    CONFIRMED: 'Your Booking is Confirmed',
+    CANCELLED: 'Booking Cancelled',
+    COMPLETED: 'Thank You for Your Session',
   };
-
-  const status = statusMessages[newStatus];
-  const date = new Date(booking.selectedDate);
-  const formattedDate = date.toLocaleDateString('en-AE', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-
-  const emailContent = {
-    to: booking.customerEmail,
-    subject: `${status.emoji} ${status.subject} | Podcast EcoSpace`,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f9f9f9;">
-        <div style="background: #111; padding: 30px; border-radius: 16px;">
-          <div style="text-align: center; margin-bottom: 20px;">
-            <h1 style="color: #A3E635; margin: 0; font-size: 24px;">Podcast EcoSpace</h1>
-          </div>
-
-          <h2 style="color: ${status.color}; margin: 20px 0; font-size: 22px; text-align: center;">${status.heading}</h2>
-
-          <p style="color: #fff; font-size: 16px;">
-            Dear ${booking.customerName},
-          </p>
-
-          <p style="color: #9CA3AF; font-size: 14px; line-height: 1.6;">
-            ${status.message}
-          </p>
-
-          <div style="background: #1F2937; padding: 20px; border-radius: 12px; margin: 20px 0;">
-            <table style="width: 100%; color: #9CA3AF; font-size: 14px; border-collapse: collapse;">
-              <tr>
-                <td style="padding: 10px 0; border-bottom: 1px solid #374151;">Date:</td>
-                <td style="color: #fff; text-align: right; padding: 10px 0; border-bottom: 1px solid #374151;">${formattedDate}</td>
-              </tr>
-              <tr>
-                <td style="padding: 10px 0; border-bottom: 1px solid #374151;">Time:</td>
-                <td style="color: #fff; text-align: right; padding: 10px 0; border-bottom: 1px solid #374151;">${booking.selectedTime}</td>
-              </tr>
-              <tr>
-                <td style="padding: 10px 0;">Service:</td>
-                <td style="color: #fff; text-align: right; padding: 10px 0;">${booking.selectedService?.name || 'Standard'}</td>
-              </tr>
-            </table>
-          </div>
-
-          ${newStatus === 'CONFIRMED' ? `
-          <div style="background: #1F2937; padding: 20px; border-radius: 12px; margin: 20px 0;">
-            <h3 style="color: #fff; font-size: 14px; margin: 0 0 10px;">Studio Location</h3>
-            <p style="color: #9CA3AF; margin: 0; font-size: 14px;">
-              Dubai World Trade Center<br>
-              Sheikh Zayed Road, Dubai, UAE
-            </p>
-          </div>
-          ` : ''}
-
-          <div style="background: #A3E635; padding: 15px; border-radius: 12px; margin: 20px 0; text-align: center;">
-            <p style="color: #000; margin: 0; font-size: 14px;">
-              Questions? WhatsApp us at <strong>+971-502060674</strong>
-            </p>
-          </div>
-
-          <p style="color: #6B7280; font-size: 12px; text-align: center; margin-top: 30px;">
-            Booking Reference: #${booking.id.slice(-8).toUpperCase()}
-          </p>
-        </div>
-      </div>
-    `,
-  };
-
-  return await sendEmail(emailContent);
+  const id = await queueEmail(
+    'status_update',
+    booking.customerEmail,
+    `${statusSubjects[newStatus]} - Podcast EcoSpace`,
+    { booking, status: newStatus },
+    2,
+    { bookingId: booking.id, status: newStatus }
+  );
+  return !!id;
 }
 
-/**
- * Core email sending function using Nodemailer
- */
-async function sendEmail(options: {
-  to: string;
-  subject: string;
-  html: string;
-}): Promise<boolean> {
+export async function sendTestEmail(toEmail: string): Promise<boolean> {
+  if (!isEmailConfigured()) return false;
+  const id = await queueEmail(
+    'test',
+    toEmail,
+    'Email Configuration Test - Podcast EcoSpace',
+    { config: { host: emailConfig.host, from: emailConfig.fromEmail, admin: emailConfig.adminEmail } },
+    3
+  );
+  return !!id;
+}
+
+// ============================================
+// TEMPLATE GENERATION
+// ============================================
+
+function generateEmailHtml(templateType: string, data: Record<string, unknown>): string {
+  switch (templateType) {
+    case 'booking_confirmation':
+      return generateBookingConfirmationHtml(data.booking as BookingEmailData);
+    case 'admin_booking':
+      return generateAdminBookingHtml(data.booking as BookingEmailData);
+    case 'contact_admin':
+      return generateContactAdminHtml(data.contact as ContactEmailData);
+    case 'contact_ack':
+      return generateContactAckHtml(data.contact as ContactEmailData);
+    case 'status_update':
+      return generateStatusUpdateHtml(data.booking as BookingEmailData, data.status as string);
+    case 'test':
+      return generateTestHtml(data.config as Record<string, string>);
+    default:
+      return '<p>Email template not found</p>';
+  }
+}
+
+// Header with logo
+function getHeader(showTagline = true): string {
+  return `
+    <tr>
+      <td style="background-color: #0a0a0a; padding: 32px 40px; text-align: center;">
+        <img src="${LOGO_URL}" alt="Podcast EcoSpace" style="height: 60px; width: auto; margin-bottom: 8px;" />
+        ${showTagline ? '<p style="margin: 0; color: #71717a; font-size: 14px;">Premium Podcast Studio | Dubai</p>' : ''}
+      </td>
+    </tr>
+  `;
+}
+
+// Admin header with badge
+function getAdminHeader(badge: string, badgeColor = '#a3e635'): string {
+  const textColor = badgeColor === '#a3e635' ? '#0a0a0a' : '#ffffff';
+  return `
+    <tr>
+      <td style="background-color: #0a0a0a; padding: 24px 40px;">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td><img src="${LOGO_URL}" alt="Podcast EcoSpace" style="height: 40px; width: auto;" /></td>
+            <td style="text-align: right;">
+              <span style="background-color: ${badgeColor}; color: ${textColor}; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; text-transform: uppercase;">${badge}</span>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  `;
+}
+
+// Footer
+function getFooter(): string {
+  return `
+    <tr>
+      <td style="background-color: #fafafa; padding: 24px 40px; border-top: 1px solid #e4e4e7;">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="text-align: center;">
+              <p style="margin: 0 0 8px; color: #52525b; font-size: 14px;">Questions? Contact us</p>
+              <a href="https://wa.me/971502060674" style="color: #18181b; font-size: 16px; font-weight: 600; text-decoration: none;">+971 50 206 0674</a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding: 20px 40px; text-align: center;">
+        <p style="margin: 0; color: #a1a1aa; font-size: 12px;">Podcast EcoSpace Dubai | Dubai World Trade Center</p>
+      </td>
+    </tr>
+  `;
+}
+
+// Email wrapper
+function wrapEmail(content: string): string {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f4f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f5; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+          ${content}
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
+// Booking confirmation for customer
+function generateBookingConfirmationHtml(booking: BookingEmailData): string {
+  const date = new Date(booking.selectedDate);
+  const formattedDate = date.toLocaleDateString('en-AE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  return wrapEmail(`
+    ${getHeader()}
+    <tr>
+      <td style="padding: 40px;">
+        <h2 style="margin: 0 0 16px; color: #18181b; font-size: 22px; font-weight: 600;">Booking Request Received</h2>
+        <p style="margin: 0 0 24px; color: #3f3f46; font-size: 15px;">Dear ${booking.customerName},</p>
+        <p style="margin: 0 0 32px; color: #52525b; font-size: 15px; line-height: 1.7;">Thank you for choosing Podcast EcoSpace. We have received your booking request and our team will review it shortly. You will receive a confirmation once your session is approved.</p>
+
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fafafa; border-radius: 8px; border: 1px solid #e4e4e7; margin-bottom: 32px;">
+          <tr><td style="padding: 20px 24px; border-bottom: 1px solid #e4e4e7;"><p style="margin: 0; color: #a3e635; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Booking Details</p></td></tr>
+          <tr><td style="padding: 0;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr><td style="padding: 16px 24px; border-bottom: 1px solid #e4e4e7; color: #71717a; font-size: 14px;">Date</td><td style="padding: 16px 24px; border-bottom: 1px solid #e4e4e7; color: #18181b; font-size: 14px; text-align: right; font-weight: 500;">${formattedDate}</td></tr>
+              <tr><td style="padding: 16px 24px; border-bottom: 1px solid #e4e4e7; color: #71717a; font-size: 14px;">Time</td><td style="padding: 16px 24px; border-bottom: 1px solid #e4e4e7; color: #18181b; font-size: 14px; text-align: right; font-weight: 500;">${booking.selectedTime}</td></tr>
+              <tr><td style="padding: 16px 24px; border-bottom: 1px solid #e4e4e7; color: #71717a; font-size: 14px;">Duration</td><td style="padding: 16px 24px; border-bottom: 1px solid #e4e4e7; color: #18181b; font-size: 14px; text-align: right; font-weight: 500;">${booking.sessionDuration} hour${booking.sessionDuration > 1 ? 's' : ''}</td></tr>
+              <tr><td style="padding: 16px 24px; border-bottom: 1px solid #e4e4e7; color: #71717a; font-size: 14px;">Service</td><td style="padding: 16px 24px; border-bottom: 1px solid #e4e4e7; color: #18181b; font-size: 14px; text-align: right; font-weight: 500;">${booking.selectedService?.name || 'Standard Package'}</td></tr>
+              <tr><td style="padding: 16px 24px; color: #18181b; font-size: 14px; font-weight: 600;">Total Amount</td><td style="padding: 16px 24px; color: #a3e635; font-size: 18px; text-align: right; font-weight: 700;">${booking.totalPrice} AED</td></tr>
+            </table>
+          </td></tr>
+        </table>
+
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #0a0a0a; border-radius: 8px; margin-bottom: 32px;">
+          <tr><td style="padding: 24px;">
+            <p style="margin: 0 0 4px; color: #a3e635; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Studio Location</p>
+            <p style="margin: 8px 0 0; color: #ffffff; font-size: 15px; line-height: 1.6;">Dubai World Trade Center<br>Sheikh Zayed Road, Dubai, UAE</p>
+          </td></tr>
+        </table>
+
+        <p style="margin: 0; color: #a1a1aa; font-size: 13px; text-align: center;">Booking Reference: <strong style="color: #71717a;">#${booking.id.slice(-8).toUpperCase()}</strong></p>
+      </td>
+    </tr>
+    ${getFooter()}
+  `);
+}
+
+// Admin booking notification
+function generateAdminBookingHtml(booking: BookingEmailData): string {
+  const date = new Date(booking.selectedDate);
+  const formattedDate = date.toLocaleDateString('en-AE', { weekday: 'short', month: 'short', day: 'numeric' });
+  const phoneClean = booking.customerPhone.replace(/[^0-9]/g, '');
+
+  return wrapEmail(`
+    ${getAdminHeader('New Booking')}
+    <tr>
+      <td style="padding: 32px 40px;">
+        <h2 style="margin: 0 0 4px; color: #18181b; font-size: 20px; font-weight: 600;">${booking.customerName}</h2>
+        <p style="margin: 0 0 24px; color: #71717a; font-size: 14px;">
+          <a href="mailto:${booking.customerEmail}" style="color: #2563eb; text-decoration: none;">${booking.customerEmail}</a>
+          <span style="color: #d4d4d8; margin: 0 8px;">|</span>
+          <a href="tel:${booking.customerPhone}" style="color: #2563eb; text-decoration: none;">${booking.customerPhone}</a>
+          <span style="color: #d4d4d8; margin: 0 8px;">|</span>
+          <a href="https://wa.me/${phoneClean}" style="color: #22c55e; text-decoration: none;">WhatsApp</a>
+        </p>
+
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fafafa; border-radius: 8px; border: 1px solid #e4e4e7; margin-bottom: 24px;">
+          <tr>
+            <td style="padding: 16px 20px; border-bottom: 1px solid #e4e4e7;"><p style="margin: 0; color: #71717a; font-size: 13px;">Date</p><p style="margin: 4px 0 0; color: #18181b; font-size: 15px; font-weight: 500;">${formattedDate}</p></td>
+            <td style="padding: 16px 20px; border-bottom: 1px solid #e4e4e7; border-left: 1px solid #e4e4e7;"><p style="margin: 0; color: #71717a; font-size: 13px;">Time</p><p style="margin: 4px 0 0; color: #18181b; font-size: 15px; font-weight: 500;">${booking.selectedTime}</p></td>
+            <td style="padding: 16px 20px; border-bottom: 1px solid #e4e4e7; border-left: 1px solid #e4e4e7;"><p style="margin: 0; color: #71717a; font-size: 13px;">Duration</p><p style="margin: 4px 0 0; color: #18181b; font-size: 15px; font-weight: 500;">${booking.sessionDuration}h</p></td>
+          </tr>
+          <tr>
+            <td colspan="2" style="padding: 16px 20px;"><p style="margin: 0; color: #71717a; font-size: 13px;">Service</p><p style="margin: 4px 0 0; color: #18181b; font-size: 15px; font-weight: 500;">${booking.selectedService?.name || 'Standard Package'}</p></td>
+            <td style="padding: 16px 20px; border-left: 1px solid #e4e4e7; text-align: right;"><p style="margin: 0; color: #71717a; font-size: 13px;">Total</p><p style="margin: 4px 0 0; color: #16a34a; font-size: 18px; font-weight: 700;">${booking.totalPrice} AED</p></td>
+          </tr>
+        </table>
+
+        ${booking.specialRequests ? `
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fefce8; border-radius: 8px; border: 1px solid #fef08a; margin-bottom: 24px;">
+          <tr><td style="padding: 16px 20px;"><p style="margin: 0 0 8px; color: #a16207; font-size: 13px; font-weight: 600; text-transform: uppercase;">Special Requests</p><p style="margin: 0; color: #713f12; font-size: 14px; line-height: 1.6;">${booking.specialRequests}</p></td></tr>
+        </table>
+        ` : ''}
+
+        <a href="${APP_URL}/admin/bookings" style="display: inline-block; background-color: #a3e635; color: #0a0a0a; padding: 14px 28px; border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none;">View in Admin Panel</a>
+      </td>
+    </tr>
+    <tr><td style="padding: 20px 40px; border-top: 1px solid #e4e4e7;"><p style="margin: 0; color: #a1a1aa; font-size: 12px;">Booking ID: ${booking.id}</p></td></tr>
+  `);
+}
+
+// Contact notification for admin
+function generateContactAdminHtml(contact: ContactEmailData): string {
+  const phoneClean = contact.phone?.replace(/[^0-9]/g, '') || '';
+
+  return wrapEmail(`
+    ${getAdminHeader('New Inquiry', '#3b82f6')}
+    <tr>
+      <td style="padding: 32px 40px;">
+        <h2 style="margin: 0 0 4px; color: #18181b; font-size: 20px; font-weight: 600;">${contact.name}</h2>
+        <p style="margin: 0 0 24px; color: #71717a; font-size: 14px;">
+          <a href="mailto:${contact.email}" style="color: #2563eb; text-decoration: none;">${contact.email}</a>
+          ${contact.phone ? `<span style="color: #d4d4d8; margin: 0 8px;">|</span><a href="tel:${contact.phone}" style="color: #2563eb; text-decoration: none;">${contact.phone}</a><span style="color: #d4d4d8; margin: 0 8px;">|</span><a href="https://wa.me/${phoneClean}" style="color: #22c55e; text-decoration: none;">WhatsApp</a>` : ''}
+        </p>
+
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f0f9ff; border-radius: 8px; border-left: 4px solid #3b82f6; margin-bottom: 24px;">
+          <tr><td style="padding: 20px 24px;">
+            <p style="margin: 0 0 12px; color: #1e40af; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Message</p>
+            <p style="margin: 0; color: #1e3a5f; font-size: 15px; line-height: 1.7; white-space: pre-wrap;">${contact.message}</p>
+          </td></tr>
+        </table>
+
+        <a href="${APP_URL}/admin/messages" style="display: inline-block; background-color: #a3e635; color: #0a0a0a; padding: 14px 28px; border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none; margin-right: 12px;">View in Admin</a>
+        <a href="mailto:${contact.email}" style="display: inline-block; background-color: #3b82f6; color: #ffffff; padding: 14px 28px; border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none;">Reply via Email</a>
+      </td>
+    </tr>
+    <tr><td style="padding: 20px 40px; border-top: 1px solid #e4e4e7;"><p style="margin: 0; color: #a1a1aa; font-size: 12px;">Inquiry ID: ${contact.id}</p></td></tr>
+  `);
+}
+
+// Contact acknowledgement for customer
+function generateContactAckHtml(contact: ContactEmailData): string {
+  return wrapEmail(`
+    ${getHeader()}
+    <tr>
+      <td style="padding: 40px;">
+        <h2 style="margin: 0 0 16px; color: #18181b; font-size: 22px; font-weight: 600;">Thank You for Reaching Out</h2>
+        <p style="margin: 0 0 24px; color: #3f3f46; font-size: 15px;">Dear ${contact.name},</p>
+        <p style="margin: 0 0 32px; color: #52525b; font-size: 15px; line-height: 1.7;">We have received your message and appreciate you contacting Podcast EcoSpace. Our team will review your inquiry and get back to you as soon as possible, typically within 24 hours.</p>
+
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fafafa; border-radius: 8px; border: 1px solid #e4e4e7; margin-bottom: 32px;">
+          <tr><td style="padding: 20px 24px; border-bottom: 1px solid #e4e4e7;"><p style="margin: 0; color: #a3e635; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Your Message</p></td></tr>
+          <tr><td style="padding: 20px 24px;"><p style="margin: 0; color: #52525b; font-size: 14px; line-height: 1.7; white-space: pre-wrap;">${contact.message}</p></td></tr>
+        </table>
+
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f0fdf4; border-radius: 8px; border: 1px solid #bbf7d0; margin-bottom: 32px;">
+          <tr><td style="padding: 20px 24px;">
+            <p style="margin: 0 0 12px; color: #166534; font-size: 14px; font-weight: 600;">What happens next?</p>
+            <ul style="margin: 0; padding-left: 20px; color: #166534; font-size: 14px; line-height: 1.8;">
+              <li>Our team will review your inquiry</li>
+              <li>We will respond within 24 hours</li>
+              <li>For urgent matters, call us directly</li>
+            </ul>
+          </td></tr>
+        </table>
+
+        <table width="100%" cellpadding="0" cellspacing="0" style="text-align: center;">
+          <tr><td><a href="${APP_URL}/book" style="display: inline-block; background-color: #a3e635; color: #0a0a0a; padding: 14px 32px; border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none;">Book a Session</a></td></tr>
+        </table>
+
+        <p style="margin: 32px 0 0; color: #a1a1aa; font-size: 13px; text-align: center;">Reference: <strong style="color: #71717a;">#${contact.id.slice(-8).toUpperCase()}</strong></p>
+      </td>
+    </tr>
+    ${getFooter()}
+  `);
+}
+
+// Status update email
+function generateStatusUpdateHtml(booking: BookingEmailData, status: string): string {
+  const statusConfig: Record<string, { heading: string; message: string; color: string; bgColor: string; borderColor: string }> = {
+    CONFIRMED: { heading: 'Booking Confirmed', message: 'Great news! Your booking has been confirmed. We look forward to seeing you at the studio.', color: '#22c55e', bgColor: '#f0fdf4', borderColor: '#86efac' },
+    CANCELLED: { heading: 'Booking Cancelled', message: 'Your booking has been cancelled. If you have any questions or would like to reschedule, please contact us.', color: '#ef4444', bgColor: '#fef2f2', borderColor: '#fecaca' },
+    COMPLETED: { heading: 'Session Completed', message: 'Thank you for choosing Podcast EcoSpace! We hope you had a great recording experience. We would love to have you back.', color: '#a3e635', bgColor: '#f7fee7', borderColor: '#bef264' },
+  };
+
+  const config = statusConfig[status] || statusConfig.CONFIRMED;
+  const date = new Date(booking.selectedDate);
+  const formattedDate = date.toLocaleDateString('en-AE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  return wrapEmail(`
+    ${getHeader()}
+    <tr><td style="background-color: ${config.bgColor}; border-bottom: 3px solid ${config.borderColor}; padding: 20px 40px; text-align: center;"><h2 style="margin: 0; color: ${config.color}; font-size: 22px; font-weight: 600;">${config.heading}</h2></td></tr>
+    <tr>
+      <td style="padding: 40px;">
+        <p style="margin: 0 0 24px; color: #3f3f46; font-size: 15px;">Dear ${booking.customerName},</p>
+        <p style="margin: 0 0 32px; color: #52525b; font-size: 15px; line-height: 1.7;">${config.message}</p>
+
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fafafa; border-radius: 8px; border: 1px solid #e4e4e7; margin-bottom: 32px;">
+          <tr><td style="padding: 20px 24px; border-bottom: 1px solid #e4e4e7;"><p style="margin: 0; color: #71717a; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Session Details</p></td></tr>
+          <tr><td style="padding: 0;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr><td style="padding: 16px 24px; border-bottom: 1px solid #e4e4e7; color: #71717a; font-size: 14px;">Date</td><td style="padding: 16px 24px; border-bottom: 1px solid #e4e4e7; color: #18181b; font-size: 14px; text-align: right; font-weight: 500;">${formattedDate}</td></tr>
+              <tr><td style="padding: 16px 24px; border-bottom: 1px solid #e4e4e7; color: #71717a; font-size: 14px;">Time</td><td style="padding: 16px 24px; border-bottom: 1px solid #e4e4e7; color: #18181b; font-size: 14px; text-align: right; font-weight: 500;">${booking.selectedTime}</td></tr>
+              <tr><td style="padding: 16px 24px; color: #71717a; font-size: 14px;">Service</td><td style="padding: 16px 24px; color: #18181b; font-size: 14px; text-align: right; font-weight: 500;">${booking.selectedService?.name || 'Standard Package'}</td></tr>
+            </table>
+          </td></tr>
+        </table>
+
+        ${status === 'CONFIRMED' ? `
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #0a0a0a; border-radius: 8px; margin-bottom: 32px;">
+          <tr><td style="padding: 24px;">
+            <p style="margin: 0 0 4px; color: #a3e635; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Studio Location</p>
+            <p style="margin: 8px 0 0; color: #ffffff; font-size: 15px; line-height: 1.6;">Dubai World Trade Center<br>Sheikh Zayed Road, Dubai, UAE</p>
+          </td></tr>
+        </table>
+        ` : ''}
+
+        <p style="margin: 0; color: #a1a1aa; font-size: 13px; text-align: center;">Booking Reference: <strong style="color: #71717a;">#${booking.id.slice(-8).toUpperCase()}</strong></p>
+      </td>
+    </tr>
+    ${getFooter()}
+  `);
+}
+
+// Test email
+function generateTestHtml(config: Record<string, string>): string {
+  return wrapEmail(`
+    ${getHeader()}
+    <tr>
+      <td style="padding: 40px; text-align: center;">
+        <div style="width: 64px; height: 64px; background-color: #f0fdf4; border-radius: 50%; margin: 0 auto 24px; line-height: 64px;"><span style="color: #22c55e; font-size: 32px;">&#10003;</span></div>
+        <h2 style="margin: 0 0 16px; color: #18181b; font-size: 22px; font-weight: 600;">Email Configuration Successful</h2>
+        <p style="margin: 0 0 32px; color: #52525b; font-size: 15px; line-height: 1.7;">Your email notifications are now configured correctly. The booking system will automatically send emails for new bookings, confirmations, and contact form submissions.</p>
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fafafa; border-radius: 8px; border: 1px solid #e4e4e7;">
+          <tr><td style="padding: 20px 24px; text-align: left;">
+            <p style="margin: 0 0 8px; color: #71717a; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Configuration Details</p>
+            <p style="margin: 0; color: #18181b; font-size: 14px; line-height: 1.8;">SMTP Host: ${config.host}<br>From: ${config.from}<br>Admin: ${config.admin}</p>
+          </td></tr>
+        </table>
+      </td>
+    </tr>
+    <tr><td style="padding: 20px 40px; border-top: 1px solid #e4e4e7; text-align: center;"><p style="margin: 0; color: #a1a1aa; font-size: 12px;">Podcast EcoSpace Dubai | Dubai World Trade Center</p></td></tr>
+  `);
+}
+
+// ============================================
+// DIRECT EMAIL SENDING (used by queue processor)
+// ============================================
+
+async function sendEmailDirect(options: { to: string; subject: string; html: string }): Promise<{ messageId?: string }> {
   const transport = getTransporter();
+  if (!transport) throw new Error('Email not configured');
 
-  if (!transport) {
-    console.log('[Email] Transporter not configured, skipping email');
-    return false;
-  }
+  const result = await transport.sendMail({
+    from: `"Podcast EcoSpace" <${emailConfig.fromEmail}>`,
+    to: options.to,
+    subject: options.subject,
+    html: options.html,
+  });
 
-  try {
-    const result = await transport.sendMail({
-      from: `"Podcast EcoSpace" <${emailConfig.fromEmail}>`,
-      to: options.to,
-      subject: options.subject,
-      html: options.html,
-    });
-
-    console.log('[Email] Sent successfully:', {
-      to: options.to,
-      subject: options.subject,
-      messageId: result.messageId,
-    });
-
-    return true;
-  } catch (error) {
-    console.error('[Email] Failed to send:', error);
-    return false;
-  }
+  console.log('[Email] Sent:', { to: options.to, subject: options.subject, messageId: result.messageId });
+  return { messageId: result.messageId };
 }

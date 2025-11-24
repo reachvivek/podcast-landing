@@ -215,3 +215,67 @@ model NewsletterSubscriber {
   subscribedAt    DateTime @default(now())
   unsubscribedAt  DateTime?
 }
+
+// Email Queue - for managing email sending with rate limiting
+model EmailQueue {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  // Email details
+  to              String
+  subject         String
+  templateType    String   // booking_confirmation, admin_booking, contact_admin, contact_ack, status_update, test
+  templateData    Json     // data passed to template
+
+  // Queue management
+  status          EmailStatus @default(PENDING)
+  priority        Int      @default(0) // higher = more urgent
+  attempts        Int      @default(0)
+  maxAttempts     Int      @default(3)
+
+  // Tracking
+  errorMessage    String?
+  sentAt          DateTime?
+
+  // Timestamps
+  createdAt       DateTime @default(now())
+  scheduledFor    DateTime @default(now())
+  processedAt     DateTime?
+
+  @@index([status])
+  @@index([scheduledFor])
+  @@index([createdAt])
+}
+
+enum EmailStatus {
+  PENDING
+  PROCESSING
+  SENT
+  FAILED
+  CANCELLED
+}
+
+// Email Log - audit trail for all sent emails
+model EmailLog {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  // Email details
+  to              String
+  subject         String
+  templateType    String
+
+  // Status
+  status          String   // sent, failed
+  messageId       String?  // from SMTP response
+  errorMessage    String?
+
+  // Metadata
+  metadata        Json?    // additional context (booking id, contact id, etc.)
+
+  // Timestamps
+  createdAt       DateTime @default(now())
+
+  @@index([to])
+  @@index([templateType])
+  @@index([status])
+  @@index([createdAt])
+}
