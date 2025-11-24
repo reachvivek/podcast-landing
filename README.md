@@ -1,141 +1,582 @@
-# Podcast EcoSpace - Dubai Booking Platform
+# Podcast EcoSpace Dubai
 
-A professional podcast studio booking platform built for EcoSpace Dubai, located at Dubai World Trade Center. This full-stack application enables customers to book recording sessions and allows administrators to manage bookings, analytics, and studio operations.
+> Professional podcast studio booking platform with integrated CRM and analytics
+
+[![Next.js](https://img.shields.io/badge/Next.js-16.0.3-black?style=flat&logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat&logo=typescript)](https://www.typescriptlang.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-green?style=flat&logo=mongodb)](https://www.mongodb.com/)
+[![Prisma](https://img.shields.io/badge/Prisma-6.19.0-2D3748?style=flat&logo=prisma)](https://www.prisma.io/)
+
+A full-stack booking platform for podcast studio management, built with Next.js 16, featuring a customer-facing booking system, admin dashboard, email automation, and comprehensive analytics.
 
 ---
 
 ## Table of Contents
 
-- [Overview](#overview)
-- [Technology Stack](#technology-stack)
-- [System Architecture](#system-architecture)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Architecture](#architecture)
 - [Database Schema](#database-schema)
-- [Project Structure](#project-structure)
 - [Getting Started](#getting-started)
 - [Environment Variables](#environment-variables)
-- [Database Setup](#database-setup)
-- [Running the Application](#running-the-application)
-- [Admin Panel](#admin-panel)
-- [API Documentation](#api-documentation)
+- [API Reference](#api-reference)
+- [Admin Dashboard](#admin-dashboard)
+- [Email System](#email-system)
 - [Deployment](#deployment)
-- [Known Issues & Gaps](#known-issues--gaps)
-- [Contributing](#contributing)
+- [Project Structure](#project-structure)
 
 ---
 
-## Overview
+## Features
 
-### Features
+### Customer Experience
+- Multi-step booking flow with real-time pricing
+- Interactive calendar with time slot selection
+- Service package selection (Audio, Video, Reels)
+- Add-on services (extra cameras, live streaming, editing)
+- Mobile-responsive design with smooth animations
+- Email and WhatsApp confirmations
+- Google Maps integration for studio location
 
-**Customer-Facing:**
-- Browse service packages (Audio-only, Video 2-cam, Premium Video, Editing)
-- Interactive multi-step booking flow with calendar selection
-- Select add-on services (extra cameras, live streaming, editing)
-- Real-time pricing calculation
-- Booking confirmation and checkout
-- Studio location with interactive map
-- Portfolio and equipment showcase
-- Contact form and newsletter subscription
+### Admin Dashboard
+- Real-time booking management
+- Analytics dashboard with charts
+- Revenue tracking and conversion metrics
+- Customer management with notes
+- Status workflow (Pending → Confirmed → In Progress → Completed)
+- Payment tracking (Cash, Card, Apple Pay)
+- Export functionality (CSV)
 
-**Admin Dashboard:**
-- Secure authentication with login page
-- Collapsible sidebar navigation
-- Booking management (view, filter, update status)
-- Real-time analytics and charts
-- Revenue tracking and completion rates
-- Customer messages management
-- Studio settings configuration
-- Dynamic service and add-on management
+### Email Automation
+- Intelligent queue system with rate limiting
+- MongoDB audit trail for all emails
+- 7 professional templates (booking, status updates, contact forms)
+- Automatic retry logic (up to 3 attempts)
+- Priority queue management
+
+### Analytics & Tracking
+- Page view tracking
+- Booking funnel analysis
+- Conversion rate monitoring
+- Revenue insights by service type
+- Peak booking time analysis
 
 ---
 
-## Technology Stack
+## Tech Stack
 
 ### Frontend
-- **Framework:** Next.js 16.0.3 (App Router)
-- **Language:** TypeScript 5.x
-- **Styling:** Tailwind CSS v4
-- **UI Library:** Radix UI (slots, primitives)
-- **Icons:** Lucide React
-- **Animations:** Framer Motion
-- **Forms:** React Hook Form (to be implemented)
-- **State Management:** React Context API
-- **Maps:** Leaflet + React Leaflet
-- **Carousels:** Swiper.js
+```
+Next.js 16.0.3          App Router with Server Components
+TypeScript 5.x          Full type safety
+Tailwind CSS v4         Utility-first styling
+Framer Motion           Smooth animations
+Radix UI                Accessible primitives
+Lucide React            Icon library
+React Leaflet           Map integration
+Swiper.js               Touch-enabled carousels
+```
 
 ### Backend
-- **Runtime:** Node.js (via Next.js API Routes)
-- **API:** RESTful endpoints (serverless functions)
-- **Database ORM:** Prisma 6.19.0
-- **Database:** MongoDB Atlas (Cloud)
-- **Authentication:** JWT-based (to be implemented)
-- **Email:** Resend / SendGrid (to be configured)
+```
+Next.js API Routes      Serverless functions
+Prisma 6.19.0          Type-safe ORM
+MongoDB Atlas           Cloud database
+Nodemailer             SMTP email delivery
+JWT                    Authentication tokens
+```
 
-### Development Tools
-- **Package Manager:** npm
-- **Linting:** ESLint 9
-- **Type Checking:** TypeScript
-- **Database Client:** MongoDB Compass (recommended)
-- **Version Control:** Git
-
-### Deployment
-- **Hosting:** Vercel
-- **CDN:** Vercel Edge Network
-- **Database:** MongoDB Atlas (M0 Free Tier or higher)
-- **Environment:** Production + Preview branches
+### DevOps
+```
+Vercel                 Hosting & CI/CD
+GitHub                 Version control
+ESLint                 Code quality
+TypeScript             Type checking
+```
 
 ---
 
-## System Architecture
+## Architecture
 
 ```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│     Browser     │────▶│  Vercel Edge    │────▶│   Next.js App   │
-│   (React SPA)   │◀────│    Network      │◀────│  (App Router)   │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-                                                        │
-                                                        ▼
-                                                ┌───────────────┐
-                                                │  API Routes   │
-                                                │ (Serverless)  │
-                                                └───────────────┘
-                                                        │
-                                                        ▼
-                                                ┌───────────────┐
-                                                │  Prisma ORM   │
-                                                └───────────────┘
-                                                        │
-                                                        ▼
-                                                ┌───────────────┐
-                                                │ MongoDB Atlas │
-                                                │   (Cloud DB)  │
-                                                └───────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                      CLIENT (Browser)                        │
+│                                                              │
+│  ┌──────────────┐  ┌──────────────┐  ┌─────────────────┐  │
+│  │  Landing     │  │  Booking     │  │  Admin Panel    │  │
+│  │  Page        │  │  Flow        │  │  /admin/*       │  │
+│  └──────────────┘  └──────────────┘  └─────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    VERCEL EDGE NETWORK                       │
+│                   (CDN + Load Balancer)                      │
+└─────────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   NEXT.JS SERVER (App Router)                │
+│                                                              │
+│  ┌──────────────┐  ┌──────────────┐  ┌─────────────────┐  │
+│  │  Server      │  │  API Routes  │  │  Middleware     │  │
+│  │  Components  │  │  /api/*      │  │  (Auth/CORS)    │  │
+│  └──────────────┘  └──────────────┘  └─────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                      PRISMA ORM                              │
+│                   (Query Builder + Types)                    │
+└─────────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    MONGODB ATLAS                             │
+│                                                              │
+│  ┌──────────────┐  ┌──────────────┐  ┌─────────────────┐  │
+│  │  Bookings    │  │  EmailQueue  │  │  Analytics      │  │
+│  │  Collection  │  │  Collection  │  │  Collection     │  │
+│  └──────────────┘  └──────────────┘  └─────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
 ## Database Schema
 
-### Models Overview
+### Core Collections
 
-| Model | Description |
-|-------|-------------|
-| `Booking` | Customer booking records with session details |
-| `ServicePackage` | Available recording packages (5 seeded) |
-| `AddOnService` | Extra services like cameras, editing (8 seeded) |
-| `BlockedSlot` | Unavailable dates/times |
-| `AdminUser` | Admin accounts with role-based access |
-| `ContactSubmission` | Contact form submissions |
-| `NewsletterSubscriber` | Email newsletter list |
-| `AnalyticsEvent` | User behavior tracking |
+#### Booking
+Primary collection for all studio bookings with customer information, session details, and pricing.
 
-### Booking Statuses
-- `PENDING` - New booking awaiting confirmation
-- `CONFIRMED` - Admin confirmed the booking
-- `IN_PROGRESS` - Recording session in progress
-- `COMPLETED` - Session finished
-- `CANCELLED` - Booking cancelled
-- `NO_SHOW` - Customer didn't show up
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | ObjectId | Unique identifier |
+| `customerName` | String | Full name |
+| `customerEmail` | String | Email address |
+| `customerPhone` | String | Phone number |
+| `selectedDate` | DateTime | Booking date |
+| `selectedTime` | String | Time slot (e.g., "10:00 AM") |
+| `sessionDuration` | Int | Session length in hours |
+| `peopleCount` | Int | Number of guests |
+| `selectedSetup` | String | Setup type (standard/video-2cam/premium) |
+| `selectedService` | JSON | Service package details |
+| `additionalServices` | String[] | Add-on service IDs |
+| `basePrice` | Float | Base package price (AED) |
+| `addonsTotal` | Float | Total add-ons cost (AED) |
+| `totalPrice` | Float | Final total (AED) |
+| `status` | Enum | PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED, NO_SHOW |
+| `paymentStatus` | Enum | UNPAID, PAID, REFUNDED, PARTIAL |
+| `paymentMethod` | String | cash, card, apple_pay |
+| `specialRequests` | String | Customer notes |
+| `adminNotes` | String | Internal admin notes |
+| `createdAt` | DateTime | Booking creation timestamp |
+| `confirmedAt` | DateTime | Admin confirmation timestamp |
+| `completedAt` | DateTime | Session completion timestamp |
+
+**Indexes:** `customerEmail`, `selectedDate`, `status`, `createdAt`
+
+---
+
+#### EmailQueue
+Queue management for outbound emails with automatic retry and priority handling.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `to` | String | Recipient email |
+| `subject` | String | Email subject line |
+| `templateType` | String | booking_confirmation, admin_booking, contact_admin, status_update |
+| `templateData` | JSON | Dynamic template data |
+| `status` | Enum | PENDING, PROCESSING, SENT, FAILED, CANCELLED |
+| `priority` | Int | Queue priority (0-10, higher = urgent) |
+| `attempts` | Int | Send attempt counter |
+| `maxAttempts` | Int | Retry limit (default: 3) |
+| `sentAt` | DateTime | Successful send timestamp |
+| `scheduledFor` | DateTime | Scheduled send time |
+| `errorMessage` | String | Failure reason |
+
+**Indexes:** `status`, `scheduledFor`, `createdAt`
+
+---
+
+#### EmailLog
+Permanent audit trail for all sent emails (compliance and debugging).
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `to` | String | Recipient email |
+| `subject` | String | Email subject |
+| `templateType` | String | Template identifier |
+| `status` | String | sent, failed |
+| `messageId` | String | SMTP response ID |
+| `metadata` | JSON | Context (booking ID, contact ID) |
+| `createdAt` | DateTime | Log entry timestamp |
+
+**Indexes:** `to`, `templateType`, `status`, `createdAt`
+
+---
+
+### Supporting Collections
+
+**ServicePackage** - Available studio packages (Audio-only, Video, Reels)
+**AddOnService** - Optional extras (cameras, editing, live streaming)
+**BlockedSlot** - Unavailable dates/times
+**AdminUser** - Admin accounts with role-based access
+**ContactSubmission** - Contact form inquiries
+**AnalyticsEvent** - User behavior tracking
+
+Full schema: [`prisma/schema.prisma`](./prisma/schema.prisma)
+
+---
+
+## Getting Started
+
+### Prerequisites
+- Node.js 18+ and npm 9+
+- MongoDB Atlas account (free tier available)
+- Gmail account for SMTP (or SendGrid/Resend)
+
+### Installation
+
+```bash
+# Clone repository
+git clone https://github.com/reachvivek/podcast-landing.git
+cd podcast-landing
+
+# Install dependencies
+npm install
+
+# Configure environment
+cp .env.example .env
+# Edit .env with your credentials
+
+# Generate Prisma client
+npx prisma generate
+
+# Seed database with sample data
+npm run seed
+
+# Start development server
+npm run dev
+```
+
+Visit [http://localhost:3000](http://localhost:3000)
+
+### Admin Access
+- URL: [http://localhost:3000/admin/login](http://localhost:3000/admin/login)
+- Username: `ecospace_admin`
+- Password: `EcoSpace@Dubai2024!`
+
+---
+
+## Environment Variables
+
+Create a `.env` file in the root directory:
+
+```env
+# Database
+DATABASE_URL="mongodb+srv://username:password@cluster.mongodb.net/podcast-bookings?retryWrites=true&w=majority"
+
+# Application
+NODE_ENV="development"
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+
+# Email (Gmail SMTP)
+SMTP_HOST="smtp.gmail.com"
+SMTP_PORT="587"
+SMTP_USER="podcastecospace@gmail.com"
+SMTP_PASSWORD="zgyq gpdc zghv xpby"
+FROM_EMAIL="podcastecospace@gmail.com"
+ADMIN_EMAIL="podcastecospace@gmail.com"
+
+# Admin Credentials
+ADMIN_USERNAME="ecospace_admin"
+ADMIN_PASSWORD="EcoSpace@Dubai2024!"
+JWT_SECRET="ecospace-jwt-secret-prod-2024-change-this"
+
+# Studio Contact
+STUDIO_PHONE="+971 50 206 0674"
+STUDIO_WHATSAPP="https://wa.me/971502060674"
+```
+
+**Security Note:** Rotate credentials before production deployment.
+
+---
+
+## API Reference
+
+### Bookings
+
+#### Create Booking
+```http
+POST /api/bookings
+Content-Type: application/json
+
+{
+  "customerName": "John Doe",
+  "customerEmail": "john@example.com",
+  "customerPhone": "+971501234567",
+  "selectedDate": "2025-11-25T00:00:00.000Z",
+  "selectedTime": "10:00 AM",
+  "sessionDuration": 2,
+  "peopleCount": 2,
+  "selectedSetup": "video-2cam",
+  "selectedService": { "id": "pkg-2", "name": "Video Podcast", "price": 750 },
+  "additionalServices": ["addon-live-streaming"],
+  "basePrice": 750,
+  "addonsTotal": 200,
+  "totalPrice": 950,
+  "specialRequests": "Need parking space"
+}
+```
+
+**Response:** `201 Created`
+```json
+{
+  "success": true,
+  "data": {
+    "id": "6748a5b2c3d4e5f6a7b8c9d0",
+    "status": "PENDING",
+    "totalPrice": 950,
+    "createdAt": "2025-11-24T12:00:00.000Z"
+  }
+}
+```
+
+---
+
+#### List Bookings (Admin)
+```http
+GET /api/bookings?status=PENDING&date=2025-11-25&page=1&limit=20
+Authorization: Bearer <JWT_TOKEN>
+```
+
+**Query Parameters:**
+- `status` - Filter by booking status
+- `date` - Filter by date (YYYY-MM-DD)
+- `page` - Page number (default: 1)
+- `limit` - Items per page (default: 20)
+
+**Response:** `200 OK`
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "...",
+      "customerName": "John Doe",
+      "selectedDate": "2025-11-25",
+      "selectedTime": "10:00 AM",
+      "totalPrice": 950,
+      "status": "PENDING"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 42,
+    "pages": 3
+  }
+}
+```
+
+---
+
+#### Update Booking Status
+```http
+PATCH /api/bookings/:id
+Authorization: Bearer <JWT_TOKEN>
+Content-Type: application/json
+
+{
+  "status": "CONFIRMED",
+  "paymentStatus": "PAID",
+  "paymentMethod": "card",
+  "adminNotes": "Customer arrived on time"
+}
+```
+
+---
+
+### Analytics
+
+#### Get Dashboard Metrics
+```http
+GET /api/analytics?period=30
+Authorization: Bearer <JWT_TOKEN>
+```
+
+**Response:** `200 OK`
+```json
+{
+  "success": true,
+  "data": {
+    "totalBookings": 156,
+    "totalRevenue": 98500,
+    "conversionRate": 0.65,
+    "avgBookingValue": 631,
+    "popularServices": [
+      { "name": "Video Podcast", "count": 78, "revenue": 58500 }
+    ],
+    "bookingsByStatus": {
+      "PENDING": 12,
+      "CONFIRMED": 23,
+      "COMPLETED": 98,
+      "CANCELLED": 23
+    },
+    "revenueByMonth": [
+      { "month": "2025-10", "revenue": 32500 },
+      { "month": "2025-11", "revenue": 45000 }
+    ]
+  }
+}
+```
+
+---
+
+### Email Testing
+
+#### Send Test Email
+```http
+POST /api/test-email
+Authorization: Bearer <JWT_TOKEN>
+Content-Type: application/json
+
+{
+  "to": "test@example.com",
+  "templateType": "booking_confirmation"
+}
+```
+
+Full API documentation: [`swagger.yaml`](./swagger.yaml) (OpenAPI 3.0)
+
+---
+
+## Admin Dashboard
+
+### Features
+
+**Dashboard** (`/admin`)
+- Today's bookings count
+- Weekly revenue (AED)
+- Monthly bookings total
+- Pending follow-ups
+- Recent bookings table (last 10)
+- Quick stats (conversion rate, popular service, peak day)
+
+**Bookings Management** (`/admin/bookings`)
+- Filterable table (status, service, date range)
+- Search by name, phone, email
+- Status update workflow
+- Payment tracking
+- Customer notes section
+- Export to CSV
+
+**Analytics** (`/admin/analytics`)
+- Revenue trends (7/30/90 days)
+- Booking funnel analysis
+- Service popularity charts
+- Peak booking times
+- Conversion metrics
+
+### Access Control
+- JWT-based authentication
+- Session management
+- Role-based permissions (SUPER_ADMIN, ADMIN, STAFF)
+- Protected routes with middleware
+
+---
+
+## Email System
+
+### Templates
+
+| Template | Trigger | Recipient |
+|----------|---------|-----------|
+| `booking_confirmation` | New booking created | Customer |
+| `admin_booking` | New booking created | Admin |
+| `contact_admin` | Contact form submission | Admin |
+| `contact_ack` | Contact form submission | Customer |
+| `status_confirmed` | Booking confirmed | Customer |
+| `status_in_progress` | Session started | Customer |
+| `status_completed` | Session finished | Customer |
+
+### Queue System
+
+**Architecture:**
+```
+Booking Created → Add to EmailQueue (PENDING)
+                    ↓
+Queue Processor (1s interval) → Pick PENDING emails
+                    ↓
+Send via Nodemailer → Update status (SENT/FAILED)
+                    ↓
+Log to EmailLog (audit trail)
+```
+
+**Features:**
+- Rate limiting (1 email/second to avoid spam filters)
+- Priority queue (high-priority emails sent first)
+- Automatic retry (3 attempts for failed emails)
+- MongoDB audit trail (compliance-ready)
+- Detailed error logging
+
+### Configuration
+SMTP settings in `.env`:
+```env
+SMTP_HOST="smtp.gmail.com"
+SMTP_PORT="587"
+SMTP_USER="your-email@gmail.com"
+SMTP_PASSWORD="app-specific-password"
+```
+
+**Gmail Setup:**
+1. Enable 2FA in Google Account
+2. Generate App Password: [Google App Passwords](https://myaccount.google.com/apppasswords)
+3. Use generated password in `SMTP_PASSWORD`
+
+---
+
+## Deployment
+
+### Vercel (Recommended)
+
+1. **Push to GitHub**
+```bash
+git add .
+git commit -m "Ready for deployment"
+git push origin master
+```
+
+2. **Import to Vercel**
+   - Go to [vercel.com](https://vercel.com)
+   - Click "New Project"
+   - Import your GitHub repository
+
+3. **Configure Environment Variables**
+   - Add all variables from `.env`
+   - Update `NEXT_PUBLIC_APP_URL` to your domain
+   - Set `NODE_ENV=production`
+
+4. **Deploy**
+   - Vercel auto-deploys on push to `master`
+   - Preview deployments for PRs
+
+### Database Migration
+```bash
+npx prisma generate
+npx prisma db push
+npm run seed
+```
+
+### Post-Deployment
+- [ ] Update MongoDB Atlas IP whitelist (allow 0.0.0.0/0 for Vercel)
+- [ ] Configure custom domain
+- [ ] Enable SSL (automatic with Vercel)
+- [ ] Test booking flow end-to-end
+- [ ] Verify email deliverability
+- [ ] Set up Google Analytics
 
 ---
 
@@ -144,270 +585,122 @@ A professional podcast studio booking platform built for EcoSpace Dubai, located
 ```
 podcast-landing/
 ├── prisma/
-│   ├── schema.prisma      # Database schema
-│   └── seed.ts            # Seed script
-├── public/images/         # Studio photos, logos
+│   ├── schema.prisma              # Database models & enums
+│   └── seed.ts                    # Initial data seeding
+│
+├── public/
+│   └── images/                    # Studio photos, logos
+│
 ├── src/
 │   ├── app/
-│   │   ├── admin/         # Admin dashboard pages
-│   │   │   ├── analytics/ # Analytics page
-│   │   │   ├── bookings/  # Bookings management
-│   │   │   ├── login/     # Admin login
-│   │   │   ├── messages/  # Contact messages
-│   │   │   └── settings/  # Studio settings
-│   │   ├── api/           # API routes
-│   │   │   ├── bookings/  # Booking CRUD
-│   │   │   ├── services/  # Service packages
-│   │   │   ├── addons/    # Add-on services
-│   │   │   └── analytics/ # Dashboard metrics
-│   │   ├── book/          # Booking flow page
-│   │   ├── checkout/      # Checkout page
-│   │   └── page.tsx       # Landing page
+│   │   ├── page.tsx               # Landing page
+│   │   ├── layout.tsx             # Root layout
+│   │   ├── globals.css            # Tailwind base styles
+│   │   │
+│   │   ├── book/                  # Booking flow
+│   │   │   └── page.tsx           # Multi-step wizard
+│   │   │
+│   │   ├── checkout/              # Checkout page
+│   │   │   └── page.tsx           # Payment & confirmation
+│   │   │
+│   │   ├── admin/                 # Admin dashboard
+│   │   │   ├── login/             # Auth page
+│   │   │   ├── page.tsx           # Dashboard overview
+│   │   │   ├── bookings/          # Booking management
+│   │   │   ├── analytics/         # Analytics & charts
+│   │   │   ├── messages/          # Contact inquiries
+│   │   │   └── settings/          # Studio settings
+│   │   │
+│   │   └── api/                   # API routes
+│   │       ├── bookings/          # Booking CRUD
+│   │       ├── services/          # Service packages
+│   │       ├── addons/            # Add-on services
+│   │       ├── analytics/         # Dashboard metrics
+│   │       ├── contact/           # Contact form
+│   │       └── auth/              # Authentication
+│   │           └── login/
+│   │
 │   ├── components/
-│   │   ├── booking/       # BookingStep1-4.tsx
-│   │   ├── layout/        # Header, Footer
-│   │   ├── sections/      # Landing sections
-│   │   └── ui/            # Loader, etc.
-│   ├── contexts/          # BookingContext
-│   └── lib/               # prisma.ts, utils.ts
-├── .env                   # Environment variables
-├── next.config.ts         # Next.js config
-└── package.json
+│   │   ├── booking/               # Booking step components
+│   │   │   ├── BookingStep1.tsx   # Date & time selection
+│   │   │   ├── BookingStep2.tsx   # Setup type
+│   │   │   ├── BookingStep3.tsx   # Service package
+│   │   │   └── BookingStep4.tsx   # Add-ons
+│   │   │
+│   │   ├── layout/                # Layout components
+│   │   │   ├── Header.tsx         # Site header
+│   │   │   └── Footer.tsx         # Site footer
+│   │   │
+│   │   ├── sections/              # Landing page sections
+│   │   │   ├── Hero.tsx
+│   │   │   ├── Services.tsx
+│   │   │   ├── Portfolio.tsx
+│   │   │   ├── Pricing.tsx
+│   │   │   └── Contact.tsx
+│   │   │
+│   │   └── ui/                    # Reusable UI components
+│   │       └── Loader.tsx
+│   │
+│   ├── contexts/
+│   │   └── BookingContext.tsx     # Global booking state
+│   │
+│   └── lib/
+│       ├── prisma.ts              # Prisma client singleton
+│       ├── email.ts               # Email system & queue
+│       └── utils.ts               # Helper functions
+│
+├── .env                           # Environment variables (gitignored)
+├── .env.example                   # Example env file
+├── next.config.ts                 # Next.js configuration
+├── tailwind.config.ts             # Tailwind CSS config
+├── tsconfig.json                  # TypeScript config
+├── package.json                   # Dependencies
+├── swagger.yaml                   # OpenAPI 3.0 spec
+└── README.md                      # This file
 ```
 
 ---
 
-## Getting Started
-
-### Prerequisites
-- Node.js 18.x or higher
-- npm 9.x or higher
-- MongoDB Atlas account
-- Git
-
-### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/reachvivek/podcast-landing.git
-cd podcast-landing
-
-# Install dependencies
-npm install
-
-# Set up environment variables
-cp .env.example .env
-# Edit .env with your MongoDB connection string
-
-# Generate Prisma client
-npx prisma generate
-
-# Seed the database
-npm run seed
-
-# Start development server
-npm run dev
-```
-
----
-
-## Environment Variables
-
-Create a `.env` file with:
-
-```env
-# Database (Required)
-DATABASE_URL="mongodb+srv://USER:PASSWORD@cluster.mongodb.net/podcast-bookings"
-
-# Application
-NODE_ENV="development"
-NEXT_PUBLIC_APP_URL="http://localhost:3000"
-
-# Email (Optional - for notifications)
-# SMTP_HOST="smtp.gmail.com"
-# SMTP_PORT="587"
-# SMTP_USER="your-email@gmail.com"
-# SMTP_PASSWORD="your-app-password"
-```
-
----
-
-## Running the Application
+## Scripts
 
 ```bash
 # Development
-npm run dev          # Start dev server at localhost:3000
-
-# Production
-npm run build        # Build for production
-npm start            # Start production server
+npm run dev              # Start dev server (localhost:3000)
+npm run build            # Build for production
+npm start                # Start production server
 
 # Database
-npm run seed         # Seed database with initial data
-npx prisma studio    # Open Prisma database viewer
+npm run seed             # Seed database with sample data
+npx prisma studio        # Open Prisma GUI (localhost:5555)
+npx prisma generate      # Generate Prisma client
+npx prisma db push       # Push schema changes to MongoDB
+
+# Code Quality
+npm run lint             # Run ESLint
+npm run type-check       # TypeScript checking
 ```
 
 ---
 
-## Admin Panel
-
-### Access
-- URL: `http://localhost:3000/admin/login`
-- Username: `admin`
-- Password: `admin123`
-
-**WARNING:** These are development credentials only. See Security section.
-
-### Features
-- **Dashboard:** Overview metrics and recent bookings
-- **Bookings:** View, filter, update, delete bookings
-- **Analytics:** Charts for revenue, bookings, popular services
-- **Messages:** Contact form submissions (mock data)
-- **Settings:** Studio configuration (client-side only)
-
----
-
-## API Documentation
-
-### Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/bookings` | Get all bookings (paginated) |
-| POST | `/api/bookings` | Create new booking |
-| GET | `/api/bookings/[id]` | Get single booking |
-| PATCH | `/api/bookings/[id]` | Update booking |
-| DELETE | `/api/bookings/[id]` | Delete/cancel booking |
-| GET | `/api/services` | Get service packages |
-| GET | `/api/addons` | Get add-on services |
-| GET | `/api/analytics` | Get dashboard metrics |
-
-### Query Parameters
-
-**GET /api/bookings**
-- `status`: Filter by status (PENDING, CONFIRMED, etc.)
-- `date`: Filter by date (YYYY-MM-DD)
-- `page`: Page number (default: 1)
-- `limit`: Items per page (default: 20)
-
-**GET /api/analytics**
-- `period`: Time period in days (7, 30, 90)
-
----
-
-## Deployment
-
-### Vercel (Recommended)
-
-1. Push to GitHub
-2. Import project in Vercel
-3. Add environment variables in Vercel settings
-4. Deploy
-
-### Environment Variables for Production
-- `DATABASE_URL` - MongoDB connection string
-- `NEXT_PUBLIC_APP_URL` - Your production URL
-- `NODE_ENV` - Set to "production"
-
----
-
-## Known Issues & Gaps
-
-### Critical Security Issues
-
-| Issue | Location | Status |
-|-------|----------|--------|
-| Hardcoded admin credentials | `src/app/admin/login/page.tsx` | TODO |
-| localStorage authentication | `src/app/admin/layout.tsx` | TODO |
-| No API authentication | All `/api/*` routes | TODO |
-| MongoDB credentials in .env | `.env` file | Rotate credentials |
-
-### Missing Features
-
-| Feature | Priority | Status |
-|---------|----------|--------|
-| Email notifications | High | Not implemented |
-| Form validation (Zod) | High | Not implemented |
-| Contact form API | High | Mock only |
-| Available slots API | Medium | Not implemented |
-| Admin messages API | Medium | Mock data |
-| WhatsApp integration | Low | Manual links only |
-| Unit tests | Low | None |
-
-### Performance Issues
-
-| Issue | Impact | Solution |
-|-------|--------|----------|
-| Large images (10MB+) | Slow loads | Compress to <200KB |
-| No caching | Slow API | Add revalidate |
-| No lazy loading | Large bundle | Dynamic imports |
-
-### Accessibility Issues
-
-| Issue | WCAG Level | Fix |
-|-------|------------|-----|
-| Low color contrast (gray-400) | AA Fail | Use gray-300 |
-| Missing ARIA labels | A Fail | Add aria-label |
-| No skip links | A Fail | Add skip to content |
-
----
-
-## Development Roadmap
-
-### Phase 1: Security (Week 1-2)
-- [ ] Replace hardcoded credentials with JWT auth
-- [ ] Add API authentication middleware
-- [ ] Rotate MongoDB credentials
-- [ ] Add input validation with Zod
-
-### Phase 2: Missing Features (Week 3-4)
-- [ ] Email notifications (Resend)
-- [ ] Contact form API endpoint
-- [ ] Available slots validation
-- [ ] Admin messages API
-
-### Phase 3: Quality (Week 5-6)
-- [ ] Compress images
-- [ ] Fix accessibility issues
-- [ ] Add error boundaries
-- [ ] Improve mobile responsiveness
-
----
-
-## Files Removed During Cleanup
-
-- `nul` - Empty file
-- `prisma.config.ts` - Not needed for Prisma 6
-- `public/file.svg`, `globe.svg`, `window.svg`, `vercel.svg` - Unused Next.js defaults
-- `src/components/audio/AudioPlayer.tsx` - Unused
-- `src/components/sections/EpisodesCarousel.tsx` - Unused
-- `src/components/sections/EpisodeCard.tsx` - Unused
-- `src/components/sections/LatestEpisodes.tsx` - Unused
-- `src/components/sections/FeaturedPodcasts.tsx` - Unused
-- `src/components/sections/PodcastExplore.tsx` - Unused
-- `src/components/sections/ServicesOverview.tsx` - Unused
-
----
-
-## Contributing
-
-1. Fork the repository
-2. Create feature branch: `git checkout -b feature/your-feature`
-3. Commit changes: `git commit -m "Add: description"`
-4. Push to branch: `git push origin feature/your-feature`
-5. Open Pull Request
-
----
-
-## Contact
+## Contact & Support
 
 **Podcast EcoSpace Dubai**
-- Location: Dubai World Trade Center
-- Phone: +971-502060674
-- Instagram: [@podcast.ecospace](https://instagram.com/podcast.ecospace)
+📍 Dubai World Trade Center (DWTC), Dubai, United Arab Emirates
+📞 Phone: +971 50 206 0674
+📱 WhatsApp: [Chat Now](https://wa.me/971502060674)
+✉️ Email: podcastecospace@gmail.com
+📸 Instagram: [@podcast.ecospace](https://instagram.com/podcast.ecospace)
 
-**Developer:** [Vivek Kumar Singh](https://github.com/reachvivek)
+**Developer**
+Vivek Kumar Singh
+📧 rogerthatvivek@gmail.com
 
 ---
 
-**Version:** 1.0.0 | **Last Updated:** November 23, 2024
+## License
+
+Proprietary - All rights reserved © 2024 Podcast EcoSpace Dubai
+
+---
+
+**Built with** ❤️ **in Dubai** | **Powered by** Next.js, MongoDB & Vercel
