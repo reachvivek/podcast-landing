@@ -1,7 +1,8 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Check, Star, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, Star, Loader2 } from 'lucide-react';
 import type { BookingData } from '@/contexts/BookingContext';
 
 interface BookingStep3Props {
@@ -11,72 +12,50 @@ interface BookingStep3Props {
   prevStep: () => void;
 }
 
-const servicePackages = [
-  {
-    id: 'recording-only',
-    name: 'Recording Only',
-    price: 350,
-    originalPrice: 550,
-    description: 'Perfect for self-editors who want raw files',
-    features: [
-      'Studio recording (1 hour)',
-      'Professional sound setup',
-      'Studio lighting',
-      'Raw files delivered via link'
-    ],
-    notIncluded: [
-      'Video recording',
-      'Editing services',
-      'Color correction'
-    ],
-    badge: null,
-    popular: false
-  },
-  {
-    id: 'podcast-editing',
-    name: 'Podcast + Editing',
-    price: 750,
-    originalPrice: 980,
-    description: 'Complete video podcast production',
-    features: [
-      'One-hour video recording',
-      '2-camera setup',
-      'Professional sound & lights',
-      'Full professional editing',
-      'Color correction',
-      'Ready-to-publish video'
-    ],
-    notIncluded: [],
-    badge: 'MOST POPULAR',
-    popular: true
-  },
-  {
-    id: 'studio-rental',
-    name: 'Studio Rental',
-    price: 200,
-    originalPrice: 300,
-    description: 'Bring your own equipment',
-    features: [
-      'Full studio access',
-      'Use your own equipment',
-      'Flexible booking hours',
-      'Air-conditioned space'
-    ],
-    notIncluded: [
-      'Equipment rental',
-      'Editing services',
-      'Engineer assistance'
-    ],
-    badge: 'BEST VALUE',
-    popular: false
-  }
-];
+interface ServicePackage {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  price: number;
+  originalPrice?: number;
+  features: string[];
+  notIncluded: string[];
+  isPopular: boolean;
+  category: string;
+}
 
 export function BookingStep3({ bookingData, updateBookingData, nextStep, prevStep }: BookingStep3Props) {
-  const handleServiceSelect = (service: typeof servicePackages[0]) => {
+  const [servicePackages, setServicePackages] = useState<ServicePackage[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string>('');
+
+  useEffect(() => {
+    async function fetchServices() {
+      try {
+        const response = await fetch('/api/services');
+        const data = await response.json();
+
+        if (data.success) {
+          setServicePackages(data.data);
+        } else {
+          setError('Failed to load service packages');
+        }
+      } catch (err) {
+        console.error('Error fetching services:', err);
+        setError('Failed to load service packages');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchServices();
+  }, []);
+
+  const handleServiceSelect = (service: ServicePackage) => {
     updateBookingData({
       selectedService: {
-        id: service.id,
+        id: service.slug,
         name: service.name,
         price: service.price
       }
@@ -84,6 +63,28 @@ export function BookingStep3({ bookingData, updateBookingData, nextStep, prevSte
   };
 
   const canProceed = !!bookingData.selectedService;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-8 h-8 text-ecospace-green animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-20">
+        <p className="text-red-400 mb-4">{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-6 py-3 rounded-xl bg-ecospace-green text-black hover:bg-ecospace-green/90 transition-all"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -100,8 +101,8 @@ export function BookingStep3({ bookingData, updateBookingData, nextStep, prevSte
       {/* Service Packages Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {servicePackages.map((service, index) => {
-          const isSelected = bookingData.selectedService?.id === service.id;
-          const savings = service.originalPrice - service.price;
+          const isSelected = bookingData.selectedService?.id === service.slug;
+          const savings = service.originalPrice ? service.originalPrice - service.price : 0;
 
           return (
             <motion.div
@@ -188,35 +189,6 @@ export function BookingStep3({ bookingData, updateBookingData, nextStep, prevSte
           );
         })}
       </div>
-
-      {/* Reels Packages Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className="bg-white/5 rounded-2xl p-6 border border-white/10"
-      >
-        <h3 className="text-lg font-semibold text-white mb-4">Social Media Reels Packages</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {[
-            { name: 'Single Reel', price: 250, description: 'Quick promo video' },
-            { name: '5 Reels Package', price: 950, description: 'Save 300 AED', perReel: 190 },
-            { name: '10 Reels Package', price: 3900, description: 'Best Value!', perReel: 390 }
-          ].map((reelPackage, index) => (
-            <div
-              key={index}
-              className="p-4 bg-white/5 rounded-xl border border-white/10 hover:border-ecospace-green/50 transition-all cursor-pointer"
-            >
-              <h4 className="font-semibold text-white">{reelPackage.name}</h4>
-              <p className="text-2xl font-bold text-ecospace-green">{reelPackage.price} AED</p>
-              {reelPackage.perReel && (
-                <p className="text-xs text-gray-400">{reelPackage.perReel} AED per reel</p>
-              )}
-              <p className="text-sm text-gray-400 mt-1">{reelPackage.description}</p>
-            </div>
-          ))}
-        </div>
-      </motion.div>
 
       {/* What You Get Section */}
       <motion.div

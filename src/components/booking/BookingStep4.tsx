@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Camera, Film, Palette, Clock, Music, Users } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Camera, Film, Palette, Clock, Music, Users, Loader2 } from 'lucide-react';
 import type { BookingData } from '@/contexts/BookingContext';
 
 interface BookingStep4Props {
@@ -12,58 +12,53 @@ interface BookingStep4Props {
   prevStep: () => void;
 }
 
-const additionalServices = [
-  {
-    id: 'extra-camera',
-    name: 'Extra Camera Angle',
-    price: 200,
-    description: 'Add a third camera for more dynamic shots',
-    icon: Camera
-  },
-  {
-    id: 'social-reels',
-    name: 'Social Media Clips',
-    price: 200,
-    description: '5 short clips optimized for social media',
-    icon: Film
-  },
-  {
-    id: 'thumbnail-design',
-    name: 'Thumbnail Design',
-    price: 150,
-    description: 'Professional cover art for your episode',
-    icon: Palette
-  },
-  {
-    id: 'extra-hour',
-    name: 'Extra Studio Hour',
-    price: 150,
-    description: 'Extend your session by 1 hour',
-    icon: Clock
-  },
-  {
-    id: 'custom-intro',
-    name: 'Custom Intro/Outro',
-    price: 300,
-    description: 'Branded intro and outro music',
-    icon: Music
-  },
-  {
-    id: 'extra-guest',
-    name: 'Additional Guest Mic',
-    price: 100,
-    description: 'Extra microphone setup for more guests',
-    icon: Users
-  }
-];
+interface AddOnService {
+  id: string;
+  slug: string;
+  name: string;
+  description: string;
+  price: number;
+  icon: string;
+}
+
+// Icon mapping
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  Camera,
+  Film,
+  Palette,
+  Clock,
+  Music,
+  Users
+};
 
 export function BookingStep4({ bookingData, updateBookingData, nextStep, prevStep }: BookingStep4Props) {
   const [selectedServices, setSelectedServices] = useState<string[]>(bookingData.additionalServices || []);
+  const [additionalServices, setAdditionalServices] = useState<AddOnService[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const toggleService = (serviceId: string) => {
-    const newServices = selectedServices.includes(serviceId)
-      ? selectedServices.filter(id => id !== serviceId)
-      : [...selectedServices, serviceId];
+  useEffect(() => {
+    async function fetchAddons() {
+      try {
+        const response = await fetch('/api/addons');
+        const data = await response.json();
+
+        if (data.success) {
+          setAdditionalServices(data.data);
+        }
+      } catch (err) {
+        console.error('Error fetching add-ons:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchAddons();
+  }, []);
+
+  const toggleService = (serviceSlug: string) => {
+    const newServices = selectedServices.includes(serviceSlug)
+      ? selectedServices.filter(id => id !== serviceSlug)
+      : [...selectedServices, serviceSlug];
 
     setSelectedServices(newServices);
     updateBookingData({ additionalServices: newServices });
@@ -71,8 +66,8 @@ export function BookingStep4({ bookingData, updateBookingData, nextStep, prevSte
 
   const calculateTotal = () => {
     const basePrice = bookingData.selectedService?.price || 0;
-    const addonsTotal = selectedServices.reduce((total, serviceId) => {
-      const service = additionalServices.find(s => s.id === serviceId);
+    const addonsTotal = selectedServices.reduce((total, serviceSlug) => {
+      const service = additionalServices.find(s => s.slug === serviceSlug);
       return total + (service?.price || 0);
     }, 0);
     return basePrice + addonsTotal;
@@ -102,20 +97,27 @@ export function BookingStep4({ bookingData, updateBookingData, nextStep, prevSte
           <p className="text-gray-400 text-sm sm:text-base">Enhance your session with optional add-ons</p>
         </motion.div>
 
-        {/* Services Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-          {additionalServices.map((service, index) => {
-            const Icon = service.icon;
-            const isSelected = selectedServices.includes(service.id);
+        {/* Loading State */}
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 text-ecospace-green animate-spin" />
+          </div>
+        ) : (
+          <>
+            {/* Services Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              {additionalServices.map((service, index) => {
+                const Icon = iconMap[service.icon] || Camera;
+                const isSelected = selectedServices.includes(service.slug);
 
-            return (
-              <motion.div
-                key={service.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 + index * 0.05 }}
-                onClick={() => toggleService(service.id)}
-                className={`cursor-pointer rounded-2xl p-5 border-2 transition-all ${
+                return (
+                  <motion.div
+                    key={service.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 + index * 0.05 }}
+                    onClick={() => toggleService(service.slug)}
+                    className={`cursor-pointer rounded-2xl p-5 border-2 transition-all ${
                   isSelected
                     ? 'border-ecospace-green bg-ecospace-green/10'
                     : 'border-white/10 bg-white/5 hover:border-white/30'
@@ -150,19 +152,21 @@ export function BookingStep4({ bookingData, updateBookingData, nextStep, prevSte
                   </div>
                 </div>
               </motion.div>
-            );
-          })}
-        </div>
+                );
+              })}
+            </div>
 
-        {/* Skip Add-ons Note */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="text-gray-500 text-sm text-center"
-        >
-          Add-ons are optional. You can continue without selecting any.
-        </motion.p>
+            {/* Skip Add-ons Note */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="text-gray-500 text-sm text-center"
+            >
+              Add-ons are optional. You can continue without selecting any.
+            </motion.p>
+          </>
+        )}
       </div>
 
       {/* Right Column - Booking Summary */}
@@ -212,10 +216,10 @@ export function BookingStep4({ bookingData, updateBookingData, nextStep, prevSte
           {selectedServices.length > 0 && (
             <div className="mb-4">
               <p className="text-gray-400 text-sm mb-2">Add-ons</p>
-              {selectedServices.map(serviceId => {
-                const service = additionalServices.find(s => s.id === serviceId);
+              {selectedServices.map(serviceSlug => {
+                const service = additionalServices.find(s => s.slug === serviceSlug);
                 return (
-                  <div key={serviceId} className="flex justify-between text-sm py-1">
+                  <div key={serviceSlug} className="flex justify-between text-sm py-1">
                     <span className="text-gray-300">{service?.name}</span>
                     <span className="text-white">+{service?.price} AED</span>
                   </div>

@@ -35,7 +35,30 @@ const isPastDate = (year: number, month: number, day: number) => {
   return new Date(year, month, day) < today;
 };
 
-const getUnavailableDays = () => [5, 12, 19, 26];
+// Returns available time slots, filtering out past times for today
+const getAvailableTimeSlots = (selectedDate: Date | undefined) => {
+  if (!selectedDate) return timeSlots;
+
+  const now = new Date();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const selected = new Date(selectedDate);
+  selected.setHours(0, 0, 0, 0);
+
+  // If selected date is today, filter out past times and add 2-3 hour buffer
+  if (selected.getTime() === today.getTime()) {
+    const bufferHours = 2; // Minimum 2 hour buffer for today
+    const minTime = new Date(now.getTime() + bufferHours * 60 * 60 * 1000);
+    const minHour = minTime.getHours();
+
+    return timeSlots.filter(slot => {
+      const slotHour = Number.parseInt(slot.split(':')[0]);
+      return slotHour >= minHour;
+    });
+  }
+
+  return timeSlots;
+};
 
 type Step = 'people' | 'duration' | 'date' | 'time';
 
@@ -51,7 +74,7 @@ export function BookingStep1({ bookingData, updateBookingData, nextStep }: Booki
   ];
 
   const days = generateCalendarDays(currentYear, currentMonth);
-  const unavailableDays = getUnavailableDays();
+  const availableTimeSlots = getAvailableTimeSlots(bookingData.selectedDate);
 
   const handlePeopleSelect = (count: number) => {
     updateBookingData({ peopleCount: count });
@@ -64,7 +87,7 @@ export function BookingStep1({ bookingData, updateBookingData, nextStep }: Booki
   };
 
   const handleDateSelect = (day: number) => {
-    if (isPastDate(currentYear, currentMonth, day) || unavailableDays.includes(day)) return;
+    if (isPastDate(currentYear, currentMonth, day)) return;
     updateBookingData({ selectedDate: new Date(currentYear, currentMonth, day) });
     setTimeout(() => setCurrentStep('time'), 300);
   };
@@ -229,8 +252,7 @@ export function BookingStep1({ bookingData, updateBookingData, nextStep }: Booki
                   if (day === null) return <div key={`empty-${index}`} className="aspect-square" />;
 
                   const isPast = isPastDate(currentYear, currentMonth, day);
-                  const isUnavailable = unavailableDays.includes(day);
-                  const isDisabled = isPast || isUnavailable;
+                  const isDisabled = isPast;
                   const isToday = day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear();
 
                   return (
@@ -286,23 +308,29 @@ export function BookingStep1({ bookingData, updateBookingData, nextStep }: Booki
                 <h3 className="text-base font-semibold text-white">Select a time</h3>
               </div>
 
-              <div className="grid grid-cols-5 gap-1.5">
-                {timeSlots.map((time) => (
-                  <button
-                    key={time}
-                    onClick={() => handleTimeSelect(time)}
-                    className={`py-2 rounded-lg text-sm font-medium transition-all ${
-                      bookingData.selectedTime === time
-                        ? 'bg-ecospace-green text-black'
-                        : 'bg-white/10 text-white hover:bg-white/20'
-                    }`}
-                  >
-                    {time}
-                  </button>
-                ))}
-              </div>
+              {availableTimeSlots.length === 0 ? (
+                <div className="text-center py-6 text-gray-400">
+                  No available time slots for today. Please select a future date.
+                </div>
+              ) : (
+                <div className="grid grid-cols-5 gap-1.5">
+                  {availableTimeSlots.map((time) => (
+                    <button
+                      key={time}
+                      onClick={() => handleTimeSelect(time)}
+                      className={`py-2 rounded-lg text-sm font-medium transition-all ${
+                        bookingData.selectedTime === time
+                          ? 'bg-ecospace-green text-black'
+                          : 'bg-white/10 text-white hover:bg-white/20'
+                      }`}
+                    >
+                      {time}
+                    </button>
+                  ))}
+                </div>
+              )}
 
-              {bookingData.selectedTime && (
+              {bookingData.selectedTime && availableTimeSlots.length > 0 && (
                 <motion.button
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}

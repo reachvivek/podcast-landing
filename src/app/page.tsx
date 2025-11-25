@@ -17,7 +17,7 @@ export default function Home() {
       <HeroSection
         title="Dubai World Trade Center's Premier Podcast Studio"
         subtitle="Professional Recording | Expert Production | Flexible Packages From 350 AED"
-        backgroundImage="/images/hero section image.jpg"
+        backgroundImage="/images/og-image.jpg"
         primaryCTA="BOOK STUDIOS & SERVICES"
         secondaryCTA="Explore Our Studio"
       />

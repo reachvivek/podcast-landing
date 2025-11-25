@@ -93,24 +93,8 @@ export async function POST(request: NextRequest) {
       specialRequests,
     } = validation.data;
 
-    // Check for conflicting bookings
+    // Note: Multiple bookings allowed for same slot since confirmation is done manually via backend admin
     const bookingDate = new Date(selectedDate);
-    const existingBooking = await prisma.booking.findFirst({
-      where: {
-        selectedDate: bookingDate,
-        selectedTime: selectedTime,
-        status: {
-          in: ['PENDING', 'CONFIRMED', 'IN_PROGRESS'],
-        },
-      },
-    });
-
-    if (existingBooking) {
-      return NextResponse.json(
-        { success: false, error: 'This time slot is already booked' },
-        { status: 409 }
-      );
-    }
 
     // Create booking
     const booking = await prisma.booking.create({
