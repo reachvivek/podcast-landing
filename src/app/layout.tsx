@@ -54,10 +54,17 @@ export const metadata: Metadata = {
     siteName: "EcoSpace",
     images: [
       {
-        url: "/images/og-image.jpg",
+        url: "/images/og-preview.jpg",
         width: 1200,
         height: 630,
         alt: "EcoSpace Podcast Studio - Professional Recording Setup at Dubai World Trade Center",
+        type: "image/jpeg"
+      },
+      {
+        url: "/images/og-square.jpg",
+        width: 1200,
+        height: 1200,
+        alt: "EcoSpace Podcast Studio - Professional Setup",
         type: "image/jpeg"
       },
       {
@@ -74,7 +81,7 @@ export const metadata: Metadata = {
     title: "EcoSpace - Premier Podcast Studio Dubai | DWTC",
     description: "Professional podcast recording & video production at Dubai World Trade Center. State-of-the-art equipment, expert team. Book your session from 350 AED.",
     creator: "@podcast.ecospace",
-    images: ["/images/og-image.jpg"],
+    images: ["/images/og-preview.jpg"],
     site: "@podcast.ecospace",
   },
   robots: {
@@ -91,6 +98,13 @@ export const metadata: Metadata = {
   verification: {
     google: "your-google-verification-code-here",
   },
+  other: {
+    // WhatsApp & Telegram use Open Graph tags, but these help with fallbacks
+    'og:image:secure_url': 'https://ecospace.ae/images/og-preview.jpg',
+    'og:image:type': 'image/jpeg',
+    'og:image:width': '1200',
+    'og:image:height': '630',
+  }
 };
 
 export default function RootLayout({
@@ -102,6 +116,26 @@ export default function RootLayout({
     <html lang="en" className={inter.variable}>
       <head>
         <StructuredData />
+        {/* Additional Open Graph tags for WhatsApp, Telegram, Instagram */}
+        <meta property="og:image:secure_url" content="https://ecospace.ae/images/og-preview.jpg" />
+        <meta property="og:image:type" content="image/jpeg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="EcoSpace Podcast Studio - Professional Recording Setup at Dubai World Trade Center" />
+
+        {/* Telegram specific */}
+        <meta property="telegram:channel" content="@podcast.ecospace" />
+
+        {/* WhatsApp & Mobile specific */}
+        <meta name="format-detection" content="telephone=yes" />
+        <meta name="mobile-web-app-capable" content="yes" />
+
+        {/* Additional Twitter/X tags */}
+        <meta name="twitter:image:alt" content="EcoSpace Podcast Studio - Professional Recording at Dubai World Trade Center" />
+
+        {/* Theme colors for mobile browsers */}
+        <meta name="theme-color" content="#00FF94" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
       </head>
       <body className="antialiased">
         <BookingProvider>
