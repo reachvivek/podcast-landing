@@ -1,23 +1,18 @@
 import nodemailer from 'nodemailer';
-import { Resend } from 'resend';
 import prisma from './prisma';
 
 /**
  * Email Queue Service for Podcast EcoSpace
  * Features: Queue system, rate limiting, MongoDB audit, logo support
- * Supports: Resend API (production) and SMTP (localhost)
  */
 
 // Email configuration
 const emailConfig = {
-  // Resend configuration (preferred for production)
-  resendApiKey: process.env.RESEND_API_KEY || '',
-  // SMTP configuration (fallback for localhost)
   host: process.env.SMTP_HOST || '',
   port: parseInt(process.env.SMTP_PORT || '587'),
   user: process.env.SMTP_USER || '',
   password: process.env.SMTP_PASSWORD || '',
-  fromEmail: process.env.FROM_EMAIL || process.env.SMTP_USER || 'onboarding@resend.dev',
+  fromEmail: process.env.FROM_EMAIL || process.env.SMTP_USER || '',
   adminEmail: process.env.ADMIN_EMAIL || '',
 };
 
@@ -46,23 +41,13 @@ console.log('[Email Config]', {
   APP_URL,
   LOGO_URL,
   isProduction: process.env.NODE_ENV === 'production',
-  provider: emailConfig.resendApiKey ? 'Resend' : 'SMTP',
 });
 
-// Email providers (lazy init)
+// Transporter (lazy init)
 let transporter: nodemailer.Transporter | null = null;
-let resend: Resend | null = null;
-
-function getResend(): Resend | null {
-  if (!emailConfig.resendApiKey) return null;
-  if (!resend) {
-    resend = new Resend(emailConfig.resendApiKey);
-  }
-  return resend;
-}
 
 function getTransporter(): nodemailer.Transporter | null {
-  if (!emailConfig.host || !emailConfig.user || !emailConfig.password) return null;
+  if (!isEmailConfigured()) return null;
   if (!transporter) {
     transporter = nodemailer.createTransport({
       host: emailConfig.host,
@@ -75,16 +60,7 @@ function getTransporter(): nodemailer.Transporter | null {
 }
 
 export function isEmailConfigured(): boolean {
-  // Prefer Resend, fallback to SMTP
-  const hasResend = !!emailConfig.resendApiKey;
-  const hasSMTP = !!(emailConfig.host && emailConfig.user && emailConfig.password);
-  return hasResend || hasSMTP;
-}
-
-function getEmailProvider(): 'resend' | 'smtp' | null {
-  if (emailConfig.resendApiKey) return 'resend';
-  if (emailConfig.host && emailConfig.user && emailConfig.password) return 'smtp';
-  return null;
+  return !!(emailConfig.host && emailConfig.user && emailConfig.password);
 }
 
 // Types
@@ -689,54 +665,16 @@ function generateTestHtml(config: Record<string, string>): string {
 // ============================================
 
 async function sendEmailDirect(options: { to: string; subject: string; html: string }): Promise<{ messageId?: string }> {
-  const provider = getEmailProvider();
+  const transport = getTransporter();
+  if (!transport) throw new Error('Email not configured');
 
-  if (!provider) {
-    throw new Error('Email not configured - set RESEND_API_KEY or SMTP credentials');
-  }
+  const result = await transport.sendMail({
+    from: `"Podcast EcoSpace" <${emailConfig.fromEmail}>`,
+    to: options.to,
+    subject: options.subject,
+    html: options.html,
+  });
 
-  if (provider === 'resend') {
-    // Use Resend API (preferred for production/Vercel)
-    const resendClient = getResend();
-    if (!resendClient) throw new Error('Resend not initialized');
-
-    try {
-      const { data, error } = await resendClient.emails.send({
-        from: `Podcast EcoSpace <${emailConfig.fromEmail}>`,
-        to: options.to,
-        subject: options.subject,
-        html: options.html,
-      });
-
-      if (error) {
-        console.error('[Email] Resend error:', error);
-        throw new Error(`Resend API error: ${error.message}`);
-      }
-
-      console.log('[Email] Sent via Resend:', { to: options.to, subject: options.subject, id: data?.id });
-      return { messageId: data?.id };
-    } catch (error) {
-      console.error('[Email] Resend send failed:', error);
-      throw error;
-    }
-  } else {
-    // Use SMTP (fallback for localhost)
-    const transport = getTransporter();
-    if (!transport) throw new Error('SMTP transporter not initialized');
-
-    try {
-      const result = await transport.sendMail({
-        from: `"Podcast EcoSpace" <${emailConfig.fromEmail}>`,
-        to: options.to,
-        subject: options.subject,
-        html: options.html,
-      });
-
-      console.log('[Email] Sent via SMTP:', { to: options.to, subject: options.subject, messageId: result.messageId });
-      return { messageId: result.messageId };
-    } catch (error) {
-      console.error('[Email] SMTP send failed:', error);
-      throw error;
-    }
-  }
+  console.log('[Email] Sent:', { to: options.to, subject: options.subject, messageId: result.messageId });
+  return { messageId: result.messageId };
 }
