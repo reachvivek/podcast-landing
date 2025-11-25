@@ -388,18 +388,18 @@ function getHeader(showTagline = true): string {
 
   return `
     <tr>
-      <td style="background-color: #0a0a0a; padding: 32px 40px; text-align: center;">
+      <td class="mobile-padding" style="background-color: #0a0a0a; padding: 32px 40px; text-align: center;">
         <table width="100%" cellpadding="0" cellspacing="0">
           <tr>
             <td style="text-align: center; padding-bottom: ${showTagline ? '12px' : '0'};">
               ${useImage ? `
-              <img src="${LOGO_URL}" alt="${LOGO_TEXT}" style="height: 60px; width: auto; max-width: 100%; display: block; margin: 0 auto;" />
+              <img src="${LOGO_URL}" alt="${LOGO_TEXT}" style="height: 60px; width: auto; max-width: 200px; display: block; margin: 0 auto;" />
               ` : `
               <h1 style="margin: 0; color: #a3e635; font-size: 28px; font-weight: 700; letter-spacing: 2px; font-family: Arial, sans-serif;">${LOGO_TEXT}</h1>
               `}
             </td>
           </tr>
-          ${showTagline ? `<tr><td style="text-align: center;"><p style="margin: 0; color: #71717a; font-size: 14px;">Premium Podcast Studio | Dubai</p></td></tr>` : ''}
+          ${showTagline ? `<tr><td style="text-align: center;"><p style="margin: 0; color: #71717a; font-size: 13px;">Premium Podcast Studio | Dubai</p></td></tr>` : ''}
         </table>
       </td>
     </tr>
@@ -414,18 +414,18 @@ function getAdminHeader(badge: string, badgeColor = '#a3e635'): string {
 
   return `
     <tr>
-      <td style="background-color: #0a0a0a; padding: 24px 40px;">
+      <td class="mobile-padding" style="background-color: #0a0a0a; padding: 24px 40px;">
         <table width="100%" cellpadding="0" cellspacing="0">
           <tr>
             <td style="vertical-align: middle;">
               ${useImage ? `
-              <img src="${LOGO_URL}" alt="${LOGO_TEXT}" style="height: 40px; width: auto; max-width: 200px; display: block;" />
+              <img src="${LOGO_URL}" alt="${LOGO_TEXT}" style="height: 40px; width: auto; max-width: 150px; display: block;" />
               ` : `
-              <span style="color: #a3e635; font-size: 18px; font-weight: 700; letter-spacing: 1px; font-family: Arial, sans-serif;">${LOGO_TEXT}</span>
+              <span style="color: #a3e635; font-size: 16px; font-weight: 700; letter-spacing: 1px; font-family: Arial, sans-serif;">${LOGO_TEXT}</span>
               `}
             </td>
             <td style="text-align: right; vertical-align: middle;">
-              <span style="background-color: ${badgeColor}; color: ${textColor}; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; text-transform: uppercase;">${badge}</span>
+              <span style="background-color: ${badgeColor}; color: ${textColor}; padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase;">${badge}</span>
             </td>
           </tr>
         </table>
@@ -438,20 +438,20 @@ function getAdminHeader(badge: string, badgeColor = '#a3e635'): string {
 function getFooter(): string {
   return `
     <tr>
-      <td style="background-color: #fafafa; padding: 24px 40px; border-top: 1px solid #e4e4e7;">
+      <td class="mobile-padding" style="background-color: #fafafa; padding: 24px 40px; border-top: 1px solid #e4e4e7;">
         <table width="100%" cellpadding="0" cellspacing="0">
           <tr>
             <td style="text-align: center;">
-              <p style="margin: 0 0 8px; color: #52525b; font-size: 14px;">Questions? Contact us</p>
-              <a href="https://wa.me/971502060674" style="color: #18181b; font-size: 16px; font-weight: 600; text-decoration: none;">+971 50 206 0674</a>
+              <p style="margin: 0 0 8px; color: #52525b; font-size: 13px;">Questions? Contact us</p>
+              <a href="https://wa.me/971502060674" style="color: #18181b; font-size: 15px; font-weight: 600; text-decoration: none;">+971 50 206 0674</a>
             </td>
           </tr>
         </table>
       </td>
     </tr>
     <tr>
-      <td style="padding: 20px 40px; text-align: center;">
-        <p style="margin: 0; color: #a1a1aa; font-size: 12px;">Podcast EcoSpace Dubai | Dubai World Trade Center</p>
+      <td class="mobile-padding" style="padding: 20px 40px; text-align: center;">
+        <p style="margin: 0; color: #a1a1aa; font-size: 11px;">Podcast EcoSpace Dubai | Dubai World Trade Center</p>
       </td>
     </tr>
   `;
@@ -465,12 +465,20 @@ function wrapEmail(content: string): string {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    @media only screen and (max-width: 600px) {
+      .mobile-padding { padding: 24px 20px !important; }
+      .mobile-text { font-size: 14px !important; }
+      .mobile-heading { font-size: 20px !important; }
+      .mobile-button { padding: 12px 24px !important; font-size: 13px !important; }
+    }
+  </style>
 </head>
 <body style="margin: 0; padding: 0; background-color: #f4f4f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f5; padding: 40px 20px;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f5; padding: 20px 10px;">
     <tr>
       <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
           ${content}
         </table>
       </td>
@@ -488,10 +496,10 @@ function generateBookingConfirmationHtml(booking: BookingEmailData): string {
   return wrapEmail(`
     ${getHeader()}
     <tr>
-      <td style="padding: 40px;">
-        <h2 style="margin: 0 0 16px; color: #18181b; font-size: 22px; font-weight: 600;">Booking Request Received</h2>
-        <p style="margin: 0 0 24px; color: #3f3f46; font-size: 15px;">Dear ${booking.customerName},</p>
-        <p style="margin: 0 0 32px; color: #52525b; font-size: 15px; line-height: 1.7;">Thank you for choosing Podcast EcoSpace. We have received your booking request and our team will review it shortly. You will receive a confirmation once your session is approved.</p>
+      <td class="mobile-padding" style="padding: 40px;">
+        <h2 class="mobile-heading" style="margin: 0 0 16px; color: #18181b; font-size: 22px; font-weight: 600;">Booking Request Received</h2>
+        <p class="mobile-text" style="margin: 0 0 20px; color: #3f3f46; font-size: 15px;">Dear ${booking.customerName},</p>
+        <p class="mobile-text" style="margin: 0 0 28px; color: #52525b; font-size: 15px; line-height: 1.7;">Thank you for choosing Podcast EcoSpace. We have received your booking request and our team will review it shortly. You will receive a confirmation once your session is approved.</p>
 
         <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fafafa; border-radius: 8px; border: 1px solid #e4e4e7; margin-bottom: 32px;">
           <tr><td style="padding: 20px 24px; border-bottom: 1px solid #e4e4e7;"><p style="margin: 0; color: #a3e635; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Booking Details</p></td></tr>
@@ -506,18 +514,18 @@ function generateBookingConfirmationHtml(booking: BookingEmailData): string {
           </td></tr>
         </table>
 
-        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fafafa; border-radius: 8px; border: 1px solid #e4e4e7; margin-bottom: 32px;">
-          <tr><td style="padding: 20px 24px; border-bottom: 1px solid #e4e4e7;"><p style="margin: 0; color: #a3e635; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Studio Location</p></td></tr>
-          <tr><td style="padding: 20px 24px;">
-            <p style="margin: 0 0 4px; color: #18181b; font-size: 15px; font-weight: 600;">${STUDIO_LOCATION.name}</p>
-            <p style="margin: 0 0 20px; color: #71717a; font-size: 14px; line-height: 1.6;">${STUDIO_LOCATION.address}<br>${STUDIO_LOCATION.city}</p>
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fafafa; border-radius: 8px; border: 1px solid #e4e4e7; margin-bottom: 28px;">
+          <tr><td style="padding: 18px 20px; border-bottom: 1px solid #e4e4e7;"><p style="margin: 0; color: #a3e635; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Studio Location</p></td></tr>
+          <tr><td style="padding: 18px 20px;">
+            <p class="mobile-text" style="margin: 0 0 4px; color: #18181b; font-size: 15px; font-weight: 600;">${STUDIO_LOCATION.name}</p>
+            <p class="mobile-text" style="margin: 0 0 18px; color: #71717a; font-size: 14px; line-height: 1.6;">${STUDIO_LOCATION.address}<br>${STUDIO_LOCATION.city}</p>
             <table width="100%" cellpadding="0" cellspacing="0">
               <tr>
-                <td style="padding-right: 8px; width: 50%;">
-                  <a href="${STUDIO_LOCATION.googleMapsUrl}" style="display: block; background-color: #a3e635; color: #0a0a0a; padding: 12px 16px; border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none; text-align: center;">Get Directions</a>
+                <td style="padding-right: 6px; width: 50%;">
+                  <a href="${STUDIO_LOCATION.googleMapsUrl}" class="mobile-button" style="display: block; background-color: #a3e635; color: #0a0a0a; padding: 14px 12px; border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none; text-align: center;">Get Directions</a>
                 </td>
-                <td style="padding-left: 8px; width: 50%;">
-                  <a href="${STUDIO_LOCATION.whatsapp}" style="display: block; background-color: #16a34a; color: #ffffff; padding: 12px 16px; border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none; text-align: center;">WhatsApp</a>
+                <td style="padding-left: 6px; width: 50%;">
+                  <a href="${STUDIO_LOCATION.whatsapp}" class="mobile-button" style="display: block; background-color: #16a34a; color: #ffffff; padding: 14px 12px; border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none; text-align: center;">WhatsApp</a>
                 </td>
               </tr>
             </table>
@@ -540,8 +548,8 @@ function generateAdminBookingHtml(booking: BookingEmailData): string {
   return wrapEmail(`
     ${getAdminHeader('New Booking')}
     <tr>
-      <td style="padding: 32px 40px;">
-        <h2 style="margin: 0 0 4px; color: #18181b; font-size: 20px; font-weight: 600;">${booking.customerName}</h2>
+      <td class="mobile-padding" style="padding: 32px 40px;">
+        <h2 class="mobile-heading" style="margin: 0 0 4px; color: #18181b; font-size: 20px; font-weight: 600;">${booking.customerName}</h2>
         <p style="margin: 0 0 24px; color: #71717a; font-size: 14px;">
           <a href="mailto:${booking.customerEmail}" style="color: #2563eb; text-decoration: none;">${booking.customerEmail}</a>
           <span style="color: #d4d4d8; margin: 0 8px;">|</span>
@@ -582,8 +590,8 @@ function generateContactAdminHtml(contact: ContactEmailData): string {
   return wrapEmail(`
     ${getAdminHeader('New Inquiry', '#3b82f6')}
     <tr>
-      <td style="padding: 32px 40px;">
-        <h2 style="margin: 0 0 4px; color: #18181b; font-size: 20px; font-weight: 600;">${contact.name}</h2>
+      <td class="mobile-padding" style="padding: 32px 40px;">
+        <h2 class="mobile-heading" style="margin: 0 0 4px; color: #18181b; font-size: 20px; font-weight: 600;">${contact.name}</h2>
         <p style="margin: 0 0 24px; color: #71717a; font-size: 14px;">
           <a href="mailto:${contact.email}" style="color: #2563eb; text-decoration: none;">${contact.email}</a>
           ${contact.phone ? `<span style="color: #d4d4d8; margin: 0 8px;">|</span><a href="tel:${contact.phone}" style="color: #2563eb; text-decoration: none;">${contact.phone}</a><span style="color: #d4d4d8; margin: 0 8px;">|</span><a href="https://wa.me/${phoneClean}" style="color: #22c55e; text-decoration: none;">WhatsApp</a>` : ''}
@@ -609,10 +617,10 @@ function generateContactAckHtml(contact: ContactEmailData): string {
   return wrapEmail(`
     ${getHeader()}
     <tr>
-      <td style="padding: 40px;">
-        <h2 style="margin: 0 0 16px; color: #18181b; font-size: 22px; font-weight: 600;">Thank You for Reaching Out</h2>
-        <p style="margin: 0 0 24px; color: #3f3f46; font-size: 15px;">Dear ${contact.name},</p>
-        <p style="margin: 0 0 32px; color: #52525b; font-size: 15px; line-height: 1.7;">We have received your message and appreciate you contacting Podcast EcoSpace. Our team will review your inquiry and get back to you as soon as possible, typically within 24 hours.</p>
+      <td class="mobile-padding" style="padding: 40px;">
+        <h2 class="mobile-heading" style="margin: 0 0 16px; color: #18181b; font-size: 22px; font-weight: 600;">Thank You for Reaching Out</h2>
+        <p class="mobile-text" style="margin: 0 0 20px; color: #3f3f46; font-size: 15px;">Dear ${contact.name},</p>
+        <p class="mobile-text" style="margin: 0 0 28px; color: #52525b; font-size: 15px; line-height: 1.7;">We have received your message and appreciate you contacting Podcast EcoSpace. Our team will review your inquiry and get back to you as soon as possible, typically within 24 hours.</p>
 
         <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fafafa; border-radius: 8px; border: 1px solid #e4e4e7; margin-bottom: 32px;">
           <tr><td style="padding: 20px 24px; border-bottom: 1px solid #e4e4e7;"><p style="margin: 0; color: #a3e635; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Your Message</p></td></tr>
@@ -655,11 +663,11 @@ function generateStatusUpdateHtml(booking: BookingEmailData, status: string): st
 
   return wrapEmail(`
     ${getHeader()}
-    <tr><td style="background-color: ${config.bgColor}; border-bottom: 3px solid ${config.borderColor}; padding: 20px 40px; text-align: center;"><h2 style="margin: 0; color: ${config.color}; font-size: 22px; font-weight: 600;">${config.heading}</h2></td></tr>
+    <tr><td class="mobile-padding" style="background-color: ${config.bgColor}; border-bottom: 3px solid ${config.borderColor}; padding: 20px 40px; text-align: center;"><h2 class="mobile-heading" style="margin: 0; color: ${config.color}; font-size: 22px; font-weight: 600;">${config.heading}</h2></td></tr>
     <tr>
-      <td style="padding: 40px;">
-        <p style="margin: 0 0 24px; color: #3f3f46; font-size: 15px;">Dear ${booking.customerName},</p>
-        <p style="margin: 0 0 32px; color: #52525b; font-size: 15px; line-height: 1.7;">${config.message}</p>
+      <td class="mobile-padding" style="padding: 40px;">
+        <p class="mobile-text" style="margin: 0 0 20px; color: #3f3f46; font-size: 15px;">Dear ${booking.customerName},</p>
+        <p class="mobile-text" style="margin: 0 0 28px; color: #52525b; font-size: 15px; line-height: 1.7;">${config.message}</p>
 
         <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fafafa; border-radius: 8px; border: 1px solid #e4e4e7; margin-bottom: 32px;">
           <tr><td style="padding: 20px 24px; border-bottom: 1px solid #e4e4e7;"><p style="margin: 0; color: #71717a; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Session Details</p></td></tr>
@@ -673,18 +681,18 @@ function generateStatusUpdateHtml(booking: BookingEmailData, status: string): st
         </table>
 
         ${status === 'CONFIRMED' ? `
-        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fafafa; border-radius: 8px; border: 1px solid #e4e4e7; margin-bottom: 32px;">
-          <tr><td style="padding: 20px 24px; border-bottom: 1px solid #e4e4e7;"><p style="margin: 0; color: #a3e635; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Studio Location</p></td></tr>
-          <tr><td style="padding: 20px 24px;">
-            <p style="margin: 0 0 4px; color: #18181b; font-size: 15px; font-weight: 600;">${STUDIO_LOCATION.name}</p>
-            <p style="margin: 0 0 20px; color: #71717a; font-size: 14px; line-height: 1.6;">${STUDIO_LOCATION.address}<br>${STUDIO_LOCATION.city}</p>
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fafafa; border-radius: 8px; border: 1px solid #e4e4e7; margin-bottom: 28px;">
+          <tr><td style="padding: 18px 20px; border-bottom: 1px solid #e4e4e7;"><p style="margin: 0; color: #a3e635; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Studio Location</p></td></tr>
+          <tr><td style="padding: 18px 20px;">
+            <p class="mobile-text" style="margin: 0 0 4px; color: #18181b; font-size: 15px; font-weight: 600;">${STUDIO_LOCATION.name}</p>
+            <p class="mobile-text" style="margin: 0 0 18px; color: #71717a; font-size: 14px; line-height: 1.6;">${STUDIO_LOCATION.address}<br>${STUDIO_LOCATION.city}</p>
             <table width="100%" cellpadding="0" cellspacing="0">
               <tr>
-                <td style="padding-right: 8px; width: 50%;">
-                  <a href="${STUDIO_LOCATION.googleMapsUrl}" style="display: block; background-color: #a3e635; color: #0a0a0a; padding: 12px 16px; border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none; text-align: center;">Get Directions</a>
+                <td style="padding-right: 6px; width: 50%;">
+                  <a href="${STUDIO_LOCATION.googleMapsUrl}" class="mobile-button" style="display: block; background-color: #a3e635; color: #0a0a0a; padding: 14px 12px; border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none; text-align: center;">Get Directions</a>
                 </td>
-                <td style="padding-left: 8px; width: 50%;">
-                  <a href="${STUDIO_LOCATION.whatsapp}" style="display: block; background-color: #16a34a; color: #ffffff; padding: 12px 16px; border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none; text-align: center;">WhatsApp</a>
+                <td style="padding-left: 6px; width: 50%;">
+                  <a href="${STUDIO_LOCATION.whatsapp}" class="mobile-button" style="display: block; background-color: #16a34a; color: #ffffff; padding: 14px 12px; border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none; text-align: center;">WhatsApp</a>
                 </td>
               </tr>
             </table>
@@ -704,10 +712,10 @@ function generateTestHtml(config: Record<string, string>): string {
   return wrapEmail(`
     ${getHeader()}
     <tr>
-      <td style="padding: 40px; text-align: center;">
-        <div style="width: 64px; height: 64px; background-color: #f0fdf4; border-radius: 50%; margin: 0 auto 24px; line-height: 64px;"><span style="color: #22c55e; font-size: 32px;">&#10003;</span></div>
-        <h2 style="margin: 0 0 16px; color: #18181b; font-size: 22px; font-weight: 600;">Email Configuration Successful</h2>
-        <p style="margin: 0 0 32px; color: #52525b; font-size: 15px; line-height: 1.7;">Your email notifications are now configured correctly. The booking system will automatically send emails for new bookings, confirmations, and contact form submissions.</p>
+      <td class="mobile-padding" style="padding: 40px; text-align: center;">
+        <div style="width: 64px; height: 64px; background-color: #f0fdf4; border-radius: 50%; margin: 0 auto 20px; line-height: 64px;"><span style="color: #22c55e; font-size: 32px;">&#10003;</span></div>
+        <h2 class="mobile-heading" style="margin: 0 0 16px; color: #18181b; font-size: 22px; font-weight: 600;">Email Configuration Successful</h2>
+        <p class="mobile-text" style="margin: 0 0 28px; color: #52525b; font-size: 15px; line-height: 1.7;">Your email notifications are now configured correctly. The booking system will automatically send emails for new bookings, confirmations, and contact form submissions.</p>
         <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fafafa; border-radius: 8px; border: 1px solid #e4e4e7;">
           <tr><td style="padding: 20px 24px; text-align: left;">
             <p style="margin: 0 0 8px; color: #71717a; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Configuration Details</p>
