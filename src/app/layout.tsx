@@ -14,6 +14,7 @@ const inter = Inter({
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ecospace.ae';
+const ogImageUrl = 'https://i.ibb.co/FkCf2ytK/DSC7237.jpg';
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -56,19 +57,11 @@ export const metadata: Metadata = {
     siteName: "EcoSpace",
     images: [
       {
-        url: `${siteUrl}/images/og-preview.jpg`,
-        secureUrl: `${siteUrl}/images/og-preview.jpg`,
+        url: ogImageUrl,
+        secureUrl: ogImageUrl,
         width: 1200,
         height: 630,
         alt: "EcoSpace Podcast Studio - Professional Recording Setup at Dubai World Trade Center",
-        type: "image/jpeg"
-      },
-      {
-        url: `${siteUrl}/images/og-square.jpg`,
-        secureUrl: `${siteUrl}/images/og-square.jpg`,
-        width: 1200,
-        height: 1200,
-        alt: "EcoSpace Podcast Studio - Professional Setup",
         type: "image/jpeg"
       }
     ],
@@ -78,7 +71,7 @@ export const metadata: Metadata = {
     title: "EcoSpace - Premier Podcast Studio Dubai | DWTC",
     description: "Professional podcast recording & video production at Dubai World Trade Center. State-of-the-art equipment, expert team. Book your session from 350 AED.",
     creator: "@podcast.ecospace",
-    images: [`${siteUrl}/images/og-preview.jpg`],
+    images: [ogImageUrl],
     site: "@podcast.ecospace",
   },
   robots: {
@@ -102,8 +95,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const ogImageUrl = `${siteUrl}/images/og-preview.jpg`;
-
   return (
     <html lang="en" className={inter.variable}>
       <head>
