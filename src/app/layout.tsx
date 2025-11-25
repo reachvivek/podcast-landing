@@ -13,8 +13,10 @@ const inter = Inter({
   weight: ['300', '400', '500', '600', '700', '800', '900'],
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ecospace.ae';
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+  metadataBase: new URL(siteUrl),
   title: {
     default: "EcoSpace - Premier Podcast Studio Dubai | Professional Recording & Production",
     template: "%s | EcoSpace Podcast Studio"
@@ -48,31 +50,26 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_AE",
-    url: "https://ecospace.ae",
+    url: siteUrl,
     title: "EcoSpace - Dubai's Premier Podcast Studio at DWTC",
     description: "Professional podcast recording, video production & editing services. State-of-the-art equipment, expert team, flexible packages. Book your session at Dubai World Trade Center.",
     siteName: "EcoSpace",
     images: [
       {
-        url: "/images/og-preview.jpg",
+        url: `${siteUrl}/images/og-preview.jpg`,
+        secureUrl: `${siteUrl}/images/og-preview.jpg`,
         width: 1200,
         height: 630,
         alt: "EcoSpace Podcast Studio - Professional Recording Setup at Dubai World Trade Center",
         type: "image/jpeg"
       },
       {
-        url: "/images/og-square.jpg",
+        url: `${siteUrl}/images/og-square.jpg`,
+        secureUrl: `${siteUrl}/images/og-square.jpg`,
         width: 1200,
         height: 1200,
         alt: "EcoSpace Podcast Studio - Professional Setup",
         type: "image/jpeg"
-      },
-      {
-        url: "/images/IMG_20251121_085355_649.png",
-        width: 512,
-        height: 512,
-        alt: "EcoSpace Logo",
-        type: "image/png"
       }
     ],
   },
@@ -81,7 +78,7 @@ export const metadata: Metadata = {
     title: "EcoSpace - Premier Podcast Studio Dubai | DWTC",
     description: "Professional podcast recording & video production at Dubai World Trade Center. State-of-the-art equipment, expert team. Book your session from 350 AED.",
     creator: "@podcast.ecospace",
-    images: ["/images/og-preview.jpg"],
+    images: [`${siteUrl}/images/og-preview.jpg`],
     site: "@podcast.ecospace",
   },
   robots: {
@@ -98,13 +95,6 @@ export const metadata: Metadata = {
   verification: {
     google: "your-google-verification-code-here",
   },
-  other: {
-    // WhatsApp & Telegram use Open Graph tags, but these help with fallbacks
-    'og:image:secure_url': 'https://ecospace.ae/images/og-preview.jpg',
-    'og:image:type': 'image/jpeg',
-    'og:image:width': '1200',
-    'og:image:height': '630',
-  }
 };
 
 export default function RootLayout({
@@ -112,26 +102,38 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const ogImageUrl = `${siteUrl}/images/og-preview.jpg`;
+
   return (
     <html lang="en" className={inter.variable}>
       <head>
         <StructuredData />
-        {/* Additional Open Graph tags for WhatsApp, Telegram, Instagram */}
-        <meta property="og:image:secure_url" content="https://ecospace.ae/images/og-preview.jpg" />
+        {/* Critical Open Graph tags for WhatsApp, Telegram, Instagram */}
+        <meta property="og:url" content={siteUrl} />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="EcoSpace - Dubai's Premier Podcast Studio at DWTC" />
+        <meta property="og:description" content="Professional podcast recording, video production & editing services. State-of-the-art equipment, expert team, flexible packages. Book your session at Dubai World Trade Center." />
+        <meta property="og:image" content={ogImageUrl} />
+        <meta property="og:image:secure_url" content={ogImageUrl} />
         <meta property="og:image:type" content="image/jpeg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:image:alt" content="EcoSpace Podcast Studio - Professional Recording Setup at Dubai World Trade Center" />
+        <meta property="og:site_name" content="EcoSpace" />
+        <meta property="og:locale" content="en_AE" />
 
-        {/* Telegram specific */}
-        <meta property="telegram:channel" content="@podcast.ecospace" />
+        {/* Twitter/X Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@podcast.ecospace" />
+        <meta name="twitter:creator" content="@podcast.ecospace" />
+        <meta name="twitter:title" content="EcoSpace - Premier Podcast Studio Dubai | DWTC" />
+        <meta name="twitter:description" content="Professional podcast recording & video production at Dubai World Trade Center. State-of-the-art equipment, expert team. Book your session from 350 AED." />
+        <meta name="twitter:image" content={ogImageUrl} />
+        <meta name="twitter:image:alt" content="EcoSpace Podcast Studio - Professional Recording at Dubai World Trade Center" />
 
         {/* WhatsApp & Mobile specific */}
         <meta name="format-detection" content="telephone=yes" />
         <meta name="mobile-web-app-capable" content="yes" />
-
-        {/* Additional Twitter/X tags */}
-        <meta name="twitter:image:alt" content="EcoSpace Podcast Studio - Professional Recording at Dubai World Trade Center" />
 
         {/* Theme colors for mobile browsers */}
         <meta name="theme-color" content="#00FF94" media="(prefers-color-scheme: light)" />
