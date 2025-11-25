@@ -130,6 +130,8 @@ export async function queueEmail(
   _metadata?: Record<string, unknown>
 ): Promise<string | null> {
   try {
+    console.log('[Email Queue] Adding email to queue:', { to, subject, templateType });
+
     const email = await prisma.emailQueue.create({
       data: {
         to,
@@ -142,8 +144,13 @@ export async function queueEmail(
       },
     });
 
-    // Process immediately in background (non-blocking)
-    processEmailQueue().catch(console.error);
+    console.log('[Email Queue] Email queued with ID:', email.id);
+
+    // IMPORTANT: On Vercel, we MUST await this or the function terminates before sending
+    // Process immediately and WAIT for it to complete
+    console.log('[Email Queue] Processing queue immediately (synchronous for Vercel)...');
+    await processEmailQueue();
+    console.log('[Email Queue] Queue processing completed');
 
     return email.id;
   } catch (error) {
@@ -156,6 +163,8 @@ export async function queueEmail(
  * Process pending emails from queue
  */
 export async function processEmailQueue(): Promise<void> {
+  console.log('[Email Queue] Starting queue processor...');
+
   const pendingEmails = await prisma.emailQueue.findMany({
     where: {
       status: 'PENDING',
@@ -166,19 +175,33 @@ export async function processEmailQueue(): Promise<void> {
     take: 10,
   });
 
+  console.log(`[Email Queue] Found ${pendingEmails.length} pending emails to process`);
+
+  if (pendingEmails.length === 0) {
+    console.log('[Email Queue] No pending emails, exiting');
+    return;
+  }
+
   for (const email of pendingEmails) {
+    console.log(`[Email Queue] Processing email ${email.id} to ${email.to}`);
+
     // Mark as processing
     await prisma.emailQueue.update({
       where: { id: email.id },
       data: { status: 'PROCESSING', attempts: { increment: 1 } },
     });
+    console.log(`[Email Queue] Marked as PROCESSING (attempt ${email.attempts + 1})`);
 
     try {
+      console.log('[Email Queue] Generating HTML template...');
       // Generate HTML from template
       const html = generateEmailHtml(email.templateType, email.templateData as Record<string, unknown>);
+      console.log(`[Email Queue] HTML generated (${html.length} chars)`);
 
+      console.log('[Email Queue] Sending email via SMTP...');
       // Send email
       const result = await sendEmailDirect({ to: email.to, subject: email.subject, html });
+      console.log(`[Email Queue] Email sent successfully! Message ID: ${result.messageId}`);
 
       // Update queue status
       await prisma.emailQueue.update({
@@ -189,6 +212,7 @@ export async function processEmailQueue(): Promise<void> {
           processedAt: new Date(),
         },
       });
+      console.log('[Email Queue] Updated queue status to SENT');
 
       // Log to audit
       await prisma.emailLog.create({
@@ -201,8 +225,10 @@ export async function processEmailQueue(): Promise<void> {
           metadata: email.templateData as object,
         },
       });
+      console.log('[Email Queue] Logged to email audit trail');
 
       // Rate limiting delay
+      console.log('[Email Queue] Waiting 1 second (rate limit)...');
       await new Promise(resolve => setTimeout(resolve, RATE_LIMIT_DELAY));
 
     } catch (error) {
