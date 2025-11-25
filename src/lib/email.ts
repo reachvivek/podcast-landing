@@ -14,12 +14,14 @@ const emailConfig = {
   password: process.env.SMTP_PASSWORD || '',
   fromEmail: process.env.FROM_EMAIL || process.env.SMTP_USER || '',
   adminEmail: process.env.ADMIN_EMAIL || '',
+  lambdaUrl: process.env.EMAIL_SERVICE_URL || '', // AWS Lambda email service URL
 };
 
 // Constants
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://podspace.vercel.app';
 const LOGO_URL = `${APP_URL}/images/IMG_20251121_085355_649.png`;
 const RATE_LIMIT_DELAY = 1000; // 1 second between emails
+const USE_LAMBDA = !!emailConfig.lambdaUrl; // Use Lambda if URL is configured
 
 // Logo as text fallback (works in all email clients)
 const LOGO_TEXT = 'PODCAST ECOSPACE';
@@ -40,13 +42,18 @@ const STUDIO_LOCATION = {
 console.log('[Email Config] ===== DETAILED CONFIGURATION =====');
 console.log('[Email Config] Environment:', process.env.NODE_ENV);
 console.log('[Email Config] APP_URL:', APP_URL);
-console.log('[Email Config] SMTP_HOST:', emailConfig.host || 'NOT SET');
-console.log('[Email Config] SMTP_PORT:', emailConfig.port);
-console.log('[Email Config] SMTP_USER:', emailConfig.user ? `${emailConfig.user.substring(0, 5)}...` : 'NOT SET');
-console.log('[Email Config] SMTP_PASSWORD:', emailConfig.password ? `***${emailConfig.password.length} chars***` : 'NOT SET');
+console.log('[Email Config] Email Service:', USE_LAMBDA ? 'AWS Lambda' : 'Direct SMTP');
+if (USE_LAMBDA) {
+  console.log('[Email Config] Lambda URL:', emailConfig.lambdaUrl ? `${emailConfig.lambdaUrl.substring(0, 40)}...` : 'NOT SET');
+} else {
+  console.log('[Email Config] SMTP_HOST:', emailConfig.host || 'NOT SET');
+  console.log('[Email Config] SMTP_PORT:', emailConfig.port);
+  console.log('[Email Config] SMTP_USER:', emailConfig.user ? `${emailConfig.user.substring(0, 5)}...` : 'NOT SET');
+  console.log('[Email Config] SMTP_PASSWORD:', emailConfig.password ? `***${emailConfig.password.length} chars***` : 'NOT SET');
+}
 console.log('[Email Config] FROM_EMAIL:', emailConfig.fromEmail || 'NOT SET');
 console.log('[Email Config] ADMIN_EMAIL:', emailConfig.adminEmail || 'NOT SET');
-console.log('[Email Config] Is Configured:', !!(emailConfig.host && emailConfig.user && emailConfig.password));
+console.log('[Email Config] Is Configured:', USE_LAMBDA ? !!emailConfig.lambdaUrl : !!(emailConfig.host && emailConfig.user && emailConfig.password));
 console.log('[Email Config] ========================================');
 
 // Transporter (lazy init)
@@ -85,7 +92,7 @@ function getTransporter(): nodemailer.Transporter | null {
 }
 
 export function isEmailConfigured(): boolean {
-  const configured = !!(emailConfig.host && emailConfig.user && emailConfig.password);
+  const configured = USE_LAMBDA ? !!emailConfig.lambdaUrl : !!(emailConfig.host && emailConfig.user && emailConfig.password);
   console.log('[Email] isEmailConfigured():', configured);
   return configured;
 }
@@ -722,7 +729,70 @@ async function sendEmailDirect(options: { to: string; subject: string; html: str
   console.log('[Email] To:', options.to);
   console.log('[Email] Subject:', options.subject);
   console.log('[Email] HTML length:', options.html.length, 'chars');
+  console.log('[Email] Method:', USE_LAMBDA ? 'AWS Lambda' : 'Direct SMTP');
 
+  // Use Lambda if configured
+  if (USE_LAMBDA) {
+    return sendViaLambda(options);
+  }
+
+  // Otherwise use direct SMTP
+  return sendViaSMTP(options);
+}
+
+// Send via AWS Lambda HTTP endpoint
+async function sendViaLambda(options: { to: string; subject: string; html: string }): Promise<{ messageId?: string }> {
+  console.log('[Email Lambda] Sending via AWS Lambda...');
+  console.log('[Email Lambda] Lambda URL:', emailConfig.lambdaUrl);
+
+  try {
+    const startTime = Date.now();
+    const response = await fetch(emailConfig.lambdaUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        to: options.to,
+        subject: options.subject,
+        html: options.html,
+      }),
+    });
+
+    const duration = Date.now() - startTime;
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[Email Lambda] ❌ HTTP Error:', response.status, response.statusText);
+      console.error('[Email Lambda] Response:', errorText);
+      throw new Error(`Lambda returned ${response.status}: ${errorText}`);
+    }
+
+    const result = await response.json();
+
+    if (!result.success) {
+      console.error('[Email Lambda] ❌ Lambda Error:', result.error);
+      throw new Error(`Lambda error: ${result.error}`);
+    }
+
+    console.log('[Email Lambda] ✅ SUCCESS! Email sent in', duration, 'ms');
+    console.log('[Email Lambda] Message ID:', result.messageId);
+    console.log('[Email Lambda] Response:', result.response);
+    console.log('[Email Lambda] ============================');
+
+    return { messageId: result.messageId };
+  } catch (error) {
+    console.error('[Email Lambda] ❌ FAILED TO SEND EMAIL');
+    console.error('[Email Lambda] Error name:', error instanceof Error ? error.name : 'Unknown');
+    console.error('[Email Lambda] Error message:', error instanceof Error ? error.message : String(error));
+    console.error('[Email Lambda] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    console.error('[Email Lambda] ============================');
+    throw error;
+  }
+}
+
+// Send via direct SMTP (localhost/development)
+async function sendViaSMTP(options: { to: string; subject: string; html: string }): Promise<{ messageId?: string }> {
   const transport = getTransporter();
   if (!transport) {
     const error = 'Email not configured - transporter is null';
@@ -730,7 +800,7 @@ async function sendEmailDirect(options: { to: string; subject: string; html: str
     throw new Error(error);
   }
 
-  console.log('[Email] Transporter ready, attempting to send...');
+  console.log('[Email SMTP] Transporter ready, attempting to send...');
 
   try {
     const mailOptions = {
@@ -740,7 +810,7 @@ async function sendEmailDirect(options: { to: string; subject: string; html: str
       html: options.html,
     };
 
-    console.log('[Email] Mail options:', {
+    console.log('[Email SMTP] Mail options:', {
       from: mailOptions.from,
       to: mailOptions.to,
       subject: mailOptions.subject,
@@ -750,19 +820,19 @@ async function sendEmailDirect(options: { to: string; subject: string; html: str
     const result = await transport.sendMail(mailOptions);
     const duration = Date.now() - startTime;
 
-    console.log('[Email] ✅ SUCCESS! Email sent in', duration, 'ms');
-    console.log('[Email] Message ID:', result.messageId);
-    console.log('[Email] Response:', result.response);
-    console.log('[Email] ============================');
+    console.log('[Email SMTP] ✅ SUCCESS! Email sent in', duration, 'ms');
+    console.log('[Email SMTP] Message ID:', result.messageId);
+    console.log('[Email SMTP] Response:', result.response);
+    console.log('[Email SMTP] ============================');
 
     return { messageId: result.messageId };
   } catch (error) {
-    console.error('[Email] ❌ FAILED TO SEND EMAIL');
-    console.error('[Email] Error name:', error instanceof Error ? error.name : 'Unknown');
-    console.error('[Email] Error message:', error instanceof Error ? error.message : String(error));
-    console.error('[Email] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
-    console.error('[Email] Full error object:', JSON.stringify(error, null, 2));
-    console.error('[Email] ============================');
+    console.error('[Email SMTP] ❌ FAILED TO SEND EMAIL');
+    console.error('[Email SMTP] Error name:', error instanceof Error ? error.name : 'Unknown');
+    console.error('[Email SMTP] Error message:', error instanceof Error ? error.message : String(error));
+    console.error('[Email SMTP] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    console.error('[Email SMTP] Full error object:', JSON.stringify(error, null, 2));
+    console.error('[Email SMTP] ============================');
     throw error;
   }
 }
