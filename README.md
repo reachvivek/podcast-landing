@@ -1,13 +1,15 @@
 # Podcast EcoSpace Dubai
 
-> Professional podcast studio booking platform with integrated CRM and analytics
+> Professional podcast studio booking platform with AWS Lambda email service, CRM, and analytics
 
 [![Next.js](https://img.shields.io/badge/Next.js-16.0.3-black?style=flat&logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat&logo=typescript)](https://www.typescriptlang.org/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-green?style=flat&logo=mongodb)](https://www.mongodb.com/)
-[![Prisma](https://img.shields.io/badge/Prisma-6.19.0-2D3748?style=flat&logo=prisma)](https://www.prisma.io/)
+[![AWS Lambda](https://img.shields.io/badge/AWS-Lambda-orange?style=flat&logo=amazonaws)](https://aws.amazon.com/lambda/)
 
-A full-stack booking platform for podcast studio management, built with Next.js 16, featuring a customer-facing booking system, admin dashboard, email automation, and comprehensive analytics.
+A full-stack booking platform for podcast studio management featuring customer booking flow, admin dashboard, AWS Lambda email service, and comprehensive analytics.
+
+**Live Site:** [podspace.vercel.app](https://podspace.vercel.app)
 
 ---
 
@@ -16,12 +18,13 @@ A full-stack booking platform for podcast studio management, built with Next.js 
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Architecture](#architecture)
+- [Email System Architecture](#email-system-architecture)
 - [Database Schema](#database-schema)
 - [Getting Started](#getting-started)
 - [Environment Variables](#environment-variables)
 - [API Reference](#api-reference)
 - [Admin Dashboard](#admin-dashboard)
-- [Email System](#email-system)
+- [AWS Lambda Email Service](#aws-lambda-email-service)
 - [Deployment](#deployment)
 - [Project Structure](#project-structure)
 
@@ -30,36 +33,38 @@ A full-stack booking platform for podcast studio management, built with Next.js 
 ## Features
 
 ### Customer Experience
-- Multi-step booking flow with real-time pricing
-- Interactive calendar with time slot selection
-- Service package selection (Audio, Video, Reels)
-- Add-on services (extra cameras, live streaming, editing)
+- Multi-step booking flow with real-time pricing calculator
+- Interactive calendar with time slot availability
+- Service package selection (Audio Recording, Video Podcast, Reels Production)
+- Add-on services (cameras, live streaming, editing packages)
 - Mobile-responsive design with smooth animations
-- Email and WhatsApp confirmations
-- Google Maps integration for studio location
+- Professional email confirmations with studio location
+- WhatsApp integration for instant contact
 
 ### Admin Dashboard
-- Real-time booking management
-- Analytics dashboard with charts
-- Revenue tracking and conversion metrics
-- Customer management with notes
-- Status workflow (Pending → Confirmed → In Progress → Completed)
+- Real-time booking management with status workflow
+- Analytics dashboard with revenue charts and conversion metrics
+- Customer relationship management with notes
 - Payment tracking (Cash, Card, Apple Pay)
+- Contact inquiry management
 - Export functionality (CSV)
+- Session filtering and search
 
 ### Email Automation
-- Intelligent queue system with rate limiting
-- MongoDB audit trail for all emails
-- 7 professional templates (booking, status updates, contact forms)
-- Automatic retry logic (up to 3 attempts)
+- AWS Lambda email service (bypasses Vercel SMTP restrictions)
+- Intelligent queue system with automatic retry (3 attempts)
+- MongoDB audit trail for compliance
+- Mobile-responsive email templates
+- Rate limiting to avoid spam filters
 - Priority queue management
+- Dual-mode: Lambda (production) / SMTP (local development)
 
 ### Analytics & Tracking
-- Page view tracking
-- Booking funnel analysis
-- Conversion rate monitoring
+- Page view tracking and conversion funnels
 - Revenue insights by service type
 - Peak booking time analysis
+- Booking status distribution
+- Monthly revenue trends
 
 ---
 
@@ -71,10 +76,10 @@ Next.js 16.0.3          App Router with Server Components
 TypeScript 5.x          Full type safety
 Tailwind CSS v4         Utility-first styling
 Framer Motion           Smooth animations
-Radix UI                Accessible primitives
-Lucide React            Icon library
-React Leaflet           Map integration
-Swiper.js               Touch-enabled carousels
+Radix UI                Accessible components
+Lucide React            Modern icon library
+React Leaflet           Interactive maps
+Swiper.js               Touch carousels
 ```
 
 ### Backend
@@ -82,16 +87,18 @@ Swiper.js               Touch-enabled carousels
 Next.js API Routes      Serverless functions
 Prisma 6.19.0          Type-safe ORM
 MongoDB Atlas           Cloud database
-Nodemailer             SMTP email delivery
-JWT                    Authentication tokens
+AWS Lambda              Email service
+Nodemailer             SMTP delivery
+JWT                    Authentication
 ```
 
-### DevOps
+### Infrastructure
 ```
-Vercel                 Hosting & CI/CD
+Vercel                 Frontend hosting & CI/CD
+AWS Lambda             Email service (Node.js 18.x)
+AWS API Gateway        HTTP endpoint for Lambda
+MongoDB Atlas          Database hosting
 GitHub                 Version control
-ESLint                 Code quality
-TypeScript             Type checking
 ```
 
 ---
@@ -99,47 +106,155 @@ TypeScript             Type checking
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                      CLIENT (Browser)                        │
-│                                                              │
-│  ┌──────────────┐  ┌──────────────┐  ┌─────────────────┐  │
-│  │  Landing     │  │  Booking     │  │  Admin Panel    │  │
-│  │  Page        │  │  Flow        │  │  /admin/*       │  │
-│  └──────────────┘  └──────────────┘  └─────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    VERCEL EDGE NETWORK                       │
-│                   (CDN + Load Balancer)                      │
-└─────────────────────────────────────────────────────────────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────────────────────┐
-│                   NEXT.JS SERVER (App Router)                │
-│                                                              │
-│  ┌──────────────┐  ┌──────────────┐  ┌─────────────────┐  │
-│  │  Server      │  │  API Routes  │  │  Middleware     │  │
-│  │  Components  │  │  /api/*      │  │  (Auth/CORS)    │  │
-│  └──────────────┘  └──────────────┘  └─────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────────────────────┐
-│                      PRISMA ORM                              │
-│                   (Query Builder + Types)                    │
-└─────────────────────────────────────────────────────────────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    MONGODB ATLAS                             │
-│                                                              │
-│  ┌──────────────┐  ┌──────────────┐  ┌─────────────────┐  │
-│  │  Bookings    │  │  EmailQueue  │  │  Analytics      │  │
-│  │  Collection  │  │  Collection  │  │  Collection     │  │
-│  └──────────────┘  └──────────────┘  └─────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│                      CLIENT (Browser)                            │
+│                                                                   │
+│  ┌─────────────┐  ┌─────────────┐  ┌──────────────────────┐    │
+│  │  Landing    │  │  Booking    │  │  Admin Dashboard     │    │
+│  │  Page       │  │  Flow       │  │  /admin/*            │    │
+│  └─────────────┘  └─────────────┘  └──────────────────────┘    │
+└──────────────────────────────────────────────────────────────────┘
+                             │
+                             ▼
+┌──────────────────────────────────────────────────────────────────┐
+│                    VERCEL EDGE NETWORK                           │
+│                   (CDN + Load Balancer)                          │
+└──────────────────────────────────────────────────────────────────┘
+                             │
+                             ▼
+┌──────────────────────────────────────────────────────────────────┐
+│              NEXT.JS SERVER (Vercel Serverless)                  │
+│                                                                   │
+│  ┌─────────────┐  ┌─────────────┐  ┌──────────────────────┐    │
+│  │  Server     │  │  API Routes │  │  Middleware          │    │
+│  │  Components │  │  /api/*     │  │  (Auth/CORS)         │    │
+│  └─────────────┘  └─────────────┘  └──────────────────────┘    │
+│                             │                                     │
+│                             │ (Email Service URL)                │
+│                             ├────────────────────────┐           │
+│                             │                        │           │
+│                             ▼                        ▼           │
+│                    ┌─────────────────┐    ┌──────────────────┐  │
+│                    │  Prisma ORM     │    │  AWS Lambda      │  │
+│                    │  (MongoDB)      │    │  Email Service   │  │
+│                    └─────────────────┘    └──────────────────┘  │
+└──────────────────────────────────────────────────────────────────┘
+                             │                        │
+                             ▼                        ▼
+┌──────────────────────────────────┐    ┌──────────────────────────┐
+│        MONGODB ATLAS             │    │    GMAIL SMTP            │
+│                                   │    │    smtp.gmail.com:587    │
+│  ┌────────────────────────────┐  │    │                          │
+│  │  Bookings Collection       │  │    │  ✅ No Port Blocking     │
+│  │  EmailQueue Collection     │  │    │  ✅ Full SMTP Access     │
+│  │  EmailLog (Audit Trail)    │  │    │  ✅ Reliable Delivery    │
+│  │  Analytics Collection      │  │    │                          │
+│  └────────────────────────────┘  │    └──────────────────────────┘
+└──────────────────────────────────┘
 ```
+
+---
+
+## Email System Architecture
+
+### Why AWS Lambda?
+
+**Problem:** Vercel blocks outbound SMTP connections on ports 587/465, preventing direct email delivery.
+
+**Solution:** AWS Lambda HTTP endpoint that bypasses Vercel's restrictions:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  BOOKING CREATED (Vercel Serverless Function)                  │
+└─────────────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  Email Queue System (src/lib/email.ts)                          │
+│                                                                  │
+│  • Detects EMAIL_SERVICE_URL env variable                       │
+│  • Routes to Lambda if configured, else direct SMTP             │
+│  • Synchronous processing (await) to prevent timeout            │
+└─────────────────────────────────────────────────────────────────┘
+                          │
+           ┌──────────────┴──────────────┐
+           ▼                             ▼
+┌─────────────────────┐      ┌─────────────────────────┐
+│  LOCAL DEVELOPMENT  │      │  PRODUCTION (Vercel)    │
+│  Direct SMTP        │      │  AWS Lambda             │
+│                     │      │                         │
+│  smtp.gmail.com:587 │      │  HTTP POST to Lambda    │
+│  ✅ Works fine      │      │  API Gateway Endpoint   │
+└─────────────────────┘      └─────────────────────────┘
+                                          │
+                                          ▼
+                            ┌──────────────────────────────────┐
+                            │  AWS Lambda Function             │
+                            │  (podcast-email-service)         │
+                            │                                  │
+                            │  • Receives JSON payload         │
+                            │  • Uses Nodemailer internally    │
+                            │  • Sends via Gmail SMTP          │
+                            │  • Returns success/failure       │
+                            │                                  │
+                            │  Runtime: Node.js 18.x           │
+                            │  Memory: 256 MB                  │
+                            │  Timeout: 30 seconds             │
+                            │  Cost: FREE (1M req/month)       │
+                            └──────────────────────────────────┘
+                                          │
+                                          ▼
+                            ┌──────────────────────────────────┐
+                            │  Gmail SMTP Server               │
+                            │  ✉️  Email Delivered             │
+                            └──────────────────────────────────┘
+```
+
+### Email Templates
+
+All templates are mobile-responsive with consistent styling:
+
+| Template | Trigger | Recipient | Purpose |
+|----------|---------|-----------|---------|
+| `booking_confirmation` | New booking | Customer | Booking details with studio location |
+| `admin_booking` | New booking | Admin | New booking notification with customer info |
+| `contact_admin` | Contact form | Admin | Inquiry notification |
+| `contact_ack` | Contact form | Customer | Acknowledgment with response time |
+| `status_update` | Status change | Customer | Confirmed/Cancelled/Completed notifications |
+| `test` | Manual trigger | Admin | Configuration test |
+
+### Queue Processing Flow
+
+```javascript
+1. Booking Created
+   ↓
+2. queueEmail() → Add to EmailQueue (status: PENDING)
+   ↓
+3. await processEmailQueue() → MUST WAIT (Vercel requirement)
+   ↓
+4. sendViaLambda() or sendViaSMTP()
+   ↓
+   ├─ Lambda: HTTP POST to API Gateway endpoint
+   │  ↓
+   │  Lambda sends via Gmail SMTP
+   │  ↓
+   │  Returns { success: true, messageId: "..." }
+   │
+   └─ SMTP: Direct connection (localhost only)
+      ↓
+      Nodemailer.sendMail()
+   ↓
+5. Update EmailQueue (status: SENT/FAILED)
+   ↓
+6. Log to EmailLog (permanent audit trail)
+```
+
+**Key Features:**
+- **Synchronous processing** - `await` ensures Vercel waits for completion
+- **Automatic retry** - 3 attempts for failed emails
+- **Rate limiting** - 1 email/second to avoid spam filters
+- **Priority queue** - High-priority emails sent first
+- **Audit trail** - All emails logged to MongoDB
 
 ---
 
@@ -148,7 +263,7 @@ TypeScript             Type checking
 ### Core Collections
 
 #### Booking
-Primary collection for all studio bookings with customer information, session details, and pricing.
+Primary collection for all studio bookings.
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -158,10 +273,10 @@ Primary collection for all studio bookings with customer information, session de
 | `customerPhone` | String | Phone number |
 | `selectedDate` | DateTime | Booking date |
 | `selectedTime` | String | Time slot (e.g., "10:00 AM") |
-| `sessionDuration` | Int | Session length in hours |
+| `sessionDuration` | Int | Hours (1-8) |
 | `peopleCount` | Int | Number of guests |
-| `selectedSetup` | String | Setup type (standard/video-2cam/premium) |
-| `selectedService` | JSON | Service package details |
+| `selectedSetup` | String | Setup type (standard/video/premium) |
+| `selectedService` | JSON | Service package { id, name, price } |
 | `additionalServices` | String[] | Add-on service IDs |
 | `basePrice` | Float | Base package price (AED) |
 | `addonsTotal` | Float | Total add-ons cost (AED) |
@@ -180,38 +295,43 @@ Primary collection for all studio bookings with customer information, session de
 ---
 
 #### EmailQueue
-Queue management for outbound emails with automatic retry and priority handling.
+Intelligent queue for outbound emails with retry logic.
 
 | Field | Type | Description |
 |-------|------|-------------|
+| `id` | ObjectId | Queue entry ID |
 | `to` | String | Recipient email |
-| `subject` | String | Email subject line |
-| `templateType` | String | booking_confirmation, admin_booking, contact_admin, status_update |
-| `templateData` | JSON | Dynamic template data |
+| `subject` | String | Email subject |
+| `templateType` | String | Template identifier |
+| `templateData` | JSON | Dynamic data for template |
 | `status` | Enum | PENDING, PROCESSING, SENT, FAILED, CANCELLED |
-| `priority` | Int | Queue priority (0-10, higher = urgent) |
+| `priority` | Int | Queue priority (0-10, higher = first) |
 | `attempts` | Int | Send attempt counter |
 | `maxAttempts` | Int | Retry limit (default: 3) |
 | `sentAt` | DateTime | Successful send timestamp |
 | `scheduledFor` | DateTime | Scheduled send time |
 | `errorMessage` | String | Failure reason |
+| `createdAt` | DateTime | Queue entry timestamp |
+| `processedAt` | DateTime | Last processing timestamp |
 
-**Indexes:** `status`, `scheduledFor`, `createdAt`
+**Indexes:** `status`, `scheduledFor`, `priority`, `createdAt`
 
 ---
 
 #### EmailLog
-Permanent audit trail for all sent emails (compliance and debugging).
+Permanent audit trail for compliance and debugging.
 
 | Field | Type | Description |
 |-------|------|-------------|
+| `id` | ObjectId | Log entry ID |
 | `to` | String | Recipient email |
 | `subject` | String | Email subject |
-| `templateType` | String | Template identifier |
+| `templateType` | String | Template used |
 | `status` | String | sent, failed |
-| `messageId` | String | SMTP response ID |
-| `metadata` | JSON | Context (booking ID, contact ID) |
-| `createdAt` | DateTime | Log entry timestamp |
+| `messageId` | String | SMTP message ID |
+| `errorMessage` | String | Error details (if failed) |
+| `metadata` | JSON | Context (bookingId, contactId) |
+| `createdAt` | DateTime | Log timestamp |
 
 **Indexes:** `to`, `templateType`, `status`, `createdAt`
 
@@ -219,14 +339,14 @@ Permanent audit trail for all sent emails (compliance and debugging).
 
 ### Supporting Collections
 
-**ServicePackage** - Available studio packages (Audio-only, Video, Reels)
-**AddOnService** - Optional extras (cameras, editing, live streaming)
-**BlockedSlot** - Unavailable dates/times
-**AdminUser** - Admin accounts with role-based access
-**ContactSubmission** - Contact form inquiries
-**AnalyticsEvent** - User behavior tracking
+- **ServicePackage** - Available studio packages (Audio-only, Video, Reels)
+- **AddOnService** - Optional extras (cameras, editing, live streaming)
+- **BlockedSlot** - Unavailable dates/times
+- **AdminUser** - Admin accounts with JWT authentication
+- **ContactSubmission** - Contact form inquiries
+- **AnalyticsEvent** - User behavior tracking
 
-Full schema: [`prisma/schema.prisma`](./prisma/schema.prisma)
+Full schema: [prisma/schema.prisma](./prisma/schema.prisma)
 
 ---
 
@@ -234,10 +354,11 @@ Full schema: [`prisma/schema.prisma`](./prisma/schema.prisma)
 
 ### Prerequisites
 - Node.js 18+ and npm 9+
-- MongoDB Atlas account (free tier available)
-- Gmail account for SMTP (or SendGrid/Resend)
+- MongoDB Atlas account (free tier)
+- AWS account (for Lambda email service)
+- Gmail account with app password
 
-### Installation
+### Local Development
 
 ```bash
 # Clone repository
@@ -254,7 +375,7 @@ cp .env.example .env
 # Generate Prisma client
 npx prisma generate
 
-# Seed database with sample data
+# Seed database
 npm run seed
 
 # Start development server
@@ -265,45 +386,122 @@ Visit [http://localhost:3000](http://localhost:3000)
 
 ### Admin Access
 - URL: [http://localhost:3000/admin/login](http://localhost:3000/admin/login)
-- Credentials: Set via environment variables (ADMIN_USERNAME, ADMIN_PASSWORD)
+- Credentials: Set via `ADMIN_USERNAME` and `ADMIN_PASSWORD` in `.env`
 
 ---
 
 ## Environment Variables
 
-Create a `.env` file in the root directory:
+### Required Variables
 
 ```env
 # Database
-DATABASE_URL="mongodb+srv://username:password@cluster.mongodb.net/podcast-bookings?retryWrites=true&w=majority"
+DATABASE_URL="mongodb+srv://username:password@cluster.mongodb.net/podcast-bookings"
 
 # Application
-NODE_ENV="development"
-NEXT_PUBLIC_APP_URL="http://localhost:3000"
+NODE_ENV="production"
+NEXT_PUBLIC_APP_URL="https://podspace.vercel.app"
 
-# Email (Gmail SMTP)
+# Email Service (Choose One)
+# Option 1: AWS Lambda (Production - Recommended)
+EMAIL_SERVICE_URL="https://your-api-id.execute-api.us-east-1.amazonaws.com/"
+
+# Option 2: Direct SMTP (Local Development Only)
 SMTP_HOST="smtp.gmail.com"
 SMTP_PORT="587"
 SMTP_USER="your-email@gmail.com"
 SMTP_PASSWORD="your-gmail-app-password"
 FROM_EMAIL="your-email@gmail.com"
-ADMIN_EMAIL="your-email@gmail.com"
+ADMIN_EMAIL="admin@example.com"
 
-# Admin Credentials
+# Admin Authentication
 ADMIN_USERNAME="your-admin-username"
 ADMIN_PASSWORD="your-secure-password"
-JWT_SECRET="your-secret-key-min-32-chars"
-
-# Studio Contact
-STUDIO_PHONE="+971-XX-XXX-XXXX"
-STUDIO_WHATSAPP="https://wa.me/971XXXXXXXXX"
+JWT_SECRET="your-secret-key-minimum-32-characters"
 ```
 
-**Security Note:**
-- Never commit real credentials to Git
-- Use `.env.local` for local development (gitignored by default)
-- Set environment variables directly in Vercel dashboard for production
-- Rotate all secrets before deployment
+### Email Service Configuration
+
+**For Production (Vercel):**
+Set `EMAIL_SERVICE_URL` to your AWS Lambda endpoint. Direct SMTP won't work due to Vercel port restrictions.
+
+**For Local Development:**
+Use SMTP credentials. Lambda endpoint is optional.
+
+**Security Notes:**
+- Never commit `.env` to Git
+- Use Vercel dashboard to set production env vars
+- Rotate secrets before deployment
+- Use app-specific passwords for Gmail
+
+---
+
+## AWS Lambda Email Service
+
+### Architecture
+
+The email service runs on AWS Lambda to bypass Vercel's SMTP port blocking.
+
+**Lambda Function Details:**
+- **Name:** `podcast-email-service`
+- **Runtime:** Node.js 18.x
+- **Memory:** 256 MB
+- **Timeout:** 30 seconds
+- **Region:** us-east-1
+- **Cost:** $0 (within 1M requests/month free tier)
+
+**API Gateway Endpoint:**
+```
+POST https://your-api-id.execute-api.us-east-1.amazonaws.com/
+Content-Type: application/json
+
+{
+  "to": "customer@example.com",
+  "subject": "Booking Confirmation",
+  "html": "<html>...</html>"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "messageId": "<abc123@gmail.com>",
+  "response": "250 2.0.0 OK"
+}
+```
+
+### Lambda Function Code
+
+Located in `../email-lambda/`:
+- `index.js` - Lambda handler with Nodemailer
+- `package.json` - Dependencies (nodemailer@6.9.8)
+
+### Deployment
+
+The Lambda function is already deployed. To redeploy:
+
+```bash
+cd ../email-lambda
+npm install
+zip -r function.zip index.js node_modules package.json
+aws lambda update-function-code \
+  --function-name podcast-email-service \
+  --zip-file fileb://function.zip
+```
+
+### Monitoring
+
+**CloudWatch Logs:**
+```
+https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fpodcast-email-service
+```
+
+**Metrics:**
+- Invocations count
+- Error rate
+- Duration (avg ~2 seconds)
+- Throttles (should be 0)
 
 ---
 
@@ -325,27 +523,20 @@ Content-Type: application/json
   "sessionDuration": 2,
   "peopleCount": 2,
   "selectedSetup": "video-2cam",
-  "selectedService": { "id": "pkg-2", "name": "Video Podcast", "price": 750 },
-  "additionalServices": ["addon-live-streaming"],
+  "selectedService": {
+    "id": "pkg-2",
+    "name": "Video Podcast",
+    "price": 750
+  },
+  "additionalServices": ["addon-live"],
   "basePrice": 750,
   "addonsTotal": 200,
   "totalPrice": 950,
-  "specialRequests": "Need parking space"
+  "specialRequests": "Need parking"
 }
 ```
 
 **Response:** `201 Created`
-```json
-{
-  "success": true,
-  "data": {
-    "id": "6748a5b2c3d4e5f6a7b8c9d0",
-    "status": "PENDING",
-    "totalPrice": 950,
-    "createdAt": "2025-11-24T12:00:00.000Z"
-  }
-}
-```
 
 ---
 
@@ -356,37 +547,14 @@ Authorization: Bearer <JWT_TOKEN>
 ```
 
 **Query Parameters:**
-- `status` - Filter by booking status
+- `status` - Filter by status (PENDING, CONFIRMED, etc.)
 - `date` - Filter by date (YYYY-MM-DD)
 - `page` - Page number (default: 1)
 - `limit` - Items per page (default: 20)
 
-**Response:** `200 OK`
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "...",
-      "customerName": "John Doe",
-      "selectedDate": "2025-11-25",
-      "selectedTime": "10:00 AM",
-      "totalPrice": 950,
-      "status": "PENDING"
-    }
-  ],
-  "pagination": {
-    "page": 1,
-    "limit": 20,
-    "total": 42,
-    "pages": 3
-  }
-}
-```
-
 ---
 
-#### Update Booking Status
+#### Update Booking
 ```http
 PATCH /api/bookings/:id
 Authorization: Bearer <JWT_TOKEN>
@@ -396,7 +564,7 @@ Content-Type: application/json
   "status": "CONFIRMED",
   "paymentStatus": "PAID",
   "paymentMethod": "card",
-  "adminNotes": "Customer arrived on time"
+  "adminNotes": "Customer confirmed via WhatsApp"
 }
 ```
 
@@ -404,76 +572,35 @@ Content-Type: application/json
 
 ### Analytics
 
-#### Get Dashboard Metrics
 ```http
 GET /api/analytics?period=30
 Authorization: Bearer <JWT_TOKEN>
 ```
 
-**Response:** `200 OK`
-```json
-{
-  "success": true,
-  "data": {
-    "totalBookings": 156,
-    "totalRevenue": 98500,
-    "conversionRate": 0.65,
-    "avgBookingValue": 631,
-    "popularServices": [
-      { "name": "Video Podcast", "count": 78, "revenue": 58500 }
-    ],
-    "bookingsByStatus": {
-      "PENDING": 12,
-      "CONFIRMED": 23,
-      "COMPLETED": 98,
-      "CANCELLED": 23
-    },
-    "revenueByMonth": [
-      { "month": "2025-10", "revenue": 32500 },
-      { "month": "2025-11", "revenue": 45000 }
-    ]
-  }
-}
-```
-
----
-
-### Email Testing
-
-#### Send Test Email
-```http
-POST /api/test-email
-Authorization: Bearer <JWT_TOKEN>
-Content-Type: application/json
-
-{
-  "to": "test@example.com",
-  "templateType": "booking_confirmation"
-}
-```
-
-Full API documentation: [`swagger.yaml`](./swagger.yaml) (OpenAPI 3.0)
+Returns:
+- Total bookings, revenue, conversion rate
+- Popular services, revenue by month
+- Booking distribution by status
 
 ---
 
 ## Admin Dashboard
 
-### Features
+### Pages
 
 **Dashboard** (`/admin`)
 - Today's bookings count
 - Weekly revenue (AED)
 - Monthly bookings total
 - Pending follow-ups
-- Recent bookings table (last 10)
-- Quick stats (conversion rate, popular service, peak day)
+- Recent bookings table
+- Quick stats (conversion, popular service)
 
-**Bookings Management** (`/admin/bookings`)
-- Filterable table (status, service, date range)
-- Search by name, phone, email
-- Status update workflow
+**Bookings** (`/admin/bookings`)
+- Filterable table (status, service, date)
+- Search (name, phone, email)
+- Status workflow management
 - Payment tracking
-- Customer notes section
 - Export to CSV
 
 **Analytics** (`/admin/analytics`)
@@ -481,105 +608,65 @@ Full API documentation: [`swagger.yaml`](./swagger.yaml) (OpenAPI 3.0)
 - Booking funnel analysis
 - Service popularity charts
 - Peak booking times
-- Conversion metrics
 
-### Access Control
+**Messages** (`/admin/messages`)
+- Contact form submissions
+- Inquiry management
+- Response tracking
+
+### Security
+
 - JWT-based authentication
-- Session management
-- Role-based permissions (SUPER_ADMIN, ADMIN, STAFF)
-- Protected routes with middleware
-
----
-
-## Email System
-
-### Templates
-
-| Template | Trigger | Recipient |
-|----------|---------|-----------|
-| `booking_confirmation` | New booking created | Customer |
-| `admin_booking` | New booking created | Admin |
-| `contact_admin` | Contact form submission | Admin |
-| `contact_ack` | Contact form submission | Customer |
-| `status_confirmed` | Booking confirmed | Customer |
-| `status_in_progress` | Session started | Customer |
-| `status_completed` | Session finished | Customer |
-
-### Queue System
-
-**Architecture:**
-```
-Booking Created → Add to EmailQueue (PENDING)
-                    ↓
-Queue Processor (1s interval) → Pick PENDING emails
-                    ↓
-Send via Nodemailer → Update status (SENT/FAILED)
-                    ↓
-Log to EmailLog (audit trail)
-```
-
-**Features:**
-- Rate limiting (1 email/second to avoid spam filters)
-- Priority queue (high-priority emails sent first)
-- Automatic retry (3 attempts for failed emails)
-- MongoDB audit trail (compliance-ready)
-- Detailed error logging
-
-### Configuration
-SMTP settings in `.env`:
-```env
-SMTP_HOST="smtp.gmail.com"
-SMTP_PORT="587"
-SMTP_USER="your-email@gmail.com"
-SMTP_PASSWORD="app-specific-password"
-```
-
-**Gmail Setup:**
-1. Enable 2FA in Google Account
-2. Generate App Password: [Google App Passwords](https://myaccount.google.com/apppasswords)
-3. Use generated password in `SMTP_PASSWORD`
+- HttpOnly cookies
+- Role-based access control
+- Protected API routes with middleware
+- Session timeout (24 hours)
 
 ---
 
 ## Deployment
 
-### Vercel (Recommended)
+### Vercel Deployment
 
 1. **Push to GitHub**
 ```bash
 git add .
-git commit -m "Ready for deployment"
+git commit -m "Deploy to production"
 git push origin master
 ```
 
-2. **Import to Vercel**
-   - Go to [vercel.com](https://vercel.com)
-   - Click "New Project"
-   - Import your GitHub repository
+2. **Configure Vercel**
+   - Import GitHub repository
+   - Set environment variables (see `.env` section)
+   - Add `EMAIL_SERVICE_URL` from Lambda deployment
 
-3. **Configure Environment Variables**
-   - Add all variables from `.env`
-   - Update `NEXT_PUBLIC_APP_URL` to your domain
-   - Set `NODE_ENV=production`
-
-4. **Deploy**
-   - Vercel auto-deploys on push to `master`
-   - Preview deployments for PRs
-
-### Database Migration
+3. **Database Setup**
 ```bash
 npx prisma generate
 npx prisma db push
 npm run seed
 ```
 
-### Post-Deployment
-- [ ] Update MongoDB Atlas IP whitelist (allow 0.0.0.0/0 for Vercel)
-- [ ] Configure custom domain
-- [ ] Enable SSL (automatic with Vercel)
+4. **Post-Deployment Checklist**
+- [ ] Update MongoDB Atlas IP whitelist (0.0.0.0/0 for Vercel)
 - [ ] Test booking flow end-to-end
-- [ ] Verify email deliverability
-- [ ] Set up Google Analytics
+- [ ] Verify email delivery (check inbox)
+- [ ] Confirm Lambda is being used (check Vercel logs)
+- [ ] Set up custom domain
+- [ ] Enable Vercel analytics
+
+### MongoDB Atlas Setup
+
+1. Create cluster (M0 free tier)
+2. Create database user
+3. Allow access from anywhere (0.0.0.0/0)
+4. Copy connection string to `DATABASE_URL`
+
+### Gmail SMTP Setup
+
+1. Enable 2FA in Google Account
+2. Generate App Password: [Google App Passwords](https://myaccount.google.com/apppasswords)
+3. Use app password in Lambda environment variables
 
 ---
 
@@ -588,77 +675,43 @@ npm run seed
 ```
 podcast-landing/
 ├── prisma/
-│   ├── schema.prisma              # Database models & enums
-│   └── seed.ts                    # Initial data seeding
-│
-├── public/
-│   └── images/                    # Studio photos, logos
+│   ├── schema.prisma              # Database models
+│   └── seed.ts                    # Initial data
 │
 ├── src/
 │   ├── app/
 │   │   ├── page.tsx               # Landing page
-│   │   ├── layout.tsx             # Root layout
-│   │   ├── globals.css            # Tailwind base styles
-│   │   │
-│   │   ├── book/                  # Booking flow
-│   │   │   └── page.tsx           # Multi-step wizard
-│   │   │
-│   │   ├── checkout/              # Checkout page
-│   │   │   └── page.tsx           # Payment & confirmation
-│   │   │
+│   │   ├── book/page.tsx          # Booking flow
+│   │   ├── checkout/page.tsx      # Confirmation
 │   │   ├── admin/                 # Admin dashboard
-│   │   │   ├── login/             # Auth page
-│   │   │   ├── page.tsx           # Dashboard overview
-│   │   │   ├── bookings/          # Booking management
-│   │   │   ├── analytics/         # Analytics & charts
-│   │   │   ├── messages/          # Contact inquiries
-│   │   │   └── settings/          # Studio settings
-│   │   │
+│   │   │   ├── login/page.tsx     # Auth
+│   │   │   ├── page.tsx           # Dashboard
+│   │   │   ├── bookings/          # Management
+│   │   │   ├── analytics/         # Charts
+│   │   │   └── messages/          # Inquiries
 │   │   └── api/                   # API routes
-│   │       ├── bookings/          # Booking CRUD
-│   │       ├── services/          # Service packages
-│   │       ├── addons/            # Add-on services
-│   │       ├── analytics/         # Dashboard metrics
-│   │       ├── contact/           # Contact form
-│   │       └── auth/              # Authentication
-│   │           └── login/
+│   │       ├── bookings/          # CRUD
+│   │       ├── analytics/         # Metrics
+│   │       ├── contact/           # Forms
+│   │       └── auth/              # JWT
 │   │
 │   ├── components/
-│   │   ├── booking/               # Booking step components
-│   │   │   ├── BookingStep1.tsx   # Date & time selection
-│   │   │   ├── BookingStep2.tsx   # Setup type
-│   │   │   ├── BookingStep3.tsx   # Service package
-│   │   │   └── BookingStep4.tsx   # Add-ons
-│   │   │
-│   │   ├── layout/                # Layout components
-│   │   │   ├── Header.tsx         # Site header
-│   │   │   └── Footer.tsx         # Site footer
-│   │   │
-│   │   ├── sections/              # Landing page sections
-│   │   │   ├── Hero.tsx
-│   │   │   ├── Services.tsx
-│   │   │   ├── Portfolio.tsx
-│   │   │   ├── Pricing.tsx
-│   │   │   └── Contact.tsx
-│   │   │
-│   │   └── ui/                    # Reusable UI components
-│   │       └── Loader.tsx
+│   │   ├── booking/               # Booking steps
+│   │   ├── sections/              # Landing sections
+│   │   └── ui/                    # Reusable UI
 │   │
 │   ├── contexts/
-│   │   └── BookingContext.tsx     # Global booking state
+│   │   └── BookingContext.tsx     # Global state
 │   │
 │   └── lib/
-│       ├── prisma.ts              # Prisma client singleton
-│       ├── email.ts               # Email system & queue
-│       └── utils.ts               # Helper functions
+│       ├── prisma.ts              # DB client
+│       ├── email.ts               # Email system (Lambda/SMTP)
+│       ├── validations.ts         # Zod schemas
+│       └── utils.ts               # Helpers
 │
-├── .env                           # Environment variables (gitignored)
-├── .env.example                   # Example env file
-├── next.config.ts                 # Next.js configuration
-├── tailwind.config.ts             # Tailwind CSS config
-├── tsconfig.json                  # TypeScript config
+├── public/images/                 # Studio photos
+├── .env                           # Environment vars (gitignored)
 ├── package.json                   # Dependencies
-├── swagger.yaml                   # OpenAPI 3.0 spec
 └── README.md                      # This file
 ```
 
@@ -669,18 +722,18 @@ podcast-landing/
 ```bash
 # Development
 npm run dev              # Start dev server (localhost:3000)
-npm run build            # Build for production
+npm run build            # Production build
 npm start                # Start production server
 
 # Database
-npm run seed             # Seed database with sample data
+npm run seed             # Seed initial data
 npx prisma studio        # Open Prisma GUI (localhost:5555)
 npx prisma generate      # Generate Prisma client
-npx prisma db push       # Push schema changes to MongoDB
+npx prisma db push       # Push schema to MongoDB
 
 # Code Quality
 npm run lint             # Run ESLint
-npm run type-check       # TypeScript checking
+npm run type-check       # TypeScript validation
 ```
 
 ---
@@ -688,15 +741,15 @@ npm run type-check       # TypeScript checking
 ## Contact & Support
 
 **Podcast EcoSpace Dubai**
-📍 Dubai World Trade Center (DWTC), Dubai, United Arab Emirates
-📞 Phone: +971 50 206 0674
-📱 WhatsApp: [Chat Now](https://wa.me/971502060674)
-✉️ Email: podcastecospace@gmail.com
-📸 Instagram: [@podcast.ecospace](https://instagram.com/podcast.ecospace)
+- 📍 Dubai World Trade Center (DWTC), Dubai, UAE
+- 📞 +971 50 206 0674
+- 📱 [WhatsApp](https://wa.me/971502060674)
+- ✉️ podcastecospace@gmail.com
+- 📸 [@podcast.ecospace](https://instagram.com/podcast.ecospace)
 
 **Developer**
-Vivek Kumar Singh
-📧 rogerthatvivek@gmail.com
+- Vivek Kumar Singh
+- 📧 rogerthatvivek@gmail.com
 
 ---
 
@@ -706,4 +759,4 @@ Proprietary - All rights reserved © 2024 Podcast EcoSpace Dubai
 
 ---
 
-**Built with** ❤️ **in Dubai** | **Powered by** Next.js, MongoDB & Vercel
+**Built with ❤️ in Dubai** | **Powered by** Next.js, AWS Lambda, MongoDB & Vercel
