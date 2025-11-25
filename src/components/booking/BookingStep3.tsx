@@ -114,26 +114,22 @@ export function BookingStep3({ bookingData, updateBookingData, nextStep, prevSte
               className={`relative cursor-pointer rounded-2xl overflow-hidden border-2 transition-all ${
                 isSelected
                   ? 'border-ecospace-green shadow-lg shadow-ecospace-green/20'
-                  : service.popular
+                  : service.isPopular
                   ? 'border-ecospace-green/50'
                   : 'border-white/10 hover:border-white/30'
               }`}
             >
               {/* Badge */}
-              {service.badge && (
-                <div className={`absolute top-0 left-0 right-0 py-2 text-center text-xs font-bold ${
-                  service.popular
-                    ? 'bg-ecospace-green text-black'
-                    : 'bg-white/10 text-ecospace-green'
-                }`}>
+              {service.isPopular && (
+                <div className="absolute top-0 left-0 right-0 py-2 text-center text-xs font-bold bg-ecospace-green text-black">
                   <div className="flex items-center justify-center gap-1">
-                    {service.popular ? <Star className="w-3 h-3" /> : <Sparkles className="w-3 h-3" />}
-                    {service.badge}
+                    <Star className="w-3 h-3" />
+                    MOST POPULAR
                   </div>
                 </div>
               )}
 
-              <div className={`p-6 bg-white/5 ${service.badge ? 'pt-12' : ''}`}>
+              <div className={`p-6 bg-white/5 ${service.isPopular ? 'pt-12' : ''}`}>
                 {/* Service Name */}
                 <h3 className="text-xl font-bold text-white mb-1">{service.name}</h3>
                 <p className="text-gray-400 text-sm mb-4">{service.description}</p>
