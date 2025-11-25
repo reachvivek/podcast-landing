@@ -134,17 +134,23 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Send email notifications (non-blocking - don't fail booking if email fails)
+    // Send email notifications (MUST await on Vercel or emails won't send)
     const emailData = {
       ...booking,
       selectedService: booking.selectedService as { name?: string; price?: number } || { name: 'Standard', price: 0 },
     };
-    Promise.all([
-      sendBookingConfirmationEmail(emailData),
-      sendAdminBookingNotification(emailData),
-    ]).catch((err) => {
-      console.error('Error sending booking emails:', err);
-    });
+
+    console.log('[Booking API] Sending email notifications...');
+    try {
+      await Promise.all([
+        sendBookingConfirmationEmail(emailData),
+        sendAdminBookingNotification(emailData),
+      ]);
+      console.log('[Booking API] ✅ Emails sent successfully');
+    } catch (err) {
+      console.error('[Booking API] ❌ Error sending booking emails:', err);
+      // Don't fail the booking if email fails
+    }
 
     return NextResponse.json({
       success: true,

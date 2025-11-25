@@ -34,15 +34,20 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Send emails via queue (non-blocking)
+    // Send emails via queue (MUST await on Vercel or emails won't send)
     // 1. Admin notification
     // 2. Customer acknowledgement
-    Promise.all([
-      sendContactNotification(submission),
-      sendContactAcknowledgement(submission),
-    ]).catch((err) => {
-      console.error('Error queueing contact emails:', err);
-    });
+    console.log('[Contact API] Sending email notifications...');
+    try {
+      await Promise.all([
+        sendContactNotification(submission),
+        sendContactAcknowledgement(submission),
+      ]);
+      console.log('[Contact API] ✅ Emails sent successfully');
+    } catch (err) {
+      console.error('[Contact API] ❌ Error queueing contact emails:', err);
+      // Don't fail the submission if email fails
+    }
 
     return NextResponse.json({
       success: true,
