@@ -36,31 +36,58 @@ const STUDIO_LOCATION = {
   googleMapsUrl: 'https://www.google.com/maps/place/DEXNET+Technologies.+DEXNode/@25.226111,55.2863855,17z/data=!3m1!4b1!4m6!3m5!1s0x3e5f434fb87cd29d:0x3760eeb213084725!8m2!3d25.226111!4d55.2838106!16s%2Fg%2F11vj9bcnwc?entry=ttu&g_ep=EgoyMDI1MTExNy4wIKXMDSoASAFQAw%3D%3D',
 };
 
-// Log configuration for debugging
-console.log('[Email Config]', {
-  APP_URL,
-  LOGO_URL,
-  isProduction: process.env.NODE_ENV === 'production',
-});
+// Log configuration for debugging (VERBOSE for Vercel diagnosis)
+console.log('[Email Config] ===== DETAILED CONFIGURATION =====');
+console.log('[Email Config] Environment:', process.env.NODE_ENV);
+console.log('[Email Config] APP_URL:', APP_URL);
+console.log('[Email Config] SMTP_HOST:', emailConfig.host || 'NOT SET');
+console.log('[Email Config] SMTP_PORT:', emailConfig.port);
+console.log('[Email Config] SMTP_USER:', emailConfig.user ? `${emailConfig.user.substring(0, 5)}...` : 'NOT SET');
+console.log('[Email Config] SMTP_PASSWORD:', emailConfig.password ? `***${emailConfig.password.length} chars***` : 'NOT SET');
+console.log('[Email Config] FROM_EMAIL:', emailConfig.fromEmail || 'NOT SET');
+console.log('[Email Config] ADMIN_EMAIL:', emailConfig.adminEmail || 'NOT SET');
+console.log('[Email Config] Is Configured:', !!(emailConfig.host && emailConfig.user && emailConfig.password));
+console.log('[Email Config] ========================================');
 
 // Transporter (lazy init)
 let transporter: nodemailer.Transporter | null = null;
 
 function getTransporter(): nodemailer.Transporter | null {
-  if (!isEmailConfigured()) return null;
+  console.log('[Email] getTransporter() called');
+
+  if (!isEmailConfigured()) {
+    console.error('[Email] Email NOT configured - missing SMTP credentials');
+    return null;
+  }
+
   if (!transporter) {
+    console.log('[Email] Creating new transporter with config:', {
+      host: emailConfig.host,
+      port: emailConfig.port,
+      secure: emailConfig.port === 465,
+      user: emailConfig.user?.substring(0, 5) + '...',
+    });
+
     transporter = nodemailer.createTransport({
       host: emailConfig.host,
       port: emailConfig.port,
       secure: emailConfig.port === 465,
       auth: { user: emailConfig.user, pass: emailConfig.password },
+      // Add connection logging
+      logger: true,
+      debug: true,
     });
+
+    console.log('[Email] Transporter created successfully');
   }
+
   return transporter;
 }
 
 export function isEmailConfigured(): boolean {
-  return !!(emailConfig.host && emailConfig.user && emailConfig.password);
+  const configured = !!(emailConfig.host && emailConfig.user && emailConfig.password);
+  console.log('[Email] isEmailConfigured():', configured);
+  return configured;
 }
 
 // Types
@@ -665,16 +692,51 @@ function generateTestHtml(config: Record<string, string>): string {
 // ============================================
 
 async function sendEmailDirect(options: { to: string; subject: string; html: string }): Promise<{ messageId?: string }> {
+  console.log('[Email] ===== SENDING EMAIL =====');
+  console.log('[Email] To:', options.to);
+  console.log('[Email] Subject:', options.subject);
+  console.log('[Email] HTML length:', options.html.length, 'chars');
+
   const transport = getTransporter();
-  if (!transport) throw new Error('Email not configured');
+  if (!transport) {
+    const error = 'Email not configured - transporter is null';
+    console.error('[Email] ERROR:', error);
+    throw new Error(error);
+  }
 
-  const result = await transport.sendMail({
-    from: `"Podcast EcoSpace" <${emailConfig.fromEmail}>`,
-    to: options.to,
-    subject: options.subject,
-    html: options.html,
-  });
+  console.log('[Email] Transporter ready, attempting to send...');
 
-  console.log('[Email] Sent:', { to: options.to, subject: options.subject, messageId: result.messageId });
-  return { messageId: result.messageId };
+  try {
+    const mailOptions = {
+      from: `"Podcast EcoSpace" <${emailConfig.fromEmail}>`,
+      to: options.to,
+      subject: options.subject,
+      html: options.html,
+    };
+
+    console.log('[Email] Mail options:', {
+      from: mailOptions.from,
+      to: mailOptions.to,
+      subject: mailOptions.subject,
+    });
+
+    const startTime = Date.now();
+    const result = await transport.sendMail(mailOptions);
+    const duration = Date.now() - startTime;
+
+    console.log('[Email] ✅ SUCCESS! Email sent in', duration, 'ms');
+    console.log('[Email] Message ID:', result.messageId);
+    console.log('[Email] Response:', result.response);
+    console.log('[Email] ============================');
+
+    return { messageId: result.messageId };
+  } catch (error) {
+    console.error('[Email] ❌ FAILED TO SEND EMAIL');
+    console.error('[Email] Error name:', error instanceof Error ? error.name : 'Unknown');
+    console.error('[Email] Error message:', error instanceof Error ? error.message : String(error));
+    console.error('[Email] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    console.error('[Email] Full error object:', JSON.stringify(error, null, 2));
+    console.error('[Email] ============================');
+    throw error;
+  }
 }
