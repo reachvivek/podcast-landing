@@ -20,7 +20,7 @@ const testimonials: Testimonial[] = [
     name: 'Ahmed Al Maktoum',
     role: 'Entrepreneur',
     podcastName: 'Dubai Business Talks',
-    avatar: '/images/avatar-placeholder.jpg',
+    avatar: 'https://api.dicebear.com/7.x/notionists/svg?seed=Ahmed',
     rating: 5,
     quote: 'EcoSpace transformed our podcast production quality. The team is professional, the equipment is top-notch, and the final product exceeded our expectations. Highly recommended!',
   },
@@ -29,7 +29,7 @@ const testimonials: Testimonial[] = [
     name: 'Sarah Johnson',
     role: 'Content Creator',
     podcastName: 'The Wellness Journey',
-    avatar: '/images/avatar-placeholder.jpg',
+    avatar: 'https://api.dicebear.com/7.x/notionists/svg?seed=Sarah',
     rating: 5,
     quote: 'As a first-time podcaster, I was nervous about the technical aspects. The EcoSpace team made everything so easy. The studio is beautiful and the results are incredible!',
   },
@@ -38,7 +38,7 @@ const testimonials: Testimonial[] = [
     name: 'Mohammed Hassan',
     role: 'Tech Entrepreneur',
     podcastName: 'Innovation Hub',
-    avatar: '/images/avatar-placeholder.jpg',
+    avatar: 'https://api.dicebear.com/7.x/notionists/svg?seed=Mohammed',
     rating: 5,
     quote: 'Best podcast studio in Dubai! The location at DWTC is perfect, the equipment is professional-grade, and the editing service is exceptional. Worth every dirham.',
   },
@@ -47,7 +47,7 @@ const testimonials: Testimonial[] = [
     name: 'Lisa Chen',
     role: 'Marketing Consultant',
     podcastName: 'Marketing Matters',
-    avatar: '/images/avatar-placeholder.jpg',
+    avatar: 'https://api.dicebear.com/7.x/notionists/svg?seed=Lisa',
     rating: 5,
     quote: 'The team at EcoSpace understands content creation. They helped us produce 10 episodes that look and sound amazing. Our audience loves the quality upgrade!',
   },
@@ -56,7 +56,7 @@ const testimonials: Testimonial[] = [
     name: 'Khalid Rahman',
     role: 'Fitness Coach',
     podcastName: 'Fit Life Dubai',
-    avatar: '/images/avatar-placeholder.jpg',
+    avatar: 'https://api.dicebear.com/7.x/notionists/svg?seed=Khalid',
     rating: 5,
     quote: 'From booking to final delivery, everything was seamless. The studio space is inspiring, and the multi-camera setup makes our videos look professionally produced.',
   },
@@ -65,7 +65,7 @@ const testimonials: Testimonial[] = [
     name: 'Emma Williams',
     role: 'Life Coach',
     podcastName: 'Empowered Living',
-    avatar: '/images/avatar-placeholder.jpg',
+    avatar: 'https://api.dicebear.com/7.x/notionists/svg?seed=Emma',
     rating: 5,
     quote: 'I have recorded at several studios in Dubai, and EcoSpace is by far the best. The attention to detail, the comfort of the space, and the quality of output are unmatched.',
   },
@@ -176,7 +176,7 @@ export function Testimonials() {
                 <div className="flex gap-1 mb-4">
                   {Array.from({ length: testimonial.rating }).map((_, i) => (
                     <Star
-                      key={i}
+                      key={`star-${testimonial.id}-${i}`}
                       className="w-4 h-4 fill-ecospace-green text-ecospace-green"
                     />
                   ))}
@@ -191,9 +191,13 @@ export function Testimonials() {
                 <div className="flex items-center gap-4 relative z-10">
                   {/* Avatar */}
                   <div className="w-12 h-12 rounded-full overflow-hidden bg-white/10 flex-shrink-0 border-2 border-ecospace-green/30 group-hover:border-ecospace-green/60 transition-colors duration-500">
-                    <div className="w-full h-full flex items-center justify-center text-ecospace-green text-xl" style={{ fontWeight: 250 }}>
-                      {testimonial.name.charAt(0)}
-                    </div>
+                    <Image
+                      src={testimonial.avatar}
+                      alt={testimonial.name}
+                      width={48}
+                      height={48}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
 
                   {/* Name & Podcast */}

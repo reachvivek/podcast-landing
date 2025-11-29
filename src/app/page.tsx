@@ -7,6 +7,7 @@ import { PortfolioShowcase } from '@/components/sections/PortfolioShowcase';
 import { HowItWorks } from '@/components/sections/HowItWorks';
 import { FeaturedPackage } from '@/components/sections/FeaturedPackage';
 import { Testimonials } from '@/components/sections/Testimonials';
+import { BlogPreview } from '@/components/sections/BlogPreview';
 import { LocationMap } from '@/components/sections/LocationMap';
 import { ContactSection } from '@/components/sections/ContactSection';
 import { MainLayout } from '@/components/layout/MainLayout';
@@ -41,10 +42,13 @@ export default function Home() {
       {/* 6. Testimonials - Social proof after pricing */}
       <Testimonials />
 
-      {/* 7. Location - Studio location with map */}
+      {/* 7. Blog Preview - Latest insights and tips */}
+      <BlogPreview />
+
+      {/* 8. Location - Studio location with map */}
       <LocationMap />
 
-      {/* 8. Contact Form - Lead capture */}
+      {/* 9. Contact Form - Lead capture */}
       <ContactSection />
     </MainLayout>
   );
