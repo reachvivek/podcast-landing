@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Eye, EyeOff, Star, Loader2, X, DollarSign, Clock, Users } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, EyeOff, Star, Loader2, X, Clock, Users } from 'lucide-react';
 
 interface ServicePackage {
   id: string;
@@ -233,9 +233,8 @@ export default function PricingAdminPage() {
               {/* Price */}
               <div className="mb-4">
                 <div className="flex items-baseline gap-2">
-                  <DollarSign className="w-5 h-5 text-ecospace-green" />
                   <span className="text-3xl font-bold text-white">{pkg.price}</span>
-                  <span className="text-gray-400">AED</span>
+                  <span className="text-gray-400 text-sm">AED</span>
                 </div>
                 {pkg.originalPrice && savings > 0 && (
                   <div className="flex items-center gap-2 mt-1">

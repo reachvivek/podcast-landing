@@ -122,7 +122,7 @@ export function HeroSection({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-white mb-6 leading-tight tracking-wide"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white mb-6 leading-tight tracking-wide"
             style={{ fontWeight: 270 }}
           >
             <div>
@@ -148,7 +148,7 @@ export function HeroSection({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
-            className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 mb-8 sm:mb-10 max-w-3xl mx-auto lg:mx-0 leading-relaxed font-light"
+            className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 mb-8 sm:mb-10 max-w-xl lg:max-w-2xl mx-auto lg:mx-0 leading-relaxed font-light"
           >
             Dubai's premier podcast studio. Professional recording, expert production, and an experience that transforms your vision into reality.
           </motion.p>
