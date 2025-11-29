@@ -4,6 +4,19 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { motion } from 'framer-motion';
 import { Mic, Video, Headphones, Zap, CheckCircle, MapPin, TrendingUp, Star } from 'lucide-react';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
+import { useState, useEffect } from 'react';
+
+// Dynamically import map to avoid SSR issues
+const StudioMap = dynamic(() => import('@/components/sections/Map'), { ssr: false });
+
+// Studio location - same as landing page
+const STUDIO_LOCATION = {
+  lat: 25.226111,
+  lng: 55.2838106,
+  address: 'Dubai World Trade Center, Sheikh Rashid Tower',
+  city: 'Dubai, UAE',
+};
 
 interface Stat {
   number: string;
@@ -23,6 +36,12 @@ interface Value {
 }
 
 export default function AboutPage() {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const stats: Stat[] = [
     { number: '500+', label: 'Episodes Recorded', icon: Video },
     { number: '200+', label: 'Happy Creators', icon: Star },
@@ -61,6 +80,13 @@ export default function AboutPage() {
     { text: 'Community - Building Dubai\'s podcasting ecosystem', icon: MapPin },
   ];
 
+  const locationBenefits = [
+    'Easy access from Sheikh Zayed Road',
+    'Walking distance from metro station',
+    'Ample parking available',
+    'Surrounded by cafes and amenities',
+  ];
+
   return (
     <MainLayout>
       {/* Hero Section */}
@@ -88,7 +114,7 @@ export default function AboutPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 bg-black">
+      <section className="py-24 bg-black">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
             {stats.map((stat, index) => {
@@ -275,74 +301,102 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Location */}
+      {/* Location Section */}
       <section className="py-24 bg-black">
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          {/* Section Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <p className="text-ecospace-green uppercase tracking-widest text-sm mb-4 font-light">
+              Visit Us
+            </p>
+            <h2 className="text-4xl md:text-5xl text-white mb-6" style={{ fontWeight: 250 }}>
+              Prime Location at{' '}
+              <span className="text-ecospace-green">DWTC</span>
+            </h2>
+            <p className="text-gray-400 max-w-2xl mx-auto font-light text-lg">
+              Located at the heart of Dubai's business district for your convenience
+            </p>
+          </motion.div>
+
+          <div className="grid lg:grid-cols-2 gap-12 items-start">
+            {/* Location Benefits */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
+              className="space-y-6"
             >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-ecospace-green/10 flex items-center justify-center">
-                  <MapPin className="w-6 h-6 text-ecospace-green" />
+              {/* Address Card */}
+              <div className="p-8 rounded-3xl bg-white/5 backdrop-blur-sm border border-white/10 hover:border-ecospace-green/50 transition-all duration-500 group">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-ecospace-green/10 flex items-center justify-center flex-shrink-0 group-hover:bg-ecospace-green/20 transition-colors duration-300">
+                    <MapPin className="w-6 h-6 text-ecospace-green" />
+                  </div>
+                  <div>
+                    <h3 className="text-white text-xl mb-2 font-light">Studio Address</h3>
+                    <p className="text-gray-400 font-light leading-relaxed">
+                      {STUDIO_LOCATION.address}<br />
+                      {STUDIO_LOCATION.city}
+                    </p>
+                  </div>
                 </div>
-                <p className="text-ecospace-green uppercase tracking-widest text-sm font-light">
-                  Our Location
-                </p>
               </div>
-              <h2 className="text-4xl md:text-5xl text-white mb-8" style={{ fontWeight: 250 }}>
-                Prime Location at{' '}
-                <span className="text-ecospace-green">DWTC</span>
-              </h2>
-              <p className="text-gray-400 font-light text-lg mb-8 leading-relaxed">
-                <strong className="text-white font-normal">Dubai World Trade Center</strong> is the
-                perfect location for your podcast studio needs - at the heart of Dubai's
-                business district.
-              </p>
+
+              {/* Benefits List */}
               <div className="space-y-4">
-                {[
-                  'Easy access from Sheikh Zayed Road',
-                  'Walking distance from metro station',
-                  'Ample parking available',
-                  'Surrounded by cafes and amenities',
-                ].map((item, index) => (
+                {locationBenefits.map((benefit, index) => (
                   <motion.div
-                    key={item}
+                    key={benefit}
                     initial={{ opacity: 0, x: -20 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.1 }}
-                    className="flex items-center gap-3"
+                    className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:border-ecospace-green/50 transition-all duration-500"
                   >
                     <CheckCircle className="w-5 h-5 text-ecospace-green flex-shrink-0" />
-                    <p className="text-gray-300 font-light text-lg">{item}</p>
+                    <p className="text-gray-300 font-light text-lg">{benefit}</p>
                   </motion.div>
                 ))}
               </div>
+
+              {/* Get Directions Button */}
+              <a
+                href={`https://www.google.com/maps/dir/?api=1&destination=${STUDIO_LOCATION.lat},${STUDIO_LOCATION.lng}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-ecospace-green text-black font-light text-lg rounded-full hover:bg-ecospace-green/90 transition-all"
+              >
+                Get Directions
+              </a>
             </motion.div>
 
+            {/* Map */}
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="relative h-[500px] rounded-3xl overflow-hidden group"
+              className="relative h-[500px] lg:h-[600px] rounded-3xl overflow-hidden border-2 border-white/10 hover:border-ecospace-green/50 transition-all duration-500"
             >
-              <div className="absolute inset-0 border border-white/10 rounded-3xl group-hover:border-ecospace-green/50 transition-colors duration-500 z-10" />
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3610.3859434086537!2d55.28214431501205!3d25.22943798388708!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3e5f433d4c0abf15%3A0x8c7d8e8e8e8e8e8e!2sDubai%20World%20Trade%20Centre!5e0!3m2!1sen!2sae!4v1234567890"
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title="EcoSpace Studio Location at Dubai World Trade Center"
-                className="rounded-3xl"
-              />
+              <div className="absolute inset-0 bg-gray-100">
+                {isMounted ? (
+                  <StudioMap location={STUDIO_LOCATION} />
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ecospace-green mx-auto mb-4"></div>
+                      <p className="text-gray-600 font-light">Loading map...</p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </motion.div>
           </div>
         </div>
