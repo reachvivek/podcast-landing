@@ -3,7 +3,7 @@
 import { MainLayout } from '@/components/layout/MainLayout';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { ChevronDown, MessageCircle, Calendar, DollarSign, Settings, Clock, FileText } from 'lucide-react';
+import { ChevronDown, MessageCircle, Calendar, Banknote, Settings, Clock, FileText } from 'lucide-react';
 
 interface FAQ {
   question: string;
@@ -125,12 +125,12 @@ export default function FAQPage() {
   const categories = Array.from(new Set(faqs.map((faq) => faq.category)));
 
   const categoryIcons: { [key: string]: any } = {
-    'Booking & Pricing': DollarSign,
+    'Booking & Pricing': Banknote,
     'Studio & Equipment': Settings,
     'Production & Editing': FileText,
     'Session Details': Clock,
     'Technical': Settings,
-    'Payment & Policies': DollarSign,
+    'Payment & Policies': Banknote,
     'Location & Access': Calendar,
   };
 
