@@ -216,6 +216,123 @@ model NewsletterSubscriber {
   unsubscribedAt  DateTime?
 }
 
+// Booking Audit Trail - tracks all changes to bookings
+model BookingAudit {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  bookingId       String   @db.ObjectId
+  action          String   // created, updated, status_changed, cancelled, confirmed
+  changes         Json?    // what changed (before/after values)
+
+  // Who made the change
+  userId          String?  // admin user id if applicable
+  userType        String   // customer, admin, system
+  userName        String?
+
+  // Additional context
+  ipAddress       String?
+  userAgent       String?
+  reason          String?  // for cancellations, modifications
+
+  createdAt       DateTime @default(now())
+
+  @@index([bookingId])
+  @@index([createdAt])
+  @@index([action])
+}
+
+// Blog Category model
+model BlogCategory {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  name            String   @unique
+  slug            String   @unique
+  description     String?
+  icon            String?  // lucide icon name
+  color           String?  // hex color
+
+  isActive        Boolean  @default(true)
+  sortOrder       Int      @default(0)
+  postCount       Int      @default(0)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  posts           BlogPost[]
+
+  @@index([isActive])
+  @@index([sortOrder])
+}
+
+// Blog Tag model
+model BlogTag {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  name            String   @unique
+  slug            String   @unique
+  usageCount      Int      @default(0)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([usageCount])
+}
+
+// Blog Post model
+model BlogPost {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  // Content
+  title           String
+  slug            String   @unique
+  excerpt         String?
+  content         String   // Rich text content
+  featuredImage   String?
+
+  // Metadata
+  status          BlogStatus @default(DRAFT)
+  isFeatured      Boolean  @default(false)
+  readingTime     Int      @default(0) // minutes
+  wordCount       Int      @default(0)
+
+  // Engagement metrics
+  viewCount       Int      @default(0)
+  likeCount       Int      @default(0)
+  shareCount      Int      @default(0)
+
+  // Relations
+  categoryId      String?  @db.ObjectId
+  category        BlogCategory? @relation(fields: [categoryId], references: [id])
+  tags            String[] // array of tag names
+
+  // Author info (admin)
+  authorId        String?
+  authorName      String
+  authorEmail     String?
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  keywords        String[]
+
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  publishedAt     DateTime?
+
+  @@index([status])
+  @@index([categoryId])
+  @@index([isFeatured])
+  @@index([publishedAt])
+  @@index([createdAt])
+}
+
+enum BlogStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
 // Email Queue - for managing email sending with rate limiting
 model EmailQueue {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
