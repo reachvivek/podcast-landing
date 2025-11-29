@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Eye, EyeOff, Loader2, X, DollarSign } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, EyeOff, Loader2, X } from 'lucide-react';
 
 interface AddOnService {
   id: string;
@@ -213,7 +213,6 @@ export default function AddonsAdminPage() {
             {/* Price */}
             <div className="mb-4">
               <div className="flex items-baseline gap-2">
-                <DollarSign className="w-5 h-5 text-ecospace-green" />
                 <span className="text-2xl font-bold text-white">{addon.price}</span>
                 <span className="text-gray-400 text-sm">AED</span>
               </div>

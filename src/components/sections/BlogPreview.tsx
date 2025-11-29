@@ -1,48 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, ArrowRight, Tag } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-
-interface BlogPost {
-  id: string;
-  slug: string;
-  title: string;
-  excerpt: string;
-  featuredImage: string | null;
-  readingTime: number;
-  publishedAt: string | null;
-  category: {
-    id: string;
-    name: string;
-    color: string;
-  } | null;
-}
+import { blogPosts } from '@/data/blogPosts';
 
 export function BlogPreview() {
-  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchBlogPosts = async () => {
-      try {
-        const response = await fetch('/api/blog/posts?status=PUBLISHED&limit=3');
-        const data = await response.json();
-
-        if (data.success) {
-          setBlogPosts(data.data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch blog posts:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBlogPosts();
-  }, []);
+  // Show only first 3 posts as featured
+  const featuredPosts = blogPosts.slice(0, 3);
+  const loading = false;
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -135,7 +102,7 @@ export function BlogPreview() {
           <div className="flex items-center justify-center h-64">
             <div className="w-8 h-8 border-2 border-ecospace-green border-t-transparent rounded-full animate-spin" />
           </div>
-        ) : blogPosts.length > 0 ? (
+        ) : featuredPosts.length > 0 ? (
           <motion.div
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
             initial="hidden"
@@ -143,7 +110,7 @@ export function BlogPreview() {
             viewport={{ once: true, margin: '-100px' }}
             variants={containerVariants}
           >
-            {blogPosts.map((post) => (
+            {featuredPosts.map((post) => (
               <motion.div
                 key={post.id}
                 variants={cardVariants}
@@ -164,22 +131,6 @@ export function BlogPreview() {
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-ecospace-green/20 to-gray-900 flex items-center justify-center">
                           <Tag className="w-12 h-12 text-ecospace-green/40" />
-                        </div>
-                      )}
-                      {/* Category Badge */}
-                      {post.category && (
-                        <div className="absolute top-4 left-4 z-10">
-                          <div
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-sm"
-                            style={{
-                              backgroundColor: post.category.color || '#A8D646',
-                            }}
-                          >
-                            <Tag className="w-3 h-3 text-black" />
-                            <span className="text-xs font-semibold text-black uppercase tracking-wider">
-                              {post.category.name}
-                            </span>
-                          </div>
                         </div>
                       )}
                       {/* Gradient Overlay */}

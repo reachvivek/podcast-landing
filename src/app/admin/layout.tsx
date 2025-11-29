@@ -15,7 +15,7 @@ import {
   MessageSquare,
   ChevronLeft,
   ChevronRight,
-  DollarSign,
+  Tag,
   Package,
   FileText,
 } from 'lucide-react';
@@ -23,7 +23,7 @@ import {
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Bookings', href: '/admin/bookings', icon: Calendar },
-  { name: 'Pricing', href: '/admin/pricing', icon: DollarSign },
+  { name: 'Pricing', href: '/admin/pricing', icon: Tag },
   { name: 'Addons', href: '/admin/addons', icon: Package },
   { name: 'Blog', href: '/admin/blog', icon: FileText },
   { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
