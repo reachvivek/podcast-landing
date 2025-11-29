@@ -16,10 +16,10 @@ function countWords(content: string): number {
 // GET single post by slug
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
 
     const post = await prisma.blogPost.findUnique({
       where: { slug },
@@ -61,10 +61,10 @@ export async function GET(
 // PATCH update post
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
     const body = await request.json();
 
     const existingPost = await prisma.blogPost.findUnique({
@@ -115,10 +115,10 @@ export async function PATCH(
 // DELETE post
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
 
     const post = await prisma.blogPost.findUnique({
       where: { slug },
