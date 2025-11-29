@@ -1,102 +1,50 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Check, Star, Mic, Video, Smartphone, Home } from 'lucide-react';
+import { Check, Star, Mic, Video, Smartphone, Home, Loader2 } from 'lucide-react';
 import { glassButtonPrimaryClass, glassButtonClass, glassButtonStyles } from '@/lib/utils';
 
-interface PackageFeature {
-  text: string;
-}
-
-interface PackageCard {
+interface ServicePackage {
   id: string;
-  icon: React.ComponentType<{ className?: string }>;
   name: string;
+  slug: string;
   description: string;
   price: number;
-  originalPrice: number;
-  savings: number;
-  features: PackageFeature[];
-  isPopular?: boolean;
-  ctaText: string;
-  ctaHref: string;
+  originalPrice?: number;
+  features: string[];
+  isPopular: boolean;
+  category: string;
 }
 
-const packages: PackageCard[] = [
-  {
-    id: 'studio-rental',
-    icon: Home,
-    name: 'Studio Rental',
-    description: 'DIY production with full studio access',
-    price: 200,
-    originalPrice: 300,
-    savings: 100,
-    features: [
-      { text: 'Bring your equipment' },
-      { text: 'Full studio access' },
-      { text: 'Professional space' },
-      { text: 'Flexible hours' },
-    ],
-    ctaText: 'Get Quote',
-    ctaHref: '/book',
-  },
-  {
-    id: 'basic-recording',
-    icon: Mic,
-    name: 'Basic Recording',
-    description: 'Professional recording setup with raw files',
-    price: 350,
-    originalPrice: 550,
-    savings: 200,
-    features: [
-      { text: '1-hour studio time' },
-      { text: 'Professional audio' },
-      { text: 'Studio lighting' },
-      { text: 'Raw audio files' },
-    ],
-    ctaText: 'Book Now',
-    ctaHref: '/book',
-  },
-  {
-    id: 'podcast-premium',
-    icon: Video,
-    name: 'Podcast Premium',
-    description: 'Complete podcast production, ready to publish',
-    price: 750,
-    originalPrice: 980,
-    savings: 230,
-    isPopular: true,
-    features: [
-      { text: '1-hour video recording' },
-      { text: '2-camera 4K setup' },
-      { text: 'Professional audio & lights' },
-      { text: 'Full editing & color correction' },
-      { text: 'Ready-to-publish content' },
-    ],
-    ctaText: 'Book This Package',
-    ctaHref: '/book',
-  },
-  {
-    id: 'social-content',
-    icon: Smartphone,
-    name: 'Social Content Bundle',
-    description: 'Multiple edited reels for social platforms',
-    price: 950,
-    originalPrice: 1250,
-    savings: 300,
-    features: [
-      { text: '5 Edited Reels' },
-      { text: 'Professional editing' },
-      { text: 'Custom titles & graphics' },
-      { text: 'Color correction' },
-      { text: 'Optimized for social' },
-    ],
-    ctaText: 'Create Reels',
-    ctaHref: '/book',
-  },
-];
+// Icon mapping based on category
+const categoryIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+  'studio-rental': Home,
+  'recording-only': Mic,
+  'podcast-editing': Video,
+  'reels': Smartphone,
+};
 
 export function FeaturedPackage() {
+  const [packages, setPackages] = useState<ServicePackage[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchPackages() {
+      try {
+        const response = await fetch('/api/services');
+        const data = await response.json();
+        if (data.success) {
+          setPackages(data.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch packages:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchPackages();
+  }, []);
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -130,6 +78,18 @@ export function FeaturedPackage() {
       },
     },
   };
+
+  if (loading) {
+    return (
+      <section id="pricing" className="py-24 bg-black relative overflow-hidden">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="w-8 h-8 text-ecospace-green animate-spin" />
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="pricing" className="py-24 bg-black relative overflow-hidden">
@@ -183,13 +143,25 @@ export function FeaturedPackage() {
           variants={containerVariants}
         >
           {packages.map((pkg) => {
-            const IconComponent = pkg.icon;
+            const IconComponent = categoryIcons[pkg.category] || Mic;
+            const savings = pkg.originalPrice ? pkg.originalPrice - pkg.price : 0;
+
             return (
               <motion.div
                 key={pkg.id}
                 variants={cardVariants}
                 className="relative group"
               >
+                {/* Popular Badge */}
+                {pkg.isPopular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                    <div className="px-4 py-1 bg-ecospace-green text-black text-xs font-bold rounded-full flex items-center gap-1">
+                      <Star className="w-3 h-3" />
+                      POPULAR
+                    </div>
+                  </div>
+                )}
+
                 {/* Card */}
                 <div className="relative h-full backdrop-blur-md rounded-3xl overflow-hidden transition-all duration-500 bg-white/5 border border-white/20 shadow-lg hover:shadow-2xl hover:border-ecospace-green/50 hover:bg-white/10">
                   {/* Shimmer Effect on Card */}
@@ -221,14 +193,16 @@ export function FeaturedPackage() {
                         </span>
                         <span className="text-lg text-gray-500">AED</span>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <span className="line-through text-sm text-gray-600">
-                          {pkg.originalPrice} AED
-                        </span>
-                        <span className="bg-ecospace-green/20 text-ecospace-green text-xs font-bold px-2 py-1 rounded-full border border-ecospace-green/30">
-                          SAVE {pkg.savings} AED
-                        </span>
-                      </div>
+                      {pkg.originalPrice && savings > 0 && (
+                        <div className="flex items-center gap-3">
+                          <span className="line-through text-sm text-gray-600">
+                            {pkg.originalPrice} AED
+                          </span>
+                          <span className="bg-ecospace-green/20 text-ecospace-green text-xs font-bold px-2 py-1 rounded-full border border-ecospace-green/30">
+                            SAVE {savings} AED
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Features List */}
@@ -238,12 +212,12 @@ export function FeaturedPackage() {
                       </p>
                       <ul className="space-y-3">
                         {pkg.features.map((feature, idx) => (
-                          <li key={idx} className="flex items-start gap-3">
+                          <li key={`${pkg.id}-feature-${idx}`} className="flex items-start gap-3">
                             <div className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center bg-white/10">
                               <Check className="w-3 h-3 text-ecospace-green" />
                             </div>
                             <span className="text-gray-300 text-sm">
-                              {feature.text}
+                              {feature}
                             </span>
                           </li>
                         ))}
@@ -252,7 +226,7 @@ export function FeaturedPackage() {
 
                     {/* CTA Button */}
                     <a
-                      href={pkg.ctaHref}
+                      href="/book"
                       className={`${glassButtonClass} inline-flex items-center justify-center gap-2 w-full text-center`}
                       style={glassButtonStyles.tilt3d}
                       onMouseMove={(e) => {
@@ -271,7 +245,7 @@ export function FeaturedPackage() {
                     >
                       <span className={glassButtonStyles.depthLayer} />
                       <span className={glassButtonStyles.shimmer} />
-                      <span className="uppercase tracking-widest relative z-10">{pkg.ctaText}</span>
+                      <span className="uppercase tracking-widest relative z-10">Book Now</span>
                     </a>
                   </div>
                 </div>
