@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Eye, EyeOff, Star, Loader2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, EyeOff, Star, Loader2, X, DollarSign, Clock, Users } from 'lucide-react';
 
 interface ServicePackage {
   id: string;
@@ -23,7 +23,7 @@ interface ServicePackage {
 export default function PricingAdminPage() {
   const [packages, setPackages] = useState<ServicePackage[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [editingPackage, setEditingPackage] = useState<ServicePackage | null>(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -86,7 +86,7 @@ export default function PricingAdminPage() {
       const data = await response.json();
       if (data.success) {
         fetchPackages();
-        resetForm();
+        closeModal();
       } else {
         alert(data.error || 'Failed to save package');
       }
@@ -113,7 +113,7 @@ export default function PricingAdminPage() {
       sortOrder: pkg.sortOrder.toString(),
       category: pkg.category,
     });
-    setShowForm(true);
+    setShowModal(true);
   };
 
   const handleDelete = async (id: string) => {
@@ -149,7 +149,7 @@ export default function PricingAdminPage() {
     }
   };
 
-  const resetForm = () => {
+  const closeModal = () => {
     setFormData({
       name: '',
       slug: '',
@@ -166,45 +166,172 @@ export default function PricingAdminPage() {
       category: 'recording-only',
     });
     setEditingPackage(null);
-    setShowForm(false);
+    setShowModal(false);
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-black">
+      <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="w-8 h-8 text-ecospace-green animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black text-white p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Pricing Packages</h1>
-            <p className="text-gray-400">Manage service packages and pricing</p>
-          </div>
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="px-6 py-3 bg-ecospace-green text-black rounded-xl font-semibold hover:bg-ecospace-green/90 transition-all flex items-center gap-2"
-          >
-            <Plus className="w-5 h-5" />
-            {showForm ? 'Cancel' : 'Add Package'}
-          </button>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-2">Pricing Packages</h1>
+          <p className="text-gray-400">Manage service packages and pricing</p>
         </div>
+        <button
+          onClick={() => setShowModal(true)}
+          className="px-6 py-3 bg-ecospace-green text-black rounded-xl font-semibold hover:bg-ecospace-green/90 transition-all flex items-center gap-2"
+        >
+          <Plus className="w-5 h-5" />
+          Add Package
+        </button>
+      </div>
 
-        {/* Form */}
-        {showForm && (
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-8 mb-8">
-            <h2 className="text-2xl font-bold text-white mb-6">
-              {editingPackage ? 'Edit Package' : 'New Package'}
-            </h2>
-            <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Packages Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {packages.map((pkg) => {
+          const savings = pkg.originalPrice ? pkg.originalPrice - pkg.price : 0;
+
+          return (
+            <div
+              key={pkg.id}
+              className={`relative bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-ecospace-green/30 transition-all ${
+                !pkg.isActive ? 'opacity-50' : ''
+              }`}
+            >
+              {/* Popular & Status Badges */}
+              <div className="flex items-center gap-2 mb-4">
+                {pkg.isPopular && (
+                  <span className="px-2 py-1 bg-ecospace-green text-black text-xs font-bold rounded-full flex items-center gap-1">
+                    <Star className="w-3 h-3" />
+                    POPULAR
+                  </span>
+                )}
+                <span className={`px-2 py-1 text-xs rounded-full ${
+                  pkg.isActive
+                    ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                    : 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
+                }`}>
+                  {pkg.isActive ? 'Active' : 'Inactive'}
+                </span>
+                <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-full border border-blue-500/30">
+                  {pkg.category}
+                </span>
+              </div>
+
+              {/* Package Name */}
+              <h3 className="text-xl font-bold text-white mb-2">{pkg.name}</h3>
+              <p className="text-gray-400 text-sm mb-4 line-clamp-2">{pkg.description}</p>
+
+              {/* Price */}
+              <div className="mb-4">
+                <div className="flex items-baseline gap-2">
+                  <DollarSign className="w-5 h-5 text-ecospace-green" />
+                  <span className="text-3xl font-bold text-white">{pkg.price}</span>
+                  <span className="text-gray-400">AED</span>
+                </div>
+                {pkg.originalPrice && savings > 0 && (
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-gray-500 line-through text-sm">{pkg.originalPrice} AED</span>
+                    <span className="text-ecospace-green text-xs font-semibold">Save {savings} AED</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Details */}
+              <div className="flex items-center gap-4 mb-4 text-sm text-gray-400">
+                <div className="flex items-center gap-1">
+                  <Clock className="w-4 h-4" />
+                  <span>{pkg.duration}h</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Users className="w-4 h-4" />
+                  <span>{pkg.maxPeople}</span>
+                </div>
+              </div>
+
+              {/* Features Preview */}
+              <div className="mb-4">
+                <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Features</p>
+                <ul className="space-y-1">
+                  {pkg.features.slice(0, 3).map((feature, i) => (
+                    <li key={i} className="text-sm text-gray-300 flex items-start gap-2">
+                      <span className="text-ecospace-green">•</span>
+                      <span className="line-clamp-1">{feature}</span>
+                    </li>
+                  ))}
+                  {pkg.features.length > 3 && (
+                    <li className="text-sm text-gray-500">+{pkg.features.length - 3} more</li>
+                  )}
+                </ul>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-2 pt-4 border-t border-white/10">
+                <button
+                  onClick={() => toggleActive(pkg)}
+                  className="flex-1 p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-all flex items-center justify-center gap-1"
+                  title={pkg.isActive ? 'Deactivate' : 'Activate'}
+                >
+                  {pkg.isActive ? (
+                    <Eye className="w-4 h-4 text-ecospace-green" />
+                  ) : (
+                    <EyeOff className="w-4 h-4 text-gray-500" />
+                  )}
+                </button>
+                <button
+                  onClick={() => handleEdit(pkg)}
+                  className="flex-1 p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-all flex items-center justify-center gap-1"
+                >
+                  <Edit2 className="w-4 h-4 text-blue-400" />
+                </button>
+                <button
+                  onClick={() => handleDelete(pkg.id)}
+                  className="flex-1 p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-all flex items-center justify-center gap-1"
+                >
+                  <Trash2 className="w-4 h-4 text-red-400" />
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {packages.length === 0 && (
+        <div className="text-center py-16 bg-white/5 border border-white/10 rounded-2xl">
+          <p className="text-gray-400">No packages found. Create your first package!</p>
+        </div>
+      )}
+
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 rounded-2xl border border-white/10 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-white/10 sticky top-0 bg-gray-900 z-10">
+              <h2 className="text-2xl font-bold text-white">
+                {editingPackage ? 'Edit Package' : 'New Package'}
+              </h2>
+              <button
+                onClick={closeModal}
+                className="p-2 hover:bg-white/10 rounded-lg transition-all"
+              >
+                <X className="w-5 h-5 text-gray-400" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <form onSubmit={handleSubmit} className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Name</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Name *</label>
                   <input
                     type="text"
                     value={formData.name}
@@ -214,7 +341,7 @@ export default function PricingAdminPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Slug</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Slug *</label>
                   <input
                     type="text"
                     value={formData.slug}
@@ -226,7 +353,7 @@ export default function PricingAdminPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Description</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Description *</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -236,9 +363,9 @@ export default function PricingAdminPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Price (AED)</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Price (AED) *</label>
                   <input
                     type="number"
                     value={formData.price}
@@ -257,7 +384,7 @@ export default function PricingAdminPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Duration (hrs)</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Duration (hrs) *</label>
                   <input
                     type="number"
                     value={formData.duration}
@@ -267,7 +394,7 @@ export default function PricingAdminPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Max People</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Max People *</label>
                   <input
                     type="number"
                     value={formData.maxPeople}
@@ -278,9 +405,9 @@ export default function PricingAdminPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Category</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Category *</label>
                   <select
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
@@ -301,7 +428,7 @@ export default function PricingAdminPage() {
                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:border-ecospace-green"
                   />
                 </div>
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-3 justify-center">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
@@ -325,12 +452,12 @@ export default function PricingAdminPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Features (one per line)</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Features (one per line) *</label>
                   <textarea
                     value={formData.features}
                     onChange={(e) => setFormData({ ...formData, features: e.target.value })}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:border-ecospace-green"
-                    rows={6}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:border-ecospace-green font-mono text-sm"
+                    rows={8}
                     placeholder="Feature 1&#10;Feature 2&#10;Feature 3"
                   />
                 </div>
@@ -339,23 +466,24 @@ export default function PricingAdminPage() {
                   <textarea
                     value={formData.notIncluded}
                     onChange={(e) => setFormData({ ...formData, notIncluded: e.target.value })}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:border-ecospace-green"
-                    rows={6}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:border-ecospace-green font-mono text-sm"
+                    rows={8}
                     placeholder="Not included 1&#10;Not included 2"
                   />
                 </div>
               </div>
 
-              <div className="flex gap-4">
+              {/* Modal Actions */}
+              <div className="flex gap-4 pt-4 border-t border-white/10">
                 <button
                   type="submit"
-                  className="px-8 py-3 bg-ecospace-green text-black rounded-xl font-semibold hover:bg-ecospace-green/90 transition-all"
+                  className="flex-1 px-8 py-3 bg-ecospace-green text-black rounded-xl font-semibold hover:bg-ecospace-green/90 transition-all"
                 >
                   {editingPackage ? 'Update Package' : 'Create Package'}
                 </button>
                 <button
                   type="button"
-                  onClick={resetForm}
+                  onClick={closeModal}
                   className="px-8 py-3 bg-white/10 text-white rounded-xl font-semibold hover:bg-white/20 transition-all"
                 >
                   Cancel
@@ -363,97 +491,8 @@ export default function PricingAdminPage() {
               </div>
             </form>
           </div>
-        )}
-
-        {/* Packages List */}
-        <div className="grid grid-cols-1 gap-4">
-          {packages.map((pkg) => (
-            <div
-              key={pkg.id}
-              className={`bg-white/5 border border-white/10 rounded-2xl p-6 ${
-                !pkg.isActive ? 'opacity-50' : ''
-              }`}
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-xl font-bold text-white">{pkg.name}</h3>
-                    {pkg.isPopular && (
-                      <span className="px-2 py-1 bg-ecospace-green text-black text-xs font-bold rounded-full flex items-center gap-1">
-                        <Star className="w-3 h-3" />
-                        POPULAR
-                      </span>
-                    )}
-                    <span className="px-2 py-1 bg-white/10 text-gray-300 text-xs rounded-full">
-                      {pkg.category}
-                    </span>
-                  </div>
-                  <p className="text-gray-400 mb-4">{pkg.description}</p>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                    <div>
-                      <span className="text-gray-500 text-sm">Price:</span>
-                      <p className="text-white font-semibold">{pkg.price} AED</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-500 text-sm">Duration:</span>
-                      <p className="text-white font-semibold">{pkg.duration} hrs</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-500 text-sm">Max People:</span>
-                      <p className="text-white font-semibold">{pkg.maxPeople}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-500 text-sm">Sort Order:</span>
-                      <p className="text-white font-semibold">{pkg.sortOrder}</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-4">
-                    <div>
-                      <p className="text-gray-500 text-sm mb-1">Features:</p>
-                      <ul className="text-gray-300 text-sm space-y-1">
-                        {pkg.features.map((f, i) => (
-                          <li key={i}>• {f}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => toggleActive(pkg)}
-                    className="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-all"
-                    title={pkg.isActive ? 'Deactivate' : 'Activate'}
-                  >
-                    {pkg.isActive ? (
-                      <Eye className="w-5 h-5 text-ecospace-green" />
-                    ) : (
-                      <EyeOff className="w-5 h-5 text-gray-500" />
-                    )}
-                  </button>
-                  <button
-                    onClick={() => handleEdit(pkg)}
-                    className="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-all"
-                  >
-                    <Edit2 className="w-5 h-5 text-blue-400" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(pkg.id)}
-                    className="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-all"
-                  >
-                    <Trash2 className="w-5 h-5 text-red-400" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
         </div>
-
-        {packages.length === 0 && !loading && (
-          <div className="text-center py-16 bg-white/5 border border-white/10 rounded-2xl">
-            <p className="text-gray-400">No packages found. Create your first package!</p>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 }
