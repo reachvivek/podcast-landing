@@ -23,7 +23,7 @@ export default function FAQPage() {
     {
       category: 'Booking & Pricing',
       question: 'What are your pricing packages?',
-      answer: 'We offer flexible packages starting from 350 AED. Our packages include Audio Only, Video Podcast, and Premium Production with varying levels of editing, camera setups, and turnaround times. Check our pricing page for detailed breakdowns.',
+      answer: 'We offer flexible packages starting from 350 AED. Our packages include Audio Only (350 AED), Video Podcast (650 AED), and Premium Production (950 AED) with varying levels of editing, camera setups, and turnaround times. Check our pricing page for detailed breakdowns.',
     },
     {
       category: 'Booking & Pricing',
@@ -137,7 +137,7 @@ export default function FAQPage() {
   return (
     <MainLayout>
       {/* Hero Section */}
-      <section className="relative min-h-[50vh] flex items-center justify-center overflow-hidden">
+      <section className="relative pt-32 pb-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-black via-black/95 to-black z-0" />
 
         <div className="container mx-auto px-4 relative z-10 text-center">
@@ -146,10 +146,10 @@ export default function FAQPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
+            <h1 className="text-5xl md:text-7xl text-white mb-6" style={{ fontWeight: 250 }}>
               Frequently Asked <span className="text-ecospace-green">Questions</span>
             </h1>
-            <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl text-gray-300 font-light max-w-3xl mx-auto leading-relaxed">
               Everything you need to know about booking and recording at EcoSpace
             </p>
           </motion.div>
@@ -157,7 +157,7 @@ export default function FAQPage() {
       </section>
 
       {/* FAQ Content */}
-      <section className="py-20 bg-gradient-to-b from-black to-gray-900">
+      <section className="py-24 bg-black">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             {categories.map((category, categoryIndex) => {
@@ -176,7 +176,7 @@ export default function FAQPage() {
                   {/* Category Header */}
                   <div className="flex items-center gap-3 mb-6">
                     <Icon className="w-6 h-6 text-ecospace-green" />
-                    <h2 className="text-2xl font-bold text-white">{category}</h2>
+                    <h2 className="text-2xl text-white" style={{ fontWeight: 250 }}>{category}</h2>
                   </div>
 
                   {/* FAQs in Category */}
@@ -188,13 +188,13 @@ export default function FAQPage() {
                       return (
                         <div
                           key={globalIndex}
-                          className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl border border-white/10 overflow-hidden"
+                          className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:border-ecospace-green/50 overflow-hidden transition-all duration-500"
                         >
                           <button
                             onClick={() => setOpenIndex(isOpen ? null : globalIndex)}
                             className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-white/5 transition-all"
                           >
-                            <span className="text-lg font-semibold text-white pr-4">
+                            <span className="text-lg text-white font-light pr-4">
                               {faq.question}
                             </span>
                             <ChevronDown
@@ -214,7 +214,7 @@ export default function FAQPage() {
                             className="overflow-hidden"
                           >
                             <div className="px-6 pb-4 pt-2">
-                              <p className="text-gray-300 leading-relaxed">{faq.answer}</p>
+                              <p className="text-gray-300 font-light leading-relaxed">{faq.answer}</p>
                             </div>
                           </motion.div>
                         </div>
@@ -229,7 +229,7 @@ export default function FAQPage() {
       </section>
 
       {/* Still Have Questions CTA */}
-      <section className="py-20 bg-gray-900">
+      <section className="py-24 bg-black">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -238,14 +238,14 @@ export default function FAQPage() {
             className="max-w-3xl mx-auto text-center"
           >
             <MessageCircle className="w-16 h-16 text-ecospace-green mx-auto mb-6" />
-            <h2 className="text-4xl font-bold text-white mb-4">Still Have Questions?</h2>
-            <p className="text-xl text-gray-300 mb-8">
+            <h2 className="text-4xl md:text-5xl text-white mb-4" style={{ fontWeight: 250 }}>Still Have Questions?</h2>
+            <p className="text-xl text-gray-300 font-light mb-8">
               Can't find the answer you're looking for? Our team is here to help!
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
                 href="/#contact"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-ecospace-green text-black font-semibold rounded-full hover:bg-ecospace-green/90 transition-all"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-ecospace-green text-black font-light rounded-full hover:bg-ecospace-green/90 transition-all duration-500"
               >
                 Contact Us
               </a>
@@ -253,7 +253,7 @@ export default function FAQPage() {
                 href="https://wa.me/971502060674"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-white/20 text-white font-semibold rounded-full hover:border-ecospace-green hover:text-ecospace-green transition-all"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-white/20 text-white font-light rounded-full hover:border-ecospace-green hover:text-ecospace-green transition-all duration-500"
               >
                 WhatsApp Us
               </a>
