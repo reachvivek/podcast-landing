@@ -113,36 +113,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Stats Section - Overlapping with hero */}
-      <section className="py-12 bg-black -mt-8">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-            {stats.map((stat, index) => {
-              const Icon = stat.icon;
-              return (
-                <motion.div
-                  key={stat.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className="group relative p-8 rounded-3xl bg-white/5 backdrop-blur-sm border border-white/10 hover:border-ecospace-green/50 transition-all duration-500 text-center"
-                >
-                  <Icon className="w-8 h-8 text-ecospace-green mx-auto mb-4" />
-                  <div className="text-4xl md:text-5xl text-white mb-2" style={{ fontWeight: 250 }}>
-                    {stat.number}
-                  </div>
-                  <div className="text-gray-400 text-sm font-light tracking-wide">{stat.label}</div>
-
-                  {/* Hover Glow Effect */}
-                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-ecospace-green/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
       {/* Our Story */}
       <section className="py-24 bg-black">
         <div className="container mx-auto px-4 lg:px-8">
@@ -194,6 +164,36 @@ export default function AboutPage() {
                 className="object-cover"
               />
             </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-24 bg-black">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            {stats.map((stat, index) => {
+              const Icon = stat.icon;
+              return (
+                <motion.div
+                  key={stat.label}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className="group relative p-8 rounded-3xl bg-white/5 backdrop-blur-sm border border-white/10 hover:border-ecospace-green/50 transition-all duration-500 text-center"
+                >
+                  <Icon className="w-8 h-8 text-ecospace-green mx-auto mb-4" />
+                  <div className="text-4xl md:text-5xl text-white mb-2" style={{ fontWeight: 250 }}>
+                    {stat.number}
+                  </div>
+                  <div className="text-gray-400 text-sm font-light tracking-wide">{stat.label}</div>
+
+                  {/* Hover Glow Effect */}
+                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-ecospace-green/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
