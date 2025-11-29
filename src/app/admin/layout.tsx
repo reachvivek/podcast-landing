@@ -15,11 +15,17 @@ import {
   MessageSquare,
   ChevronLeft,
   ChevronRight,
+  DollarSign,
+  Package,
+  FileText,
 } from 'lucide-react';
 
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Bookings', href: '/admin/bookings', icon: Calendar },
+  { name: 'Pricing', href: '/admin/pricing', icon: DollarSign },
+  { name: 'Addons', href: '/admin/addons', icon: Package },
+  { name: 'Blog', href: '/admin/blog', icon: FileText },
   { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
   { name: 'Messages', href: '/admin/messages', icon: MessageSquare },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
