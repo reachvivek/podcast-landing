@@ -199,6 +199,31 @@ export function Footer() {
               </Link>
             </div>
           </div>
+
+          {/* Developer Credit */}
+          <div className="mt-4 pt-4 border-t border-white/5 text-center">
+            <p className="text-gray-600 text-xs font-light">
+              Website by{' '}
+              <a
+                href="https://reachvivek.vercel.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-500 hover:text-ecospace-green transition-colors"
+                title="Full Stack Developer based in Dubai"
+              >
+                Vivek Kumar Singh
+              </a>
+              {' • '}
+              <a
+                href="https://linkedin.com/in/reachvivek"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-600 hover:text-ecospace-green transition-colors"
+              >
+                Get Your Custom Website
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </footer>
