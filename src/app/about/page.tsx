@@ -114,7 +114,7 @@ export default function AboutPage() {
       </section>
 
       {/* Our Story */}
-      <section className="py-24 bg-black">
+      <section className="py-24 bg-black -mt-12">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <motion.div
@@ -123,7 +123,7 @@ export default function AboutPage() {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <p className="text-ecospace-green uppercase tracking-widest text-sm mb-4 font-light">
+              <p className="text-ecospace-green uppercase tracking-widest text-base mb-6 font-semibold">
                 Our Story
               </p>
               <h2 className="text-4xl md:text-5xl text-white mb-8" style={{ fontWeight: 250 }}>
