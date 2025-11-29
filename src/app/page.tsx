@@ -6,6 +6,7 @@ import { StudioGallery } from '@/components/sections/StudioGallery';
 import { PortfolioShowcase } from '@/components/sections/PortfolioShowcase';
 import { HowItWorks } from '@/components/sections/HowItWorks';
 import { FeaturedPackage } from '@/components/sections/FeaturedPackage';
+import { Testimonials } from '@/components/sections/Testimonials';
 import { LocationMap } from '@/components/sections/LocationMap';
 import { ContactSection } from '@/components/sections/ContactSection';
 import { MainLayout } from '@/components/layout/MainLayout';
@@ -37,15 +38,14 @@ export default function Home() {
       {/* 5. Pricing - Only after they see the value */}
       <FeaturedPackage />
 
-      {/* 6. Location - Studio location with map */}
+      {/* 6. Testimonials - Social proof after pricing */}
+      <Testimonials />
+
+      {/* 7. Location - Studio location with map */}
       <LocationMap />
 
-      {/* 7. Contact Form - Lead capture */}
+      {/* 8. Contact Form - Lead capture */}
       <ContactSection />
-
-      {/* TODO: Add sections below */}
-      {/* Testimonials */}
-      {/* FAQ Preview */}
     </MainLayout>
   );
 }
