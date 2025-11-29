@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import { Menu, X, Calendar } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -22,11 +23,11 @@ interface HeaderProps {
 const defaultNavigation: readonly NavigationItem[] = [
   { name: 'Home', href: '/' },
   { name: 'About', href: '/about' },
-  { name: 'Portfolio', href: '#portfolio' },
-  { name: 'Pricing', href: '#pricing' },
+  { name: 'Portfolio', href: '/#portfolio' },
+  { name: 'Pricing', href: '/#pricing' },
   { name: 'Blog', href: '/blog' },
   { name: 'FAQ', href: '/faq' },
-  { name: 'Contact', href: '#contact' },
+  { name: 'Contact', href: '/#contact' },
 ];
 
 export function Header({
@@ -36,16 +37,83 @@ export function Header({
   ctaText = 'Book Studio',
   ctaHref = '/book',
 }: Readonly<HeaderProps>) {
+  const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState('');
+
+  // Helper function to check if a nav item is active
+  const isActive = (href: string) => {
+    if (href === '/') {
+      return pathname === '/' && !activeSection;
+    }
+    // Handle both /#section and #section formats
+    if (href.startsWith('/#')) {
+      const hash = href.substring(1); // Get #section from /#section
+      return pathname === '/' && activeSection === hash;
+    }
+    if (href.startsWith('#')) {
+      return activeSection === href;
+    }
+    return pathname.startsWith(href);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
+
+      // Only run scroll spy on home page
+      if (pathname !== '/') return;
+
+      // Get all sections that have IDs matching our hash links
+      const sections = ['portfolio', 'pricing', 'contact'].map(id => ({
+        id: `#${id}`,
+        element: document.getElementById(id)
+      })).filter(s => s.element);
+
+      // Check which section is currently in view
+      const scrollPosition = window.scrollY + window.innerHeight / 3;
+
+      let currentSection = '';
+
+      for (const section of sections) {
+        if (section.element) {
+          const { offsetTop, offsetHeight } = section.element;
+          if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+            currentSection = section.id;
+            break;
+          }
+        }
+      }
+
+      setActiveSection(currentSection);
     };
+
+    const handleHashChange = () => {
+      setActiveSection(window.location.hash);
+    };
+
+    // Set initial hash on mount
+    if (typeof window !== 'undefined') {
+      setActiveSection(window.location.hash);
+      handleScroll(); // Run scroll spy on mount
+    }
+
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    window.addEventListener('hashchange', handleHashChange);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, [pathname]);
+
+  // Update hash when pathname changes (for navigation between pages)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setActiveSection(window.location.hash);
+    }
+  }, [pathname]);
 
   return (
     <header
@@ -103,7 +171,11 @@ export function Header({
               >
                 <Link
                   href={link.href}
-                  className="text-white/70 hover:text-ecospace-green font-light text-sm tracking-widest uppercase transition-all duration-300 relative group"
+                  className={`font-light text-sm tracking-widest uppercase transition-all duration-300 relative group ${
+                    isActive(link.href)
+                      ? 'text-ecospace-green'
+                      : 'text-white/70 hover:text-ecospace-green'
+                  }`}
                 >
                   {link.name}
                   <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-ecospace-green transition-all duration-300 group-hover:w-full" />
@@ -166,7 +238,11 @@ export function Header({
                   >
                     <Link
                       href={link.href}
-                      className="block text-white/80 hover:text-ecospace-green font-light text-sm tracking-widest uppercase transition-colors duration-300 py-2"
+                      className={`block font-light text-sm tracking-widest uppercase transition-colors duration-300 py-2 ${
+                        isActive(link.href)
+                          ? 'text-ecospace-green'
+                          : 'text-white/80 hover:text-ecospace-green'
+                      }`}
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       {link.name}
