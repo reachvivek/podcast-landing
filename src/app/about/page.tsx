@@ -90,7 +90,7 @@ export default function AboutPage() {
   return (
     <MainLayout>
       {/* Hero Section */}
-      <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden py-32">
+      <section className="relative pt-32 pb-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-black via-black to-black z-0" />
 
         <div className="container mx-auto px-4 lg:px-8 relative z-10 text-center">
@@ -113,8 +113,8 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-24 bg-black">
+      {/* Stats Section - Overlapping with hero */}
+      <section className="py-12 bg-black -mt-8">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
             {stats.map((stat, index) => {
