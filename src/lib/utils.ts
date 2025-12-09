@@ -35,11 +35,11 @@ export const glassButtonClass = cn(
   glassButtonStyles.shadow
 );
 
-// Primary CTA glass button class - main character energy
+// Primary CTA button class - solid ecospace-green for maximum impact
 export const glassButtonPrimaryClass = cn(
-  glassButtonStyles.base,
-  glassButtonStyles.primaryBorder,
-  glassButtonStyles.text,
-  glassButtonStyles.primaryBackground,
-  glassButtonStyles.primaryShadow
+  "relative overflow-hidden font-medium backdrop-blur-md text-sm px-8 py-4 rounded-full transition-all duration-500 group",
+  "bg-ecospace-green hover:bg-ecospace-green/90",
+  "text-black",
+  "border-2 border-ecospace-green hover:border-white/20",
+  "shadow-2xl shadow-ecospace-green/30 hover:shadow-ecospace-green/50 hover:scale-105"
 );

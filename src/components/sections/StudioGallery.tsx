@@ -1,81 +1,162 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronLeft, ChevronRight, Camera, Mic2, Video, Lightbulb } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Camera, ChevronDown, ChevronUp } from 'lucide-react';
+
+// Shuffle array function - Fisher-Yates algorithm
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
 
 const galleryImages = [
+  // Studio images (5)
   {
     id: 1,
-    src: '/images/studio-hero-12.jpg',
-    alt: 'Professional podcast interview',
+    src: '/images/studio/_DSC0567.jpg',
+    alt: 'Professional podcast studio setup',
     category: 'Studio',
   },
   {
     id: 2,
-    src: '/images/studio-hero-8.jpg',
-    alt: 'Female podcaster recording',
-    category: 'Sessions',
-  },
-  {
-    id: 3,
-    src: '/images/studio-portfolio-4.jpg',
-    alt: 'Studio ambiance & lighting',
-    category: 'Lighting',
-  },
-  {
-    id: 4,
-    src: '/images/studio-hero-10.jpg',
-    alt: 'Recording setup overview',
-    category: 'Equipment',
-  },
-  {
-    id: 5,
-    src: '/images/studio-portfolio-6.jpg',
-    alt: 'Modern studio interior',
+    src: '/images/studio/_DSC8577.JPG',
+    alt: 'Studio recording environment',
     category: 'Studio',
   },
   {
+    id: 3,
+    src: '/images/studio/_DSC8601.JPG',
+    alt: 'Modern podcast studio interior',
+    category: 'Studio',
+  },
+  {
+    id: 4,
+    src: '/images/studio/_DSC8631.JPG',
+    alt: 'Studio space overview',
+    category: 'Studio',
+  },
+  {
+    id: 5,
+    src: '/images/studio/_DSC8846.JPG',
+    alt: 'Professional studio atmosphere',
+    category: 'Studio',
+  },
+
+  // Community/Guests images (7) - FOCUS
+  {
     id: 6,
-    src: '/images/studio-hero-7.jpg',
-    alt: 'Live podcast session',
-    category: 'Sessions',
+    src: '/images/community/_DSC0581.JPG',
+    alt: 'Podcast guests in conversation',
+    category: 'Guests',
+  },
+  {
+    id: 7,
+    src: '/images/community/_DSC0596.JPG',
+    alt: 'Community podcast session',
+    category: 'Guests',
+  },
+  {
+    id: 8,
+    src: '/images/community/_DSC7234.JPG',
+    alt: 'Engaging podcast interview',
+    category: 'Guests',
+  },
+  {
+    id: 9,
+    src: '/images/community/_DSC8858.JPG',
+    alt: 'Guest speaker recording',
+    category: 'Guests',
+  },
+  {
+    id: 10,
+    src: '/images/community/_DSC8876.JPG',
+    alt: 'Community content creation',
+    category: 'Guests',
+  },
+  {
+    id: 11,
+    src: '/images/community/_DSC8899.JPG',
+    alt: 'Collaborative podcast session',
+    category: 'Guests',
+  },
+  {
+    id: 12,
+    src: '/images/community/DSC08909.JPG',
+    alt: 'Dynamic podcast discussion',
+    category: 'Guests',
+  },
+
+  // Equipment images (7)
+  {
+    id: 13,
+    src: '/images/equipment/_DSC8604.JPG',
+    alt: 'Professional recording equipment',
+    category: 'Equipment',
+  },
+  {
+    id: 14,
+    src: '/images/equipment/_DSC8665.JPG',
+    alt: 'Audio setup and microphones',
+    category: 'Equipment',
+  },
+  {
+    id: 15,
+    src: '/images/equipment/_DSC8733.JPG',
+    alt: 'Studio gear and technology',
+    category: 'Equipment',
+  },
+  {
+    id: 16,
+    src: '/images/equipment/_DSC8743.JPG',
+    alt: 'Recording equipment detail',
+    category: 'Equipment',
+  },
+  {
+    id: 17,
+    src: '/images/equipment/_DSC8848.JPG',
+    alt: 'Professional audio equipment',
+    category: 'Equipment',
+  },
+  {
+    id: 18,
+    src: '/images/equipment/_DSC8883.JPG',
+    alt: 'Studio production tools',
+    category: 'Equipment',
+  },
+  {
+    id: 19,
+    src: '/images/equipment/_DSC8904.JPG',
+    alt: 'Complete recording setup',
+    category: 'Equipment',
   },
 ];
 
-const studioFeatures = [
-  {
-    icon: Camera,
-    title: '4K Cameras',
-    description: 'Sony professional cameras with cinema lenses',
-  },
-  {
-    icon: Mic2,
-    title: 'Pro Audio',
-    description: 'Shure SM7B mics with Rodecaster interface',
-  },
-  {
-    icon: Video,
-    title: 'Multi-Angle',
-    description: '2-3 camera setup for dynamic content',
-  },
-  {
-    icon: Lightbulb,
-    title: 'Studio Lighting',
-    description: 'Professional LED panels & key lights',
-  },
-];
 
 export function StudioGallery() {
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
   const [filter, setFilter] = useState<string>('All');
+  const [showAll, setShowAll] = useState(false);
+  const [shuffledImages, setShuffledImages] = useState(galleryImages);
 
-  const categories = ['All', 'Studio', 'Equipment', 'Sessions', 'Lighting'];
+  const categories = ['All', 'Studio', 'Equipment', 'Guests'];
+
+  // Shuffle images on mount
+  useEffect(() => {
+    setShuffledImages(shuffleArray(galleryImages));
+  }, []);
 
   const filteredImages = filter === 'All'
-    ? galleryImages
-    : galleryImages.filter(img => img.category === filter);
+    ? shuffledImages
+    : shuffledImages.filter(img => img.category === filter);
+
+  // Show 8 images initially, all when expanded
+  const displayedImages = showAll ? filteredImages : filteredImages.slice(0, 8);
 
   const openLightbox = (index: number) => {
     setSelectedImage(index);
@@ -132,28 +213,6 @@ export function StudioGallery() {
           </p>
         </motion.div>
 
-        {/* Studio Features */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12"
-        >
-          {studioFeatures.map((feature, index) => (
-            <div
-              key={feature.title}
-              className="p-4 sm:p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-ecospace-green/50 transition-all duration-300 text-center group"
-            >
-              <div className="w-12 h-12 mx-auto rounded-xl bg-ecospace-green/10 flex items-center justify-center mb-4 group-hover:bg-ecospace-green/20 transition-colors">
-                <feature.icon className="w-6 h-6 text-ecospace-green" />
-              </div>
-              <h3 className="text-white font-medium mb-1 text-sm sm:text-base">{feature.title}</h3>
-              <p className="text-gray-500 text-xs sm:text-sm">{feature.description}</p>
-            </div>
-          ))}
-        </motion.div>
-
         {/* Category Filter */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -186,7 +245,7 @@ export function StudioGallery() {
           className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4"
         >
           <AnimatePresence mode="popLayout">
-            {filteredImages.map((image, index) => (
+            {displayedImages.map((image, index) => (
               <motion.div
                 key={image.id}
                 layout
@@ -214,6 +273,31 @@ export function StudioGallery() {
             ))}
           </AnimatePresence>
         </motion.div>
+
+        {/* View More Button */}
+        {filteredImages.length > 8 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="flex justify-center mt-8"
+          >
+            <button
+              onClick={() => setShowAll(!showAll)}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/5 border border-white/10 hover:border-ecospace-green/50 text-white hover:text-ecospace-green transition-all duration-300"
+            >
+              <span className="text-sm font-light uppercase tracking-wider">
+                {showAll ? 'View Less' : `View More (${filteredImages.length - 8} more)`}
+              </span>
+              {showAll ? (
+                <ChevronUp className="w-4 h-4" />
+              ) : (
+                <ChevronDown className="w-4 h-4" />
+              )}
+            </button>
+          </motion.div>
+        )}
 
         {/* CTA */}
         <motion.div

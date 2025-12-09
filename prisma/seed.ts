@@ -13,66 +13,97 @@ async function main() {
 
   // Create Service Packages
   const servicePackages = await Promise.all([
+    // Podcast Small Package - 1 camera
     prisma.servicePackage.create({
       data: {
-        name: 'Recording Only',
-        slug: 'recording-only',
-        description: 'Perfect for self-editors who want raw files',
-        price: 350,
-        originalPrice: 550,
+        name: 'Podcast Small Package',
+        slug: 'podcast-small',
+        description: 'Studio recording one hour with one camera',
+        price: 190,
+        originalPrice: 380,
         duration: 1,
         features: [
-          'Studio recording (1 hour)',
-          'Professional sound setup',
-          'Studio lighting',
-          'Raw files delivered via link'
+          'One-hour studio recording',
+          '1-camera setup',
+          'Clean sound & professional lights',
+          'Original files delivered via link',
+          'No editing included'
         ],
         notIncluded: [
-          'Video recording',
-          'Editing services',
-          'Color correction'
+          'Video editing',
+          'Color correction',
+          'Second camera angle'
         ],
         isActive: true,
         category: 'recording-only',
         sortOrder: 1,
       },
     }),
+    // Podcast Standard Package - 2 cameras
     prisma.servicePackage.create({
       data: {
-        name: 'Podcast + Editing',
-        slug: 'podcast-editing',
-        description: 'Complete video podcast production',
+        name: 'Podcast Standard Package',
+        slug: 'podcast-standard',
+        description: 'Studio recording with 2 cameras, sound & lights',
+        price: 320,
+        originalPrice: 640,
+        duration: 1,
+        features: [
+          'One-hour studio recording',
+          '2-camera setup',
+          'Professional sound & lights',
+          'Original files delivered via link',
+          'No editing included'
+        ],
+        notIncluded: [
+          'Video editing',
+          'Color correction',
+          'Post-production'
+        ],
+        isActive: true,
+        category: 'recording-only',
+        sortOrder: 2,
+      },
+    }),
+    // Horizontal Podcast + Editing
+    prisma.servicePackage.create({
+      data: {
+        name: 'Horizontal Podcast + Editing',
+        slug: 'horizontal-podcast-editing',
+        description: 'Complete video podcast production with full editing',
         price: 750,
         originalPrice: 980,
         duration: 1,
         features: [
-          'One-hour video recording',
-          '2-camera setup',
+          'Studio recording 2 cameras',
           'Professional sound & lights',
+          '2-3 persons capacity',
           'Full professional editing',
-          'Color correction',
-          'Ready-to-publish video'
+          'Text and music from client',
+          'Video duration 10-20 minutes',
+          'One final correction included'
         ],
         notIncluded: [],
         isActive: true,
         category: 'podcast-editing',
         isPopular: true,
-        sortOrder: 2,
+        sortOrder: 3,
       },
     }),
+    // Studio Rental
     prisma.servicePackage.create({
       data: {
-        name: 'Studio Rental',
+        name: 'Rent Studio Space',
         slug: 'studio-rental',
-        description: 'Bring your own equipment',
+        description: 'Rent studio space for personal production',
         price: 200,
         originalPrice: 300,
         duration: 1,
         features: [
           'Full studio access',
-          'Use your own equipment',
+          'Use for personal production',
           'Flexible booking hours',
-          'Air-conditioned space'
+          'Professional environment'
         ],
         notIncluded: [
           'Equipment rental',
@@ -81,43 +112,22 @@ async function main() {
         ],
         isActive: true,
         category: 'studio-rental',
-        sortOrder: 3,
-      },
-    }),
-    // Social Media Reels Packages
-    prisma.servicePackage.create({
-      data: {
-        name: 'Single Reel',
-        slug: 'single-reel',
-        description: 'Quick promo video for social media',
-        price: 250,
-        duration: 1,
-        features: [
-          'Professional recording',
-          'Quick turnaround (24-48h)',
-          'Optimized for IG/TikTok',
-          'Music & captions included'
-        ],
-        notIncluded: [],
-        isActive: true,
-        category: 'reels',
         sortOrder: 4,
       },
     }),
+    // Professional Reels
     prisma.servicePackage.create({
       data: {
-        name: '5 Reels Package',
-        slug: '5-reels-package',
-        description: 'Save 300 AED on bulk reels',
-        price: 950,
-        originalPrice: 1250,
-        duration: 2,
+        name: 'Professional Reels',
+        slug: 'professional-reels',
+        description: 'Video record for short reels with editing',
+        price: 250,
+        duration: 1,
         features: [
-          '5 professional reels',
-          'Consistent branding',
-          'Multiple format delivery',
-          'Music & captions included',
-          '190 AED per reel'
+          'Video record for short reels',
+          'Editing and titles included',
+          'No effects',
+          'Social media ready'
         ],
         notIncluded: [],
         isActive: true,
@@ -125,26 +135,72 @@ async function main() {
         sortOrder: 5,
       },
     }),
+    // 10 Reels Package
     prisma.servicePackage.create({
       data: {
         name: '10 Reels Package',
         slug: '10-reels-package',
-        description: 'Best Value! Perfect for content creators',
-        price: 3900,
-        originalPrice: 5000,
-        duration: 3,
+        description: 'One-hour video recording with 10 edited reels',
+        price: 2900,
+        duration: 1,
         features: [
-          '10 professional reels',
-          'Content strategy consultation',
-          'Custom branding',
-          'Priority turnaround',
-          'Music & captions included',
-          '390 AED per reel'
+          'One-hour video recording',
+          'Studio + professional lights',
+          '10 edited reels included',
+          'Editing and titles',
+          'No effects',
+          '290 AED per reel'
         ],
         notIncluded: [],
         isActive: true,
         category: 'reels',
         sortOrder: 6,
+      },
+    }),
+    // Podcast 5 Hours Package
+    prisma.servicePackage.create({
+      data: {
+        name: 'Podcast 5 Hours Package',
+        slug: 'podcast-5-hours',
+        description: '5 hours recording with 15 professional reels',
+        price: 2700,
+        originalPrice: 3800,
+        duration: 5,
+        features: [
+          '5 hours video recording',
+          '2-camera setup',
+          'Professional lights & clean sound',
+          '15 Professional Reels included',
+          'Editing, color correction and titles',
+          'No effects'
+        ],
+        notIncluded: [],
+        isActive: true,
+        category: 'podcast-editing',
+        sortOrder: 7,
+      },
+    }),
+    // Podcast 10 Hours Package
+    prisma.servicePackage.create({
+      data: {
+        name: 'Podcast 10 Hours Package',
+        slug: 'podcast-10-hours',
+        description: '10 hours recording with 30 professional reels',
+        price: 2700,
+        originalPrice: 3800,
+        duration: 10,
+        features: [
+          '10 hours video recording',
+          '2-camera setup',
+          'Professional lights & clean sound',
+          '30 Professional Reels included',
+          'Editing, color correction and titles',
+          'Customized studio'
+        ],
+        notIncluded: [],
+        isActive: true,
+        category: 'podcast-editing',
+        sortOrder: 8,
       },
     }),
   ]);
@@ -153,6 +209,26 @@ async function main() {
 
   // Create Add-On Services
   const addOnServices = await Promise.all([
+    prisma.addOnService.create({
+      data: {
+        name: 'Simple Editing',
+        slug: 'simple-editing',
+        description: 'Simple editing for video 20-60 seconds',
+        price: 90,
+        icon: 'Film',
+        isActive: true,
+      },
+    }),
+    prisma.addOnService.create({
+      data: {
+        name: 'Extra Studio Hour',
+        slug: 'extra-hour',
+        description: 'One hour more shooting time',
+        price: 100,
+        icon: 'Clock',
+        isActive: true,
+      },
+    }),
     prisma.addOnService.create({
       data: {
         name: 'Extra Camera Angle',
@@ -185,16 +261,6 @@ async function main() {
     }),
     prisma.addOnService.create({
       data: {
-        name: 'Extra Studio Hour',
-        slug: 'extra-hour',
-        description: 'Additional hour of studio time',
-        price: 150,
-        icon: 'Clock',
-        isActive: true,
-      },
-    }),
-    prisma.addOnService.create({
-      data: {
         name: 'Custom Intro/Outro',
         slug: 'custom-intro',
         description: 'Professionally produced branded intro and outro',
@@ -220,16 +286,6 @@ async function main() {
         description: 'Stream your podcast live to multiple platforms',
         price: 400,
         icon: 'Radio',
-        isActive: true,
-      },
-    }),
-    prisma.addOnService.create({
-      data: {
-        name: 'Transcription Service',
-        slug: 'transcription',
-        description: 'Full episode transcription with timestamps',
-        price: 120,
-        icon: 'FileText',
         isActive: true,
       },
     }),

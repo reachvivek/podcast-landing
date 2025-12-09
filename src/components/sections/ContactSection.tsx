@@ -26,19 +26,34 @@ export function ContactSection() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // TODO: Implement actual form submission logic
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
 
-    console.log('Form submitted:', formData);
-    alert('Thank you for your message! We will get back to you soon.');
+      const data = await response.json();
 
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      message: '',
-    });
-    setIsSubmitting(false);
+      if (data.success) {
+        alert('Thank you for your message! We will get back to you soon.');
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          message: '',
+        });
+      } else {
+        alert('Failed to send message. Please try again or contact us directly.');
+      }
+    } catch (error) {
+      console.error('Failed to submit form:', error);
+      alert('Failed to send message. Please try again or contact us directly.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const containerVariants = {

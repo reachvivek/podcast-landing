@@ -17,6 +17,11 @@ interface ServicePackage {
   category: string;
 }
 
+interface FeaturedPackageProps {
+  limit?: number; // Limit number of packages to display
+  showViewAllButton?: boolean; // Show "View All Pricing" button
+}
+
 // Icon mapping based on category
 const categoryIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   'studio-rental': Home,
@@ -25,7 +30,7 @@ const categoryIcons: Record<string, React.ComponentType<{ className?: string }>>
   'reels': Smartphone,
 };
 
-export function FeaturedPackage() {
+export function FeaturedPackage({ limit, showViewAllButton = true }: FeaturedPackageProps) {
   const [packages, setPackages] = useState<ServicePackage[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -92,7 +97,7 @@ export function FeaturedPackage() {
   }
 
   return (
-    <section id="pricing" className="py-24 bg-black relative overflow-hidden">
+    <section id="pricing" className="pt-12 pb-12 md:pt-20 md:pb-16 lg:pt-24 lg:pb-20 bg-black relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <div
@@ -142,7 +147,7 @@ export function FeaturedPackage() {
           viewport={{ once: true, margin: '-100px' }}
           variants={containerVariants}
         >
-          {packages.map((pkg) => {
+          {(limit ? packages.slice(0, limit) : packages).map((pkg) => {
             const IconComponent = categoryIcons[pkg.category] || Mic;
             const savings = pkg.originalPrice ? pkg.originalPrice - pkg.price : 0;
 
@@ -255,36 +260,38 @@ export function FeaturedPackage() {
         </motion.div>
 
         {/* Bottom CTA */}
-        <motion.div
-          className="text-center mt-16"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-        >
-          <p className="text-gray-400 mb-6 text-lg">
-            Need a custom package or have questions?
-          </p>
-          <a
-            href="/pricing"
-            className="inline-flex items-center gap-2 text-ecospace-green hover:text-white font-semibold text-lg transition-colors duration-300 group"
+        {showViewAllButton && limit && packages.length > limit && (
+          <motion.div
+            className="text-center mt-16"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.4 }}
           >
-            View All Pricing Options
-            <svg
-              className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+            <p className="text-gray-400 mb-6 text-lg">
+              Need a custom package or have questions?
+            </p>
+            <a
+              href="/pricing"
+              className="inline-flex items-center gap-2 text-ecospace-green hover:text-white font-semibold text-lg transition-colors duration-300 group"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 8l4 4m0 0l-4 4m4-4H3"
-              />
-            </svg>
-          </a>
-        </motion.div>
+              View All Pricing Options
+              <svg
+                className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 8l4 4m0 0l-4 4m4-4H3"
+                />
+              </svg>
+            </a>
+          </motion.div>
+        )}
       </div>
     </section>
   );

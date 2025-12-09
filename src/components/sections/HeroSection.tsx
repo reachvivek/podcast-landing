@@ -93,7 +93,7 @@ export function HeroSection({
               quality={90}
             />
             {/* Gradient Overlay - Darker for text readability */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/60" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/90 to-black/70" />
           </motion.div>
         </AnimatePresence>
 
@@ -123,7 +123,7 @@ export function HeroSection({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5 }}
             className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white mb-6 leading-tight tracking-wide"
-            style={{ fontWeight: 270 }}
+            style={{ fontWeight: 270, textShadow: '0 2px 20px rgba(0, 0, 0, 0.8), 0 4px 40px rgba(0, 0, 0, 0.6)' }}
           >
             <div>
               Where{' '}
@@ -149,6 +149,7 @@ export function HeroSection({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
             className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 mb-8 sm:mb-10 max-w-xl lg:max-w-2xl mx-auto lg:mx-0 leading-relaxed font-light"
+            style={{ textShadow: '0 2px 15px rgba(0, 0, 0, 0.8), 0 4px 30px rgba(0, 0, 0, 0.6)' }}
           >
             Dubai's premier podcast studio. Professional recording, expert production, and an experience that transforms your vision into reality.
           </motion.p>

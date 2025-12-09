@@ -53,7 +53,7 @@ export function BlogPreview() {
   };
 
   return (
-    <section className="py-24 bg-black relative overflow-hidden">
+    <section className="pt-12 pb-16 md:pt-20 md:pb-24 bg-black relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <div

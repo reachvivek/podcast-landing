@@ -17,71 +17,127 @@ interface Testimonial {
 const testimonials: Testimonial[] = [
   {
     id: '1',
-    name: 'Ahmed Al Maktoum',
-    role: 'Entrepreneur',
-    podcastName: 'Dubai Business Talks',
-    avatar: '/images/testimonials/ahmed.jpg',
+    name: 'Anton Sokolov',
+    role: 'Speaker & Event Host',
+    podcastName: 'International Events',
+    avatar: '/images/testimonials/Anton Sokolov - speaker in events.jpg',
     rating: 5,
-    quote: 'EcoSpace transformed our podcast production quality. The team is professional, the equipment is top-notch, and the final product exceeded our expectations. Highly recommended!',
+    quote: 'EcoSpace Studio provides exceptional quality for recording my speaking events and podcast content. The professional setup and attention to detail make every session productive and seamless.',
   },
   {
     id: '2',
-    name: 'Sarah Johnson',
-    role: 'Content Creator',
-    podcastName: 'The Wellness Journey',
-    avatar: '/images/testimonials/sarah.jpg',
+    name: 'Elmira Dini',
+    role: 'Real Estate Manager',
+    podcastName: '10+ Years in Real Estate',
+    avatar: '/images/testimonials/Elmira Dini - more 10 year realstate manager.jpg',
     rating: 5,
-    quote: 'As a first-time podcaster, I was nervous about the technical aspects. The EcoSpace team made everything so easy. The studio is beautiful and the results are incredible!',
+    quote: 'As someone who has been in the real estate industry for over a decade, I appreciate quality and professionalism. EcoSpace delivers on both fronts with outstanding results for our property showcase videos.',
   },
   {
     id: '3',
-    name: 'Mohammed Hassan',
-    role: 'Tech Entrepreneur',
-    podcastName: 'Innovation Hub',
-    avatar: '/images/testimonials/mohammed.jpg',
+    name: 'Igor Botnari',
+    role: 'Co-founder',
+    podcastName: 'X1ecochain & Profixone',
+    avatar: '/images/testimonials/igor Botnari - cofounder x1ecochain , Profixone.jpg',
     rating: 5,
-    quote: 'Best podcast studio in Dubai! The location at DWTC is perfect, the equipment is professional-grade, and the editing service is exceptional. Worth every dirham.',
+    quote: 'The best podcast studio in Dubai! As a tech entrepreneur, I need top-tier production quality to communicate complex ideas. EcoSpace consistently exceeds expectations with their state-of-the-art equipment and expertise.',
   },
   {
     id: '4',
-    name: 'Lisa Chen',
-    role: 'Marketing Consultant',
-    podcastName: 'Marketing Matters',
-    avatar: '/images/testimonials/lisa.jpg',
+    name: 'Malika Suleimenova',
+    role: 'Event Agency & Ambassador',
+    podcastName: 'Russian TV in Dubai',
+    avatar: '/images/testimonials/Malika Suleimenova - event agency , ambassador - Russian Tv in Dubai.jpg',
     rating: 5,
-    quote: 'The team at EcoSpace understands content creation. They helped us produce 10 episodes that look and sound amazing. Our audience loves the quality upgrade!',
+    quote: 'Working in television and events, I have high standards for production quality. EcoSpace Studio has become my go-to choice for recording professional content. The team understands media production perfectly.',
   },
   {
     id: '5',
-    name: 'Khalid Rahman',
-    role: 'Fitness Coach',
-    podcastName: 'Fit Life Dubai',
-    avatar: '/images/testimonials/khalid.jpg',
+    name: 'Mihail Manoli',
+    role: 'Crypto Investor',
+    podcastName: '@mihaimanoli',
+    avatar: '/images/testimonials/Mihail Manoli - crypto , investor , Instagram @mihaimanoli.jpg',
     rating: 5,
-    quote: 'From booking to final delivery, everything was seamless. The studio space is inspiring, and the multi-camera setup makes our videos look professionally produced.',
+    quote: 'Perfect studio for creating high-quality content for my audience. The multi-camera setup and editing services help me produce professional videos that engage my community. Highly recommended!',
   },
   {
     id: '6',
-    name: 'Emma Williams',
-    role: 'Life Coach',
-    podcastName: 'Empowered Living',
-    avatar: '/images/testimonials/emma.jpg',
+    name: 'Rubis Khalitov',
+    role: 'Media Producer',
+    podcastName: 'Russian TV Company',
+    avatar: '/images/testimonials/Rubis Khalitov - Russian tv company.jpeg',
     rating: 5,
-    quote: 'I have recorded at several studios in Dubai, and EcoSpace is by far the best. The attention to detail, the comfort of the space, and the quality of output are unmatched.',
+    quote: 'From a professional TV production perspective, EcoSpace offers broadcast-quality equipment and expertise. The studio environment is inspiring, and the results speak for themselves. Exceptional service!',
+  },
+  {
+    id: '7',
+    name: 'Rut Moisei',
+    role: 'Content Creator & Blogger',
+    podcastName: 'Digital Content',
+    avatar: '/images/testimonials/Rut Moisei - blogres - content creator.jpeg',
+    rating: 5,
+    quote: 'As a content creator, I need a studio that understands the demands of modern digital media. EcoSpace has everything I need - professional cameras, great lighting, and a team that makes the process effortless.',
   },
 ];
 
-export function Testimonials() {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-      },
-    },
-  };
+// Testimonial Card Component
+function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
+  return (
+    <div className="group relative flex-shrink-0 w-[400px]">
+      {/* Card */}
+      <div className="relative h-full backdrop-blur-sm rounded-3xl overflow-hidden transition-all duration-500 bg-white/5 border border-white/10 hover:border-ecospace-green/50 hover:bg-white/10 p-6 md:p-8">
+        {/* Quote Icon */}
+        <div className="absolute top-6 right-6 opacity-10 group-hover:opacity-20 transition-opacity duration-500">
+          <Quote className="w-12 h-12 md:w-16 md:h-16 text-ecospace-green" />
+        </div>
 
+        {/* Rating */}
+        <div className="flex gap-1 mb-4">
+          {Array.from({ length: testimonial.rating }).map((_, i) => (
+            <Star
+              key={`star-${testimonial.id}-${i}`}
+              className="w-4 h-4 fill-ecospace-green text-ecospace-green"
+            />
+          ))}
+        </div>
+
+        {/* Quote */}
+        <p className="text-gray-300 font-light leading-relaxed mb-6 relative z-10 line-clamp-4">
+          "{testimonial.quote}"
+        </p>
+
+        {/* Author Info */}
+        <div className="flex items-center gap-4 relative z-10">
+          {/* Avatar */}
+          <div className="w-12 h-12 rounded-full overflow-hidden bg-white/10 flex-shrink-0 border-2 border-ecospace-green/30 group-hover:border-ecospace-green/60 transition-colors duration-500">
+            <Image
+              src={testimonial.avatar}
+              alt={testimonial.name}
+              width={48}
+              height={48}
+              className="w-full h-full object-cover"
+            />
+          </div>
+
+          {/* Name & Podcast */}
+          <div>
+            <h4 className="text-white font-light text-base" style={{ fontWeight: 250 }}>
+              {testimonial.name}
+            </h4>
+            <p className="text-gray-500 text-sm font-light">
+              {testimonial.podcastName}
+            </p>
+          </div>
+        </div>
+
+        {/* Hover Glow Effect */}
+        <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-ecospace-green/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+      </div>
+    </div>
+  );
+}
+
+export function Testimonials() {
   const titleVariants = {
     hidden: { opacity: 0, y: 30 },
     visible: {
@@ -94,20 +150,8 @@ export function Testimonials() {
     },
   };
 
-  const cardVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-        ease: 'easeOut' as const,
-      },
-    },
-  };
-
   return (
-    <section className="py-24 bg-black relative overflow-hidden">
+    <section className="py-16 md:py-24 bg-black relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <div
@@ -120,14 +164,13 @@ export function Testimonials() {
         />
       </div>
 
-      <div className="container mx-auto px-4 lg:px-8 relative z-10">
+      <div className="relative z-10">
         {/* Section Header */}
         <motion.div
-          className="text-center max-w-3xl mx-auto mb-16"
+          className="text-center max-w-3xl mx-auto mb-12 md:mb-16 px-4"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: '-100px' }}
-          variants={containerVariants}
         >
           <motion.p
             variants={titleVariants}
@@ -137,7 +180,7 @@ export function Testimonials() {
           </motion.p>
           <motion.h2
             variants={titleVariants}
-            className="text-4xl md:text-5xl lg:text-6xl text-white mb-6"
+            className="text-3xl md:text-4xl lg:text-5xl text-white mb-6"
             style={{ fontWeight: 250 }}
           >
             What Our Clients{' '}
@@ -145,98 +188,104 @@ export function Testimonials() {
           </motion.h2>
           <motion.p
             variants={titleVariants}
-            className="text-lg text-gray-400 font-light max-w-2xl mx-auto"
+            className="text-base md:text-lg text-gray-400 font-light max-w-2xl mx-auto"
           >
             Join hundreds of satisfied creators who trust EcoSpace for their podcast production
           </motion.p>
         </motion.div>
 
-        {/* Testimonials Grid */}
-        <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: '-100px' }}
-          variants={containerVariants}
-        >
-          {testimonials.map((testimonial) => (
-            <motion.div
-              key={testimonial.id}
-              variants={cardVariants}
-              className="group relative"
-            >
-              {/* Card */}
-              <div className="relative h-full backdrop-blur-sm rounded-3xl overflow-hidden transition-all duration-500 bg-white/5 border border-white/10 hover:border-ecospace-green/50 hover:bg-white/10 p-8">
-                {/* Quote Icon */}
-                <div className="absolute top-6 right-6 opacity-10 group-hover:opacity-20 transition-opacity duration-500">
-                  <Quote className="w-16 h-16 text-ecospace-green" />
-                </div>
-
-                {/* Rating */}
-                <div className="flex gap-1 mb-4">
-                  {Array.from({ length: testimonial.rating }).map((_, i) => (
-                    <Star
-                      key={`star-${testimonial.id}-${i}`}
-                      className="w-4 h-4 fill-ecospace-green text-ecospace-green"
-                    />
-                  ))}
-                </div>
-
-                {/* Quote */}
-                <p className="text-gray-300 font-light leading-relaxed mb-6 relative z-10">
-                  "{testimonial.quote}"
-                </p>
-
-                {/* Author Info */}
-                <div className="flex items-center gap-4 relative z-10">
-                  {/* Avatar */}
-                  <div className="w-12 h-12 rounded-full overflow-hidden bg-white/10 flex-shrink-0 border-2 border-ecospace-green/30 group-hover:border-ecospace-green/60 transition-colors duration-500">
-                    <Image
-                      src={testimonial.avatar}
-                      alt={testimonial.name}
-                      width={48}
-                      height={48}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-
-                  {/* Name & Podcast */}
-                  <div>
-                    <h4 className="text-white font-light text-base" style={{ fontWeight: 250 }}>
-                      {testimonial.name}
-                    </h4>
-                    <p className="text-gray-500 text-sm font-light">
-                      {testimonial.podcastName}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Hover Glow Effect */}
-                <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-ecospace-green/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
+        {/* Infinite Scrolling Carousel */}
+        <div className="relative">
+          <div className="carousel-container group">
+            {/* First set of testimonials */}
+            <div className="carousel-track">
+              {testimonials.map((testimonial) => (
+                <TestimonialCard key={testimonial.id} testimonial={testimonial} />
+              ))}
+            </div>
+            {/* Duplicate set for infinite scroll */}
+            <div className="carousel-track" aria-hidden="true">
+              {testimonials.map((testimonial) => (
+                <TestimonialCard key={`duplicate-${testimonial.id}`} testimonial={testimonial} />
+              ))}
+            </div>
+          </div>
+        </div>
 
         {/* Bottom CTA */}
         <motion.div
-          className="text-center mt-16"
+          className="text-center mt-12 md:mt-16 px-4"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.4 }}
         >
-          <p className="text-gray-400 font-light mb-6 text-lg">
+          <p className="text-gray-400 font-light mb-6 text-base md:text-lg">
             Ready to create your own success story?
           </p>
-          <a
-            href="/book"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-ecospace-green text-black font-light text-lg rounded-full hover:bg-ecospace-green/90 transition-all duration-500 shadow-lg shadow-ecospace-green/20"
-          >
-            Book Your Session
-          </a>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <a
+              href="/book"
+              className="inline-flex items-center gap-2 px-6 md:px-8 py-3 md:py-4 bg-ecospace-green text-black font-medium text-base md:text-lg rounded-full hover:bg-ecospace-green/90 transition-all duration-500 shadow-lg shadow-ecospace-green/20 hover:scale-105"
+            >
+              Book Your Session
+            </a>
+            <a
+              href="/testimonials"
+              className="inline-flex items-center gap-2 px-6 md:px-8 py-3 md:py-4 bg-white/5 border-2 border-white/20 text-white font-light text-base md:text-lg rounded-full hover:border-ecospace-green hover:bg-ecospace-green/10 transition-all duration-500"
+            >
+              View All Testimonials
+            </a>
+          </div>
         </motion.div>
       </div>
+
+      <style jsx>{`
+        .carousel-container {
+          display: flex;
+          overflow: hidden;
+          user-select: none;
+          gap: 20px;
+        }
+
+        .carousel-track {
+          display: flex;
+          gap: 20px;
+          padding-left: 20px;
+          animation: scroll 40s linear infinite;
+          will-change: transform;
+        }
+
+        /* Pause on hover */
+        .carousel-container:hover .carousel-track {
+          animation-play-state: paused;
+        }
+
+        @keyframes scroll {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(calc(-400px * ${testimonials.length} - 20px * ${testimonials.length}));
+          }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+          .carousel-track {
+            animation: scroll 30s linear infinite;
+          }
+
+          @keyframes scroll {
+            0% {
+              transform: translateX(0);
+            }
+            100% {
+              transform: translateX(calc(-350px * ${testimonials.length} - 20px * ${testimonials.length}));
+            }
+          }
+        }
+      `}</style>
     </section>
   );
 }

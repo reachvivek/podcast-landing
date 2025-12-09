@@ -37,7 +37,7 @@ export default function Home() {
       <HowItWorks />
 
       {/* 5. Pricing - Only after they see the value */}
-      <FeaturedPackage />
+      <FeaturedPackage limit={4} />
 
       {/* 6. Testimonials - Social proof after pricing */}
       <Testimonials />
