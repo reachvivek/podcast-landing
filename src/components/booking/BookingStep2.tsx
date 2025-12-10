@@ -18,12 +18,12 @@ const studioThemes = [
     name: 'Light Theme Studio',
     description: 'Bright and vibrant atmosphere for energetic content',
     features: [
-      'Bright white walls',
-      'Professional equipment',
-      'Multi-camera options',
-      'Perfect for upbeat content'
+      'Light neutral walls',
+      'Conference setup',
+      'Professional monitors',
+      'Perfect for business content'
     ],
-    image: '/images/studio/_DSC8846.JPG',
+    image: '/images/studio/_DSC8631.JPG',
     icon: Sparkles,
     mood: 'Energetic & Bright'
   },
