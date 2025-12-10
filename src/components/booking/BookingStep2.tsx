@@ -18,12 +18,12 @@ const studioThemes = [
     name: 'Light Theme Studio',
     description: 'Bright and vibrant atmosphere for energetic content',
     features: [
-      'Warm lighting setup',
-      'Professional microphones',
+      'Bright white walls',
+      'Professional equipment',
       'Multi-camera options',
       'Perfect for upbeat content'
     ],
-    image: '/images/studio/_DSC0567.jpg',
+    image: '/images/studio/_DSC8846.JPG',
     icon: Sparkles,
     mood: 'Energetic & Bright'
   },
@@ -32,12 +32,12 @@ const studioThemes = [
     name: 'Dark Theme Studio',
     description: 'Moody and cinematic ambiance for professional productions',
     features: [
-      'Dramatic lighting',
-      'Professional microphones',
-      'Multi-camera options',
+      'Dramatic black walls',
+      'Green moss accents',
+      'Cozy seating setup',
       'Ideal for interviews & discussions'
     ],
-    image: '/images/studio/_DSC8577.JPG',
+    image: '/images/studio/_DSC0567.jpg',
     icon: Moon,
     mood: 'Cinematic & Professional'
   }
