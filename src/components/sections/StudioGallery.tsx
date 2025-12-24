@@ -16,7 +16,7 @@ const shuffleArray = <T,>(array: T[]): T[] => {
 };
 
 const galleryImages = [
-  // Studio images (5)
+  // Studio images (8)
   {
     id: 1,
     src: '/images/studio/_DSC0567.jpg',
@@ -45,6 +45,24 @@ const galleryImages = [
     id: 5,
     src: '/images/studio/_DSC8846.JPG',
     alt: 'Professional studio atmosphere',
+    category: 'Studio',
+  },
+  {
+    id: 20,
+    src: '/images/studio/_DSC8622.JPG',
+    alt: 'Studio creative workspace',
+    category: 'Studio',
+  },
+  {
+    id: 21,
+    src: '/images/studio/_DSC8650.JPG',
+    alt: 'Studio production setup',
+    category: 'Studio',
+  },
+  {
+    id: 22,
+    src: '/images/studio/_DSC8668.JPG',
+    alt: 'Professional recording space',
     category: 'Studio',
   },
 
