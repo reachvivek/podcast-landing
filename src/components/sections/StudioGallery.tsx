@@ -16,7 +16,7 @@ const shuffleArray = <T,>(array: T[]): T[] => {
 };
 
 const galleryImages = [
-  // Studio images (8)
+  // Studio images (17)
   {
     id: 1,
     src: '/images/studio/_DSC0567.jpg',
@@ -65,8 +65,62 @@ const galleryImages = [
     alt: 'Professional recording space',
     category: 'Studio',
   },
+  {
+    id: 23,
+    src: '/images/studio/_DSC0174.JPG',
+    alt: 'Studio lighting setup',
+    category: 'Studio',
+  },
+  {
+    id: 24,
+    src: '/images/studio/_DSC0182.JPG',
+    alt: 'Studio equipment detail',
+    category: 'Studio',
+  },
+  {
+    id: 25,
+    src: '/images/studio/_DSC0184.JPG',
+    alt: 'Professional studio layout',
+    category: 'Studio',
+  },
+  {
+    id: 26,
+    src: '/images/studio/_DSC0568.JPG',
+    alt: 'Studio recording booth',
+    category: 'Studio',
+  },
+  {
+    id: 27,
+    src: '/images/studio/_DSC0710.JPG',
+    alt: 'Studio workspace design',
+    category: 'Studio',
+  },
+  {
+    id: 28,
+    src: '/images/studio/_DSC0719.JPG',
+    alt: 'Professional audio space',
+    category: 'Studio',
+  },
+  {
+    id: 29,
+    src: '/images/studio/_DSC0725.JPG',
+    alt: 'Studio production area',
+    category: 'Studio',
+  },
+  {
+    id: 30,
+    src: '/images/studio/_DSC7261.JPG',
+    alt: 'Modern studio setup',
+    category: 'Studio',
+  },
+  {
+    id: 31,
+    src: '/images/studio/_DSC8573.JPG',
+    alt: 'Studio creative space',
+    category: 'Studio',
+  },
 
-  // Community/Guests images (7) - FOCUS
+  // Community/Guests images (16)
   {
     id: 6,
     src: '/images/community/_DSC0581.JPG',
@@ -107,6 +161,60 @@ const galleryImages = [
     id: 12,
     src: '/images/community/DSC08909.JPG',
     alt: 'Dynamic podcast discussion',
+    category: 'Guests',
+  },
+  {
+    id: 32,
+    src: '/images/community/DSC01199.JPG',
+    alt: 'Guest panel discussion',
+    category: 'Guests',
+  },
+  {
+    id: 33,
+    src: '/images/community/_DSC0535.JPG',
+    alt: 'Community recording session',
+    category: 'Guests',
+  },
+  {
+    id: 34,
+    src: '/images/community/_DSC0546.JPG',
+    alt: 'Podcast interview moment',
+    category: 'Guests',
+  },
+  {
+    id: 35,
+    src: '/images/community/_DSC0877.JPG',
+    alt: 'Guest speaker presentation',
+    category: 'Guests',
+  },
+  {
+    id: 36,
+    src: '/images/community/_DSC2736.jpg',
+    alt: 'Community content session',
+    category: 'Guests',
+  },
+  {
+    id: 37,
+    src: '/images/community/_DSC8874.JPG',
+    alt: 'Engaging conversation',
+    category: 'Guests',
+  },
+  {
+    id: 38,
+    src: '/images/community/_DSC8913.JPG',
+    alt: 'Podcast guest interview',
+    category: 'Guests',
+  },
+  {
+    id: 39,
+    src: '/images/community/_DSC8920.JPG',
+    alt: 'Community podcast recording',
+    category: 'Guests',
+  },
+  {
+    id: 40,
+    src: '/images/community/_DSC8923.JPG',
+    alt: 'Guest discussion session',
     category: 'Guests',
   },
 
