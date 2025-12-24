@@ -4,6 +4,7 @@ import { HeroSection } from '@/components/sections/HeroSection';
 import { WhyChooseUs } from '@/components/sections/WhyChooseUs';
 import { StudioGallery } from '@/components/sections/StudioGallery';
 import { PortfolioShowcase } from '@/components/sections/PortfolioShowcase';
+import { FeaturedPodcasts } from '@/components/sections/FeaturedPodcasts';
 import { HowItWorks } from '@/components/sections/HowItWorks';
 import { FeaturedPackage } from '@/components/sections/FeaturedPackage';
 import { Testimonials } from '@/components/sections/Testimonials';
@@ -33,22 +34,25 @@ export default function Home() {
       {/* 4. Portfolio - Social proof of past creators */}
       <PortfolioShowcase />
 
-      {/* 4. How It Works - Easy booking process */}
+      {/* 5. Featured Podcasts - Showcase latest episodes */}
+      <FeaturedPodcasts />
+
+      {/* 6. How It Works - Easy booking process */}
       <HowItWorks />
 
-      {/* 5. Pricing - Only after they see the value */}
+      {/* 7. Pricing - Only after they see the value */}
       <FeaturedPackage limit={4} />
 
-      {/* 6. Testimonials - Social proof after pricing */}
+      {/* 8. Testimonials - Social proof after pricing */}
       <Testimonials />
 
-      {/* 7. Blog Preview - Latest insights and tips */}
+      {/* 9. Blog Preview - Latest insights and tips */}
       <BlogPreview />
 
-      {/* 8. Location - Studio location with map */}
+      {/* 10. Location - Studio location with map */}
       <LocationMap />
 
-      {/* 9. Contact Form - Lead capture */}
+      {/* 11. Contact Form - Lead capture */}
       <ContactSection />
     </MainLayout>
   );

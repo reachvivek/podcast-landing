@@ -9,7 +9,8 @@ export interface Episode {
   guestImage?: string;
   duration: string;
   publishedDate: string;
-  audioUrl: string;
+  audioUrl?: string;
+  youtubeUrl?: string;
   imageUrl: string;
   featured?: boolean;
 }

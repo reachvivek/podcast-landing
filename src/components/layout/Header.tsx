@@ -23,7 +23,7 @@ interface HeaderProps {
 const defaultNavigation: readonly NavigationItem[] = [
   { name: 'Home', href: '/' },
   { name: 'About', href: '/about' },
-  { name: 'Portfolio', href: '/#portfolio' },
+  { name: 'Podcasts', href: '/podcasts' },
   { name: 'Pricing', href: '/#pricing' },
   { name: 'Blog', href: '/blog' },
   { name: 'FAQ', href: '/faq' },
